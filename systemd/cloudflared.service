@@ -1,0 +1,21 @@
+[Unit]
+Description=Cloudflared named tunnel for stars
+Documentation=https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/
+After=network-online.target martin.service
+Wants=network-online.target martin.service
+
+[Service]
+Type=simple
+User=stars
+Group=stars
+WorkingDirectory=/opt/stars
+ExecStart=/usr/bin/cloudflared --config /opt/stars/config/cloudflared/config.yaml tunnel run
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

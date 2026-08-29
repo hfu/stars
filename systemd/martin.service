@@ -1,0 +1,22 @@
+[Unit]
+Description=Martin tile server for stars
+Documentation=https://maplibre.org/martin/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=stars
+Group=stars
+WorkingDirectory=/opt/stars
+ExecStart=/usr/local/bin/martin --config /opt/stars/config/martin.yaml
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

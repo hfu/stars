@@ -1,0 +1,4 @@
+# Ignore all data files - they are large and machine-local
+*.pmtiles
+*.tif
+*.tiff

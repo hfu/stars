@@ -1,0 +1,9 @@
+# Local data files
+data/
+
+# Local config overrides
+config/martin.yaml
+
+# Tunnel credentials and secrets (never commit)
+secrets/
+config/cloudflared/config.yaml
