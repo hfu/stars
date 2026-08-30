@@ -78,3 +78,10 @@ back once it's live.
   cosmetic tweak (a second commit excluding maritime/EEZ boundary lines, a politically
   sensitive call the gatekeeper session held for the user's explicit confirmation before
   merging, separate from the routine diff-verification review).
+- [PR #6](https://github.com/hfu/stars/pull/6) — added `styles/std.json`, a traditional
+  256px raster style for GSI's 標準地図 (std), requested by a third consumer
+  (`dwg7/zukaku`, a Field-Papers-style print-atlas tool). First PR from a contributor
+  that initially asked the gatekeeper session to file the PR on its behalf — declined, to
+  keep contributor and reviewer roles separate, and the contributor filed it themselves
+  as normal. Also went through one review round (a `background` fallback layer was
+  proposed, discussed, and then dropped by the contributor before merge).
