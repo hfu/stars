@@ -19,13 +19,6 @@
   },
   "layers": [
     {
-      "id": "background",
-      "type": "background",
-      "paint": {
-        "background-color": "#f0f0f0"
-      }
-    },
-    {
       "id": "gsi-std",
       "type": "raster",
       "source": "gsi-std",
