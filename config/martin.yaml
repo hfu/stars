@@ -7,6 +7,12 @@ pmtiles:
     japan-seamless-aerial-z18: /home/stars/data/z18.pmtiles
     bvmap: https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles
     openstreetmap_jp_planet: https://tile.openstreetmap.jp/static/planet.pmtiles
+    overture_buildings: https://dev.smellman.org/static/overture-latest/buildings.pmtiles
+    overture_base: https://dev.smellman.org/static/overture-latest/base.pmtiles
+    overture_addresses: https://dev.smellman.org/static/overture-latest/addresses.pmtiles
+    overture_divisions: https://dev.smellman.org/static/overture-latest/divisions.pmtiles
+    overture_places: https://dev.smellman.org/static/overture-latest/places.pmtiles
+    overture_transportation: https://dev.smellman.org/static/overture-latest/transportation.pmtiles
 
 styles:
   paths:
