@@ -80,10 +80,14 @@ truth, and `/home/stars/styles` as the deploy target, not the other way around.
   file → `scp` the merged file over → verify checksums match → confirm the change is live
   via `curl https://stars.optgeo.org/style/<id>?cb=$(date +%s)` (note: the public path is
   `style/<id>`, not `styles/<id>.json`, which 301-redirects) → delete the backup.
-- **No Martin restart needed for style changes** — confirmed 2026-08-30 that replacing
-  `/home/stars/styles/vbm.json` took effect immediately on the next request, unlike tile
-  *sources*, which do need `systemctl --user restart martin` to pick up. Don't restart
-  Martin as part of a style-only deploy.
+- **No Martin restart needed when *replacing* an existing style file's content** —
+  confirmed 2026-08-30 that overwriting `/home/stars/styles/vbm.json` took effect
+  immediately on the next request. **A restart IS needed when *adding a brand-new* style
+  file** — confirmed 2026-08-30 deploying `styles/positron.json` (new file, new style ID)
+  404'd until `systemctl --user restart martin`. Martin scans `styles.paths` for the set
+  of available style IDs at startup; it re-reads a *known* file's content per-request, but
+  doesn't notice a new file appearing until restarted. So: same-file edits don't need a
+  restart, new files do.
 
 ## config.yaml gatekeeper responsibility (added 2026-08-30)
 

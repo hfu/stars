@@ -150,10 +150,16 @@ originally written to describe, most of which has not been implemented.
   substitution on top of it — design changes always land here first.
 - The public style-serving endpoint is `stars.optgeo.org/style/<id>` (e.g.
   `/style/vbm`) — **not** `/styles/<id>.json`, which 301-redirects.
-- Martin serves style files straight off disk per request — replacing
-  `/home/stars/styles/vbm.json` took effect immediately with **no Martin restart needed**
-  (confirmed 2026-08-30). This differs from tile *sources*, which do need
-  `systemctl --user restart martin` to be picked up.
+- Martin serves style files straight off disk per request — replacing an *existing*
+  style file's content (e.g. `/home/stars/styles/vbm.json`) took effect immediately with
+  **no Martin restart needed** (confirmed 2026-08-30).
+  **Correction (2026-08-30, same day):** this doesn't extend to adding a brand-new style
+  file. Deploying `styles/positron.json` (new file, new style ID, from
+  [pull/5](https://github.com/hfu/stars/pull/5)) 404'd until
+  `systemctl --user restart martin` — Martin only discovers the *set* of available style
+  IDs by scanning `styles.paths` at startup, though it re-reads a *known* file's content
+  fresh on every request. So: same-file content edits don't need a restart, new files do.
+  This still differs from tile *sources*, which always need a restart regardless.
 - Deploy sequence: back up the target file → copy the merged file over → verify checksums
   match → confirm live via a cache-busted `curl` against the `style/<id>` endpoint →
   delete the backup once confirmed.

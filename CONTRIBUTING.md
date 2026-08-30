@@ -13,7 +13,7 @@ operational picture; this file only covers the contribution path.
 
 | Path | What it is | Deploy needs |
 |---|---|---|
-| [`styles/*.json`](styles/) | MapLibre style JSON served at `stars.optgeo.org/style/<id>` | No Martin restart |
+| [`styles/*.json`](styles/) | MapLibre style JSON served at `stars.optgeo.org/style/<id>` | No restart for edits to an existing file; **a restart is needed when adding a brand-new style file** (Martin only discovers new style IDs at startup) |
 | [`config/martin.yaml`](config/martin.yaml) | Martin's tile-source/style config, mirrors `/home/stars/.config/martin/config.yaml` exactly | Martin restart (brief full outage) |
 
 Both are the canonical, versioned copies — treat them as the source of truth, not
@@ -68,3 +68,13 @@ back once it's live.
   the first exercised under the `dwg7/kaga0` design-master division of labor: their local
   copy is a mechanical path substitution on top of what's merged here, not an independent
   fork — design changes land here first.
+- [PR #4](https://github.com/hfu/stars/pull/4) — further VBM label text-size bump
+  (13→18, `styles/vbm.json`), a second pass on the labels PR #1 first touched.
+- [PR #5](https://github.com/hfu/stars/pull/5) — added `styles/positron.json`, a
+  general-purpose light basemap adapted from OpenMapTiles' Positron style, requested by a
+  different consumer (`dwg7/height-coverage`) than the VBM/VLCM work above. First PR to
+  add a brand-new style file rather than edit an existing one — this is what surfaced the
+  restart requirement noted in the table above. Also the first PR with content beyond a
+  cosmetic tweak (a second commit excluding maritime/EEZ boundary lines, a politically
+  sensitive call the gatekeeper session held for the user's explicit confirmation before
+  merging, separate from the routine diff-verification review).
