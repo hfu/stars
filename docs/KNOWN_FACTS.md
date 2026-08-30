@@ -25,6 +25,10 @@ originally written to describe, most of which has not been implemented.
   `Initial commit`. README.md, docs/, systemd/, .github/, and .gitignore exist only in
   local working trees and have not been pushed. So even "clone the repo to production"
   would not currently bring over most of what's in this working tree.
+  **Correction (2026-08-29/30):** this is no longer true of GitHub — README.md, docs/,
+  systemd/, .github/, .gitignore, and (2026-08-30) styles/ have all been pushed to
+  `origin/main`. Production itself is still not a checkout of this repo; nothing above
+  changed on the host, only on GitHub.
 
 ### Martin
 - **Correction (2026-08-28, later same day):** the original version of this document said
@@ -69,6 +73,9 @@ originally written to describe, most of which has not been implemented.
   the local `config/martin.yaml`). It also declares a `styles.paths` pointing at
   `/home/stars/styles`, which this repo's config has no equivalent for. A timestamped
   backup is kept alongside on each edit (`config.yaml.bak.<timestamp>`).
+  **Correction (2026-08-30):** this repo now does have an equivalent —
+  [styles/](../styles/) is the canonical, versioned copy of `/home/stars/styles`. See
+  "Style.json gatekeeper workflow" below.
 - Data lives at `/home/stars/data` — currently ~1.5 TB across large pmtiles files
   (`z18.pmtiles` 424 GB, `seamlessphoto512.pmtiles` 767 GB, `kitaphoto17.pmtiles` 190 GB,
   `mapterhorn-japan-bridge.pmtiles` 211 GB, plus smaller files), plus (as of 2026-08-28)
@@ -77,6 +84,9 @@ originally written to describe, most of which has not been implemented.
   has not been deployed; COG is still not supported by the production Martin build.
 - Disk usage on the data filesystem is **86% full** (1.5 TB used / 1.8 TB total, 248 GB
   free) — worth checking before adding new large files.
+  **Correction (2026-08-29):** re-measured at 76% full (440 GB free of 1.8 TB) the next
+  day — the figure moves day to day (large files get added/removed), so treat both numbers
+  as stale and re-run `df -h` rather than trusting either.
 - Log: `/home/stars/martin.log` (plain redirected stdout, not journald).
 - Nothing currently auto-restarts Martin on boot or on crash (no systemd unit, no cron
   entry — `crontab -l` is empty). It stays up only because it was started manually and
@@ -104,6 +114,24 @@ originally written to describe, most of which has not been implemented.
   Martin or changing sources, verify with a cache-busting query string
   (`curl https://stars.optgeo.org/catalog?cb=$(date +%s)`) — an unbusted request can
   return a stale pre-change catalog for up to 4 hours (`cf-cache-status: HIT`).
+
+### Style.json gatekeeper workflow (added 2026-08-30)
+
+- This repo's [styles/](../styles/) directory is the canonical, versioned source for
+  production's `/home/stars/styles/*.json`. This session/repo is the designated gatekeeper:
+  contributors (e.g. the `dwg7/kaga0` Raspberry Pi appliance project, session name
+  `kaga0-01`) PR against `styles/*.json` here; this session reviews, merges, and deploys.
+  First instance: [pull/1](https://github.com/hfu/stars/pull/1) (VBM label text-size and
+  onsen icon-size fixes, found while tuning `dwg7/kaga0` on a real 1440p display).
+- The public style-serving endpoint is `stars.optgeo.org/style/<id>` (e.g.
+  `/style/vbm`) — **not** `/styles/<id>.json`, which 301-redirects.
+- Martin serves style files straight off disk per request — replacing
+  `/home/stars/styles/vbm.json` took effect immediately with **no Martin restart needed**
+  (confirmed 2026-08-30). This differs from tile *sources*, which do need
+  `systemctl --user restart martin` to be picked up.
+- Deploy sequence: back up the target file → copy the merged file over → verify checksums
+  match → confirm live via a cache-busted `curl` against the `style/<id>` endpoint →
+  delete the backup once confirmed.
 
 ### Practical implication for future changes
 - Restarting the Martin process affects only `stars.optgeo.org` (nothing else routes to
@@ -151,6 +179,8 @@ tunnel (depot.optgeo.org) and the ~1.5 TB of existing data under `/home/stars/da
 ## Immediate Repository State
 - The local working tree has README.md, docs/, systemd/, .github/, and .gitignore that
   have never been pushed to `origin`; only `LICENSE` exists on GitHub as of 2026-08-28.
+  **Correction (2026-08-29/30):** all of the above, plus styles/, have since been pushed
+  to `origin/main`. Only `LICENSE` was true as of 2026-08-28; it is not true anymore.
 
 ## Assumptions To Verify (target design, Section B)
 - Required Martin config keys for COG in the chosen version.

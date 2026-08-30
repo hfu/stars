@@ -35,8 +35,10 @@ banner pointing back here.
   (`cache-control: max-age=14400`). After any production change, verify with a
   cache-busting query string (`?cb=$(date +%s)`) and check `cf-cache-status: MISS` —
   otherwise you'll see stale pre-change state and may think something failed.
-- Disk on the data filesystem is ~86% full (248 GB free of 1.8 TB) as of 2026-08-28 —
-  check headroom before copying new large files to `/home/stars/data`.
+- Disk on the data filesystem is ~76% full (440 GB free of 1.8 TB) as of 2026-08-29
+  (**correction** to an earlier 86%/248GB figure recorded 2026-08-28 — re-check with `df -h`
+  rather than trusting either number, since it clearly moves day to day) — check headroom
+  before copying new large files to `/home/stars/data`.
 - Before any restart or config edit, back up
   `/home/stars/.config/martin/config.yaml` first (`cp -p ... config.yaml.bak.$(date
   +%Y%m%d_%H%M%S)`), and confirm the exact PID via `ps aux | grep martin` yourself before
@@ -45,12 +47,45 @@ banner pointing back here.
   string of the very shell you're running the check in.
 - Any destructive/production-affecting action (restart, config edit, file overwrite)
   needs explicit user confirmation before executing — state the exact plan first.
+- After a production file replace where you took a backup first (e.g.
+  `vbm.json.bak.<timestamp>`), delete that backup once you've verified the change is live
+  and correct — don't leave it in the production directory. See "Style.json gatekeeper
+  responsibility" below for the deploy sequence this applies to.
 
-## Current confirmed production state (as of 2026-08-28)
+## Style.json gatekeeper responsibility (added 2026-08-30)
 
-- No `/opt/stars` checkout anywhere; this repo has never been deployed there. GitHub
-  `origin` (`git@github.com:hfu/stars`) has only `LICENSE` committed — README, docs/,
-  systemd/, .github/, .gitignore exist only in local working trees, never pushed.
+This session/repo is the designated gatekeeper for production's map style JSON files
+(`/home/stars/styles/*.json`). The canonical, versioned copy lives in this repo's
+[styles/](styles/) directory (`vbm.json`, `vlcm.json`, `bvmap-dark.json`,
+`openstreetmap_jp_planet.json` as of 2026-08-30) — treat `styles/` here as the source of
+truth, and `/home/stars/styles` as the deploy target, not the other way around.
+
+- **Why this exists:** `dwg7/kaga0` (a separate Raspberry Pi appliance project displaying
+  VBM/VLCM offline) needed a way to upstream style fixes found while tuning on real
+  hardware, without either standing up new infrastructure or patching production directly.
+  The user designated this repo/session as the intake point rather than creating a
+  separate style-management repo.
+- **Intake workflow:** a contributor (e.g. the `kaga0-01` Claude session) opens a GitHub PR
+  against `styles/*.json` in `hfu/stars`. This session reviews (confirm the diff is scoped
+  to what was described, validate the JSON, sanity-check the changed values) and merges.
+  See [pull/1](https://github.com/hfu/stars/pull/1) for the first exercised instance.
+- **Deploy sequence after merge** (needs explicit user confirmation per the hard rules
+  above, same as any production change): `git pull` locally → back up the production
+  file → `scp` the merged file over → verify checksums match → confirm the change is live
+  via `curl https://stars.optgeo.org/style/<id>?cb=$(date +%s)` (note: the public path is
+  `style/<id>`, not `styles/<id>.json`, which 301-redirects) → delete the backup.
+- **No Martin restart needed for style changes** — confirmed 2026-08-30 that replacing
+  `/home/stars/styles/vbm.json` took effect immediately on the next request, unlike tile
+  *sources*, which do need `systemctl --user restart martin` to pick up. Don't restart
+  Martin as part of a style-only deploy.
+
+## Current confirmed production state (as of 2026-08-28, styles/GitHub state updated 2026-08-30)
+
+- No `/opt/stars` checkout anywhere; this repo has never been deployed there.
+  **Correction (2026-08-30):** GitHub `origin` no longer has just `LICENSE` — README.md,
+  docs/, systemd/, .github/, .gitignore, and styles/ have all been pushed as of
+  2026-08-29/30. Production itself still has no checkout of this repo; only the GitHub
+  remote state changed.
 - Martin v1.10.1 (no COG support built in), config
   `/home/stars/.config/martin/config.yaml`, data `/home/stars/data`, styles
   `/home/stars/styles`, supervised by `systemctl --user` (see rules above), linger
