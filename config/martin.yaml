@@ -1,0 +1,13 @@
+pmtiles:
+  paths:
+    - /home/stars/data
+  sources:
+    pmtiles_jma_1saibun_hkd: /home/stars/data/jma_1saibun_hkd.pmtiles
+    pmtiles_ksj_n03_hkd: /home/stars/data/ksj_n03_hkd.pmtiles
+    japan-seamless-aerial-z18: /home/stars/data/z18.pmtiles
+    bvmap: https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles
+    openstreetmap_jp_planet: https://tile.openstreetmap.jp/static/planet.pmtiles
+
+styles:
+  paths:
+    - /home/stars/styles

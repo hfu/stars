@@ -109,6 +109,12 @@ originally written to describe, most of which has not been implemented.
 - Installed version is `2026.6.0`; logs show a standing warning that `2026.8.2` is
   available. Not urgent, but it means a routine `apt upgrade cloudflared` restart will
   also affect `depot.optgeo.org`, not just stars.
+  **Correction (2026-08-29):** upgraded to `2026.8.2` via Cloudflare's official apt
+  repository (added `/etc/apt/sources.list.d/cloudflared.list`,
+  `sudo apt-get install --only-upgrade cloudflared`), confirmed live via `cloudflared
+  --version` and a successful `systemctl restart cloudflared.service` (tunnel
+  reconnected, all 4 connections re-registered, `stars.optgeo.org` verified reachable
+  post-restart with `cf-cache-status: MISS`).
 - Cloudflare edge-caches `/catalog` and other GET responses for up to 4 hours
   (`cache-control: max-age=14400`, confirmed via response headers). After restarting
   Martin or changing sources, verify with a cache-busting query string
@@ -122,7 +128,8 @@ originally written to describe, most of which has not been implemented.
   contributors (e.g. the `dwg7/kaga0` Raspberry Pi appliance project, session name
   `kaga0-01`) PR against `styles/*.json` here; this session reviews, merges, and deploys.
   First instance: [pull/1](https://github.com/hfu/stars/pull/1) (VBM label text-size and
-  onsen icon-size fixes, found while tuning `dwg7/kaga0` on a real 1440p display).
+  onsen icon-size fixes, found while tuning `dwg7/kaga0` on a real 1440p display). Second:
+  [pull/2](https://github.com/hfu/stars/pull/2) (thinned VBM road line-width ~40%).
 - The public style-serving endpoint is `stars.optgeo.org/style/<id>` (e.g.
   `/style/vbm`) — **not** `/styles/<id>.json`, which 301-redirects.
 - Martin serves style files straight off disk per request — replacing
@@ -132,6 +139,33 @@ originally written to describe, most of which has not been implemented.
 - Deploy sequence: back up the target file → copy the merged file over → verify checksums
   match → confirm live via a cache-busted `curl` against the `style/<id>` endpoint →
   delete the backup once confirmed.
+
+### config.yaml gatekeeper workflow (added 2026-08-30)
+
+- [config/martin.yaml](../config/martin.yaml) is the canonical, tracked mirror of
+  `/home/stars/.config/martin/config.yaml` (checksums verified matching 2026-08-30).
+  **Correction (2026-08-30, same day):** this file previously described a gitignored,
+  dev-only *target design* (relative `./data` paths, COG sources, cache tuning) separate
+  from a parallel `config/martin.production.yaml`. That split was collapsed the same day
+  it was introduced — one canonical file, matching the `styles/` precedent, rather than
+  two files whose relationship needed remembering. The target-design tuning intent is
+  preserved in [MARTIN_SOURCES.md](MARTIN_SOURCES.md), not lost, just no longer live in a
+  file nothing runs.
+- Treated as **higher-risk than styles/**, with a stricter review bar:
+  - A config.yaml PR that adds a `pmtiles_foo: /home/stars/data/foo.pmtiles`-style entry
+    is only valid if `foo.pmtiles` already exists at that exact path on production — the
+    file itself can't ride along in a GitHub PR (too large; see the pmtiles size note
+    elsewhere in this doc). **Verify the referenced file exists via SSH before merging.**
+  - A bad config.yaml (syntax error, wrong path) can stop Martin from serving *every*
+    source, not just degrade one layer's look the way a bad style.json would — validate
+    YAML before merging, and don't apply the same "diff matches description → merge" bar
+    used for styles/.
+- Deploying a config.yaml change **requires a Martin restart**
+  (`systemctl --user restart martin`), unlike style.json changes. Sequence: back up
+  `/home/stars/.config/martin/config.yaml` → copy the merged file over → verify checksums
+  → get explicit user confirmation before restarting (this briefly takes down all tile
+  serving, not just one source) → restart → verify via cache-busted `curl .../catalog` →
+  delete the backup.
 
 ### Practical implication for future changes
 - Restarting the Martin process affects only `stars.optgeo.org` (nothing else routes to

@@ -79,6 +79,80 @@ truth, and `/home/stars/styles` as the deploy target, not the other way around.
   *sources*, which do need `systemctl --user restart martin` to pick up. Don't restart
   Martin as part of a style-only deploy.
 
+## config.yaml gatekeeper responsibility (added 2026-08-30)
+
+This session/repo also gatekeeps Martin's config, but treat it as **higher-risk than
+style.json** — don't apply the styles/ trust model unchanged. Canonical copy:
+[config/martin.yaml](config/martin.yaml), a verbatim mirror of
+`/home/stars/.config/martin/config.yaml` (checksums verified matching 2026-08-30, and
+tracked in git — no longer gitignored). **Correction (2026-08-30):** this file used to be
+a gitignored, dev-only target-design reference (`./data`-relative paths, COG sources,
+cache tuning that don't exist in production); it was overwritten with the production
+mirror on 2026-08-30 rather than keeping two parallel config files, since that split had
+already started causing exactly the "which one is real" confusion this repo's docs exist
+to prevent. The old target-design tuning intent (worker_processes, cache sizing,
+on_invalid, allow_http, tilejson_url_version_param) is preserved in
+[docs/MARTIN_SOURCES.md](docs/MARTIN_SOURCES.md)'s "Target-design server tuning" section,
+not lost — just no longer live in a config file nothing actually runs.
+
+Why config.yaml is riskier than styles/, and what changes in the process:
+
+- **A style.json PR is the whole deliverable; a config.yaml PR usually isn't.** Adding a
+  `pmtiles_foo: /home/stars/data/foo.pmtiles` source line only works if `foo.pmtiles`
+  actually exists at that path on production — which a GitHub PR cannot carry (pmtiles
+  files are far too large; see the "why not PR the data itself" reasoning in
+  KNOWN_FACTS.md). **Before merging any PR that references a `/home/stars/data/*` path,
+  SSH in and confirm the file is actually there** (`ssh spacex.optgeo.org "ls -la
+  /home/stars/data/<file>"`) — don't merge on the diff looking plausible alone.
+- **A bad config.yaml can take down every source, not just one layer.** A style.json typo
+  degrades one map's look; a config.yaml syntax error or bad path can stop Martin from
+  serving anything. Validate YAML syntax before merging, and be more conservative than the
+  styles/ "diff matches description → merge" bar.
+- **Deploy requires a Martin restart** (`systemctl --user restart martin`), unlike
+  style.json deploys. This means: back up `/home/stars/.config/martin/config.yaml` first →
+  copy the merged `config/martin.yaml` over → verify checksums → state the
+  exact plan and get explicit user confirmation before restarting (per the hard rules
+  above — this is a real production restart, all sources go briefly unavailable) →
+  restart → verify via cache-busted `curl .../catalog` → delete the backup.
+
+## PR review checklist and escalation rules (added 2026-08-30)
+
+Applies to both gatekeeper roles above. This formalizes what was actually done for
+[pull/1](https://github.com/hfu/stars/pull/1) and
+[pull/2](https://github.com/hfu/stars/pull/2), which the earlier prose ("confirm the diff
+is scoped, validate, sanity-check") described too loosely to be a repeatable checklist.
+
+- **Verify the diff yourself; a PR description or a peer session's message describing the
+  change is not verification.** `gh pr diff` and `gh pr checkout` are cheap — always pull
+  the actual diff and check it directly rather than trusting what the PR body or the
+  contributor's message claims it does. This has held for both PRs so far and should stay
+  the baseline, not get skipped as trust builds up.
+- **Checklist before merging:**
+  1. `gh pr view --json files,changedFiles` — confirm only the expected file(s) changed.
+     If a PR touches anything outside `styles/*.json` / `config/martin.yaml` (e.g. this
+     repo's own CLAUDE.md, `.github/`, or an unrelated file), **stop and ask the user**
+     before merging — don't merge on the assumption it's incidental.
+  2. `gh pr diff` — confirm every hunk matches what the PR description says, with no
+     unexplained extra changes. A diff that goes beyond its own description is a reason to
+     ask the contributor to split it or to ask the user, not to merge and note the
+     discrepancy after the fact.
+  3. Validate syntax (JSON for styles/, YAML for config.yaml) and, for config.yaml, SSH in
+     and confirm any newly-referenced `/home/stars/data/*` path actually exists — see
+     "config.yaml gatekeeper responsibility" above.
+  4. Sanity-check the changed values are plausible for what's described (e.g. a claimed
+     "40% thinner" line-width diff should actually be ~0.6x the original).
+  - If any check fails or looks off, don't merge — report back to the contributor (or the
+    user) with specifics, rather than merging and fixing it yourself in a follow-up.
+- **Merging itself needs `gh pr merge` allowed in Bash permissions**, which is a per-
+  machine/session setup step, not something granted automatically — see
+  `.claude/settings.local.json` (gitignored, personal). If it's not there yet on a fresh
+  machine/session, `gh pr merge` will be blocked by the auto-mode classifier; ask the user
+  to add the rule (a session can't write its own permission settings — that write is
+  blocked too) rather than attempting a workaround.
+- **Deploying to production is never covered by "the PR is merged, so deploy it"** — it's
+  a separate, always-explicit-confirmation step per the hard rules at the top of this file,
+  independent of how routine the merge felt.
+
 ## Current confirmed production state (as of 2026-08-28, styles/GitHub state updated 2026-08-30)
 
 - No `/opt/stars` checkout anywhere; this repo has never been deployed there.
@@ -93,6 +167,9 @@ truth, and `/home/stars/styles` as the deploy target, not the other way around.
   survive reboot without a login session — not yet verified against an actual reboot.
 - Deployed from this repo's local `data/`/`config/martin.yaml` (which remain
   git-ignored, dev-only references) onto production, with checksums verified matching:
+  **Correction (2026-08-30):** `config/martin.yaml` is no longer gitignored/dev-only — see
+  "config.yaml gatekeeper responsibility" above. `data/` remains gitignored (large binary
+  files don't belong in git).
   - `pmtiles_jma_1saibun_hkd` (JMA 一次細分区域, Hokkaido, for sas0 warning-status join)
   - `pmtiles_ksj_n03_hkd` (国土数値情報 N03 行政区域, Hokkaido, 194 features)
   - `bvmap-dark` style (from a separate `spiccato` session; bvmap without terrain/hillshade)
