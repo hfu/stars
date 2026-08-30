@@ -1788,12 +1788,23 @@
       "source": "openmaptiles",
       "source-layer": "boundary",
       "filter": [
-        "==",
+        "all",
         [
-          "get",
-          "admin_level"
+          "==",
+          [
+            "get",
+            "admin_level"
+          ],
+          4
         ],
-        4
+        [
+          "!=",
+          [
+            "get",
+            "maritime"
+          ],
+          1
+        ]
       ],
       "layout": {
         "line-cap": "round",
@@ -1849,6 +1860,14 @@
             "has",
             "claimed_by"
           ]
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "maritime"
+          ],
+          1
         ]
       ],
       "layout": {
@@ -1897,12 +1916,23 @@
       "source-layer": "boundary",
       "minzoom": 5,
       "filter": [
-        "==",
+        "all",
         [
-          "get",
-          "admin_level"
+          "==",
+          [
+            "get",
+            "admin_level"
+          ],
+          2
         ],
-        2
+        [
+          "!=",
+          [
+            "get",
+            "maritime"
+          ],
+          1
+        ]
       ],
       "layout": {
         "line-cap": "round",
