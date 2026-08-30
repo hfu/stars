@@ -17,4 +17,3 @@ pmtiles:
 styles:
   paths:
     - /home/stars/styles
-  rendering: true
