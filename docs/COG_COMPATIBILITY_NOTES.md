@@ -1,10 +1,12 @@
 # Martin Experimental COG Compatibility Notes
 
-> **Status note (2026-08-28):** production's Martin binary (`/home/stars/.local/bin/martin`,
-> v1.10.1) is a normal release build with no COG-related flags — `unstable-cog` has not
-> been built or deployed there. COG is not currently served in production at all. This
-> document remains a target-design reference for when that build is undertaken. See
-> [KNOWN_FACTS.md](KNOWN_FACTS.md) Section A.
+> **Status note (2026-08-28, version updated 2026-08-30):** production's Martin binary
+> (`/home/stars/.local/bin/martin`, now **v1.14.0**) is a normal release build with no
+> COG-related flags — `unstable-cog` has not been built or deployed there, and remains a
+> non-default opt-in Cargo feature even in 1.14.0 (confirmed against upstream's Cargo.toml),
+> so the version upgrade didn't change this. COG is not currently served in production at
+> all. This document remains a target-design reference for when that build is undertaken.
+> See [KNOWN_FACTS.md](KNOWN_FACTS.md) Section A.
 
 ## 1. Source of findings
 This note is based on practical findings shared in UNopenGIS issue 893.

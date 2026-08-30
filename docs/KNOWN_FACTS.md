@@ -64,6 +64,17 @@ originally written to describe, most of which has not been implemented.
 - Binary: `/home/stars/.local/bin/martin`, version **1.10.1**. `martin --help` has no
   COG-related flags — this is a normal release build, **not** a `--features=unstable-cog`
   build. COG is not currently served in production.
+  **Correction (2026-08-30):** upgraded to **v1.14.0**, installed by swapping in the
+  official `martin-aarch64-unknown-linux-gnu` prebuilt release binary (checksum verified,
+  backed up the old binary, restarted via `systemctl --user restart martin`, deleted the
+  backup once the catalog and a spot-check of every source type came back matching
+  pre-upgrade). Confirmed `unstable-cog` is still a non-default Cargo feature as of 1.14.0
+  (checked Cargo.toml directly) — the COG gap is unchanged, still not a version issue.
+  Picked up along the way: v1.11.0 added filesystem-watch live-reload for PMTiles/COG
+  sources (no restart needed when the underlying file changes) and two 1.14.0 security
+  fixes (a `rendering`-only render-worker crash, not applicable since rendering is
+  disabled; and a sprite-id amplification DoS, not currently exploitable since no
+  `sprites:` sources are configured, but worth having patched regardless).
 - Config: `/home/stars/.config/martin/config.yaml` (not `/opt/stars/config/martin.yaml`).
   It combines directory auto-discovery (`pmtiles.paths: [/home/stars/data]`, which
   publishes every `*.pmtiles` file under a source ID derived from the filename) with a

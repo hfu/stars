@@ -172,6 +172,15 @@ is scoped, validate, sanity-check") described too loosely to be a repeatable che
   `/home/stars/styles`, supervised by `systemctl --user` (see rules above), linger
   enabled for `stars` (`loginctl enable-linger stars`, done 2026-08-28) so it should
   survive reboot without a login session — not yet verified against an actual reboot.
+  **Correction (2026-08-30):** upgraded to **v1.14.0** via a prebuilt
+  `martin-aarch64-unknown-linux-gnu` binary from the official GitHub release (not a
+  rebuild — same install method as before, `/home/stars/.local/bin/martin` is a raw
+  binary, not package-managed). Still **no COG support** — confirmed `unstable-cog`
+  remains a non-default opt-in Cargo feature even in 1.14.0, so upgrading the version
+  alone doesn't add it; COG would need a separate `--features=unstable-cog` build.
+  Regression-tested after upgrade: catalog (17 tile sources, 4 styles), tile fetches
+  across pmtiles/remote-proxy/Overture sources, and style/TileJSON endpoints all matched
+  pre-upgrade behavior.
 - Deployed from this repo's local `data/`/`config/martin.yaml` (which remain
   git-ignored, dev-only references) onto production, with checksums verified matching:
   **Correction (2026-08-30):** `config/martin.yaml` is no longer gitignored/dev-only — see
