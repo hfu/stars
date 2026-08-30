@@ -442,7 +442,19 @@
       "minzoom": 11,
       "layout": {
         "icon-image": "温泉-20",
-        "icon-size": 0.8,
+        "icon-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          10,
+          0.25,
+          14,
+          0.8
+        ],
         "icon-allow-overlap": true
       }
     },
@@ -473,7 +485,7 @@
         "text-font": [
           "NotoSansJP-Regular"
         ],
-        "text-size": 10,
+        "text-size": 13,
         "text-anchor": "top",
         "text-offset": [
           0,
@@ -515,7 +527,7 @@
         "text-font": [
           "NotoSansJP-Regular"
         ],
-        "text-size": 10,
+        "text-size": 13,
         "text-anchor": "top",
         "text-offset": [
           0,
@@ -557,7 +569,7 @@
         "text-font": [
           "NotoSansJP-Regular"
         ],
-        "text-size": 10,
+        "text-size": 13,
         "text-anchor": "top",
         "text-offset": [
           0,
@@ -599,7 +611,7 @@
         "text-font": [
           "NotoSansJP-Regular"
         ],
-        "text-size": 10,
+        "text-size": 13,
         "text-anchor": "top",
         "text-offset": [
           0,
@@ -641,7 +653,7 @@
         "text-font": [
           "NotoSansJP-Regular"
         ],
-        "text-size": 10,
+        "text-size": 13,
         "text-anchor": "top",
         "text-offset": [
           0,
