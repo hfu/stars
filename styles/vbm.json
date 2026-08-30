@@ -1,0 +1,932 @@
+{
+  "version": 8,
+  "name": "Hokkaido VBM (volcanic basic map, thematic-only)",
+  "glyphs": "https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
+  "sprite": "https://gsi-cyberjapan.github.io/optimal_bvmap/sprite/std",
+  "sources": {
+    "vbm": {
+      "type": "vector",
+      "url": "https://stars.optgeo.org/vbm",
+      "minzoom": 5,
+      "maxzoom": 14
+    }
+  },
+  "layers": [
+    {
+      "id": "vbm-water-area",
+      "type": "fill",
+      "source": "vbm",
+      "source-layer": "5112",
+      "paint": {
+        "fill-color": "#a6cbe8",
+        "fill-opacity": 0.6
+      }
+    },
+    {
+      "id": "vbm-building-3001",
+      "type": "fill",
+      "source": "vbm",
+      "source-layer": "3001",
+      "minzoom": 13,
+      "paint": {
+        "fill-color": "#c9a98c",
+        "fill-opacity": 0.7
+      }
+    },
+    {
+      "id": "vbm-building-3002",
+      "type": "fill",
+      "source": "vbm",
+      "source-layer": "3002",
+      "minzoom": 13,
+      "paint": {
+        "fill-color": "#c9a98c",
+        "fill-opacity": 0.7
+      }
+    },
+    {
+      "id": "vbm-building-3003",
+      "type": "fill",
+      "source": "vbm",
+      "source-layer": "3003",
+      "minzoom": 13,
+      "paint": {
+        "fill-color": "#c9a98c",
+        "fill-opacity": 0.7
+      }
+    },
+    {
+      "id": "vbm-building-3004",
+      "type": "fill",
+      "source": "vbm",
+      "source-layer": "3004",
+      "minzoom": 13,
+      "paint": {
+        "fill-color": "#c9a98c",
+        "fill-opacity": 0.7
+      }
+    },
+    {
+      "id": "vbm-water-edge-5101",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "5101",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "#3b7bb5",
+        "line-width": 1.2
+      }
+    },
+    {
+      "id": "vbm-water-edge-5102",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "5102",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "#3b7bb5",
+        "line-width": 1.2
+      }
+    },
+    {
+      "id": "vbm-water-edge-5106",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "5106",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "#3b7bb5",
+        "line-width": 1.2
+      }
+    },
+    {
+      "id": "vbm-water-structure-5202",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "5202",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4a90c4",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "vbm-water-structure-5211",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "5211",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4a90c4",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "vbm-water-structure-5226",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "5226",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4a90c4",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "vbm-water-structure-5227",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "5227",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4a90c4",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "vbm-water-structure-5228",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "5228",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4a90c4",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "vbm-water-structure-5232",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "5232",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4a90c4",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "vbm-water-structure-5239",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "5239",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4a90c4",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "vbm-sabo-5265",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "5265",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#7a5230",
+        "line-width": 1.5
+      }
+    },
+    {
+      "id": "vbm-admin-1102",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "1102",
+      "paint": {
+        "line-color": "#9b59b6",
+        "line-width": 1,
+        "line-dasharray": [
+          4,
+          2
+        ]
+      }
+    },
+    {
+      "id": "vbm-admin-1103",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "1103",
+      "paint": {
+        "line-color": "#9b59b6",
+        "line-width": 1,
+        "line-dasharray": [
+          4,
+          2
+        ]
+      }
+    },
+    {
+      "id": "vbm-area-6201",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "6201",
+      "paint": {
+        "line-color": "#9b59b6",
+        "line-width": 1,
+        "line-dasharray": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "vbm-road-2101",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "2101",
+      "minzoom": 13,
+      "paint": {
+        "line-color": "#e8b400",
+        "line-width": 2
+      }
+    },
+    {
+      "id": "vbm-road-2103",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "2103",
+      "minzoom": 13,
+      "paint": {
+        "line-color": "#e8b400",
+        "line-width": 2
+      }
+    },
+    {
+      "id": "vbm-road-2106",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "2106",
+      "minzoom": 13,
+      "paint": {
+        "line-color": "#e8b400",
+        "line-width": 1.5
+      }
+    },
+    {
+      "id": "vbm-road-2107",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "2107",
+      "minzoom": 13,
+      "paint": {
+        "line-color": "#e8b400",
+        "line-width": 2.5
+      }
+    },
+    {
+      "id": "vbm-rail-2301",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "2301",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "#333333",
+        "line-width": 1.5
+      }
+    },
+    {
+      "id": "vbm-rail-2306",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "2306",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "#333333",
+        "line-width": 1.5
+      }
+    },
+    {
+      "id": "vbm-rail-2311",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "2311",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "#333333",
+        "line-width": 1.5
+      }
+    },
+    {
+      "id": "vbm-power-4265",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "4265",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "#999999",
+        "line-width": 0.75
+      }
+    },
+    {
+      "id": "vbm-isobath-7132",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "7132",
+      "minzoom": 13,
+      "paint": {
+        "line-color": "#5aa0d8",
+        "line-width": 0.75,
+        "line-dasharray": [
+          3,
+          2
+        ]
+      }
+    },
+    {
+      "id": "vbm-isobath-7133",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "7133",
+      "minzoom": 13,
+      "paint": {
+        "line-color": "#5aa0d8",
+        "line-width": 0.5,
+        "line-dasharray": [
+          3,
+          2
+        ]
+      }
+    },
+    {
+      "id": "vbm-isobath-7134",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "7134",
+      "minzoom": 13,
+      "paint": {
+        "line-color": "#5aa0d8",
+        "line-width": 0.5,
+        "line-dasharray": [
+          3,
+          2
+        ]
+      }
+    },
+    {
+      "id": "vbm-contour-7102",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "7102",
+      "minzoom": 13,
+      "paint": {
+        "line-color": "#a06a3c",
+        "line-width": 0.5
+      }
+    },
+    {
+      "id": "vbm-contour-7106",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "7106",
+      "minzoom": 13,
+      "paint": {
+        "line-color": "#a06a3c",
+        "line-width": 0.5
+      }
+    },
+    {
+      "id": "vbm-contour-7101",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "7101",
+      "minzoom": 9,
+      "paint": {
+        "line-color": "#a06a3c",
+        "line-width": [
+          "step",
+          [
+            "zoom"
+          ],
+          0.5,
+          13,
+          1.2
+        ]
+      }
+    },
+    {
+      "id": "vbm-contour-7105",
+      "type": "line",
+      "source": "vbm",
+      "source-layer": "7105",
+      "minzoom": 9,
+      "paint": {
+        "line-color": "#a06a3c",
+        "line-width": [
+          "step",
+          [
+            "zoom"
+          ],
+          0.5,
+          13,
+          1.2
+        ]
+      }
+    },
+    {
+      "id": "vbm-point-6221",
+      "type": "symbol",
+      "source": "vbm",
+      "source-layer": "6221",
+      "minzoom": 11,
+      "layout": {
+        "icon-image": "噴火口・噴気口-20",
+        "icon-size": 0.8,
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "vbm-point-6222",
+      "type": "symbol",
+      "source": "vbm",
+      "source-layer": "6222",
+      "minzoom": 11,
+      "layout": {
+        "icon-image": "温泉-20",
+        "icon-size": 0.8,
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "vbm-point-6241",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "6241",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#3f7fe0",
+        "circle-radius": 4,
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-width": 1
+      }
+    },
+    {
+      "id": "vbm-point-6241-label",
+      "type": "symbol",
+      "source": "vbm",
+      "source-layer": "6241",
+      "minzoom": 11,
+      "layout": {
+        "text-field": [
+          "get",
+          "名称"
+        ],
+        "text-font": [
+          "NotoSansJP-Regular"
+        ],
+        "text-size": 10,
+        "text-anchor": "top",
+        "text-offset": [
+          0,
+          0.6
+        ],
+        "text-max-width": 8,
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": "#222222",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1.2
+      }
+    },
+    {
+      "id": "vbm-point-3581",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "3581",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#2e8b57",
+        "circle-radius": 4,
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-width": 1
+      }
+    },
+    {
+      "id": "vbm-point-3581-label",
+      "type": "symbol",
+      "source": "vbm",
+      "source-layer": "3581",
+      "minzoom": 11,
+      "layout": {
+        "text-field": [
+          "get",
+          "名称"
+        ],
+        "text-font": [
+          "NotoSansJP-Regular"
+        ],
+        "text-size": 10,
+        "text-anchor": "top",
+        "text-offset": [
+          0,
+          0.6
+        ],
+        "text-max-width": 8,
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": "#222222",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1.2
+      }
+    },
+    {
+      "id": "vbm-point-3582",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "3582",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#2e8b57",
+        "circle-radius": 4,
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-width": 1
+      }
+    },
+    {
+      "id": "vbm-point-3582-label",
+      "type": "symbol",
+      "source": "vbm",
+      "source-layer": "3582",
+      "minzoom": 11,
+      "layout": {
+        "text-field": [
+          "get",
+          "名称"
+        ],
+        "text-font": [
+          "NotoSansJP-Regular"
+        ],
+        "text-size": 10,
+        "text-anchor": "top",
+        "text-offset": [
+          0,
+          0.6
+        ],
+        "text-max-width": 8,
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": "#222222",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1.2
+      }
+    },
+    {
+      "id": "vbm-point-6242",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "6242",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#2e8b57",
+        "circle-radius": 4,
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-width": 1
+      }
+    },
+    {
+      "id": "vbm-point-6242-label",
+      "type": "symbol",
+      "source": "vbm",
+      "source-layer": "6242",
+      "minzoom": 11,
+      "layout": {
+        "text-field": [
+          "get",
+          "名称"
+        ],
+        "text-font": [
+          "NotoSansJP-Regular"
+        ],
+        "text-size": 10,
+        "text-anchor": "top",
+        "text-offset": [
+          0,
+          0.6
+        ],
+        "text-max-width": 8,
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": "#222222",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1.2
+      }
+    },
+    {
+      "id": "vbm-point-4257",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "4257",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#b22222",
+        "circle-radius": 4,
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-width": 1
+      }
+    },
+    {
+      "id": "vbm-point-4257-label",
+      "type": "symbol",
+      "source": "vbm",
+      "source-layer": "4257",
+      "minzoom": 11,
+      "layout": {
+        "text-field": [
+          "get",
+          "名称"
+        ],
+        "text-font": [
+          "NotoSansJP-Regular"
+        ],
+        "text-size": 10,
+        "text-anchor": "top",
+        "text-offset": [
+          0,
+          0.6
+        ],
+        "text-max-width": 8,
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": "#222222",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1.2
+      }
+    },
+    {
+      "id": "vbm-point-7135",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "7135",
+      "minzoom": 13,
+      "paint": {
+        "circle-color": "#5aa0d8",
+        "circle-radius": 3
+      }
+    },
+    {
+      "id": "vbm-control-7301",
+      "type": "symbol",
+      "source": "vbm",
+      "source-layer": "7301",
+      "minzoom": 11,
+      "layout": {
+        "icon-image": [
+          "case",
+          [
+            "!=",
+            [
+              "get",
+              "三角点標高"
+            ],
+            null
+          ],
+          "三角点-20",
+          "水準点"
+        ],
+        "icon-size": 0.8,
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "vbm-control-7302",
+      "type": "symbol",
+      "source": "vbm",
+      "source-layer": "7302",
+      "minzoom": 11,
+      "layout": {
+        "icon-image": [
+          "case",
+          [
+            "!=",
+            [
+              "get",
+              "三角点標高"
+            ],
+            null
+          ],
+          "三角点-20",
+          "水準点"
+        ],
+        "icon-size": 0.8,
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "vbm-control-7303",
+      "type": "symbol",
+      "source": "vbm",
+      "source-layer": "7303",
+      "minzoom": 11,
+      "layout": {
+        "icon-image": [
+          "case",
+          [
+            "!=",
+            [
+              "get",
+              "三角点標高"
+            ],
+            null
+          ],
+          "三角点-20",
+          "水準点"
+        ],
+        "icon-size": 0.8,
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "vbm-control-7308",
+      "type": "symbol",
+      "source": "vbm",
+      "source-layer": "7308",
+      "minzoom": 11,
+      "layout": {
+        "icon-image": [
+          "case",
+          [
+            "!=",
+            [
+              "get",
+              "三角点標高"
+            ],
+            null
+          ],
+          "三角点-20",
+          "水準点"
+        ],
+        "icon-size": 0.8,
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "vbm-annotation-8110",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8110",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8111",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8111",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8114",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8114",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8115",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8115",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8121",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8121",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8122",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8122",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8123",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8123",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8124",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8124",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8125",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8125",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8126",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8126",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8131",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8131",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8151",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8151",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8152",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8152",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8162",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8162",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    },
+    {
+      "id": "vbm-annotation-8171",
+      "type": "circle",
+      "source": "vbm",
+      "source-layer": "8171",
+      "minzoom": 11,
+      "paint": {
+        "circle-color": "#555555",
+        "circle-radius": 2
+      }
+    }
+  ]
+}
