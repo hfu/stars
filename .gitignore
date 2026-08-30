@@ -7,3 +7,6 @@ config/martin.yaml
 # Tunnel credentials and secrets (never commit)
 secrets/
 config/cloudflared/config.yaml
+
+# Personal Claude Code permission overrides
+.claude/settings.local.json
