@@ -68,7 +68,13 @@ truth, and `/home/stars/styles` as the deploy target, not the other way around.
 - **Intake workflow:** a contributor (e.g. the `kaga0-01` Claude session) opens a GitHub PR
   against `styles/*.json` in `hfu/stars`. This session reviews (confirm the diff is scoped
   to what was described, validate the JSON, sanity-check the changed values) and merges.
-  See [pull/1](https://github.com/hfu/stars/pull/1) for the first exercised instance.
+  See [pull/1](https://github.com/hfu/stars/pull/1) for the first exercised instance;
+  [pull/2](https://github.com/hfu/stars/pull/2) and
+  [pull/3](https://github.com/hfu/stars/pull/3) followed. As of pull/3, `dwg7/kaga0`
+  treats `hfu/stars` as the design master — their local copy is only a mechanical
+  source/glyphs/sprite path substitution on top of what's merged here, never an
+  independent design fork — so every VBM/VLCM design change should keep arriving as a PR
+  here first.
 - **Deploy sequence after merge** (needs explicit user confirmation per the hard rules
   above, same as any production change): `git pull` locally → back up the production
   file → `scp` the merged file over → verify checksums match → confirm the change is live
@@ -118,8 +124,9 @@ Why config.yaml is riskier than styles/, and what changes in the process:
 ## PR review checklist and escalation rules (added 2026-08-30)
 
 Applies to both gatekeeper roles above. This formalizes what was actually done for
-[pull/1](https://github.com/hfu/stars/pull/1) and
-[pull/2](https://github.com/hfu/stars/pull/2), which the earlier prose ("confirm the diff
+[pull/1](https://github.com/hfu/stars/pull/1),
+[pull/2](https://github.com/hfu/stars/pull/2), and
+[pull/3](https://github.com/hfu/stars/pull/3), which the earlier prose ("confirm the diff
 is scoped, validate, sanity-check") described too loosely to be a repeatable checklist.
 
 - **Verify the diff yourself; a PR description or a peer session's message describing the

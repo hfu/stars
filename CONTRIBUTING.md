@@ -61,3 +61,10 @@ back once it's live.
   fixes (`styles/vbm.json`), the first exercised instance of this workflow.
 - [PR #2](https://github.com/hfu/stars/pull/2) — VBM road line-width thinning
   (`styles/vbm.json`).
+- [PR #3](https://github.com/hfu/stars/pull/3) — staggered 35 VBM point/symbol/line
+  layers' `minzoom` across z10-14 instead of 38 layers appearing simultaneously at z11
+  (`styles/vbm.json`). The largest PR under this workflow so far (35 layers across 5
+  logical groups, reviewed value-by-value against the PR's own before/after table) and
+  the first exercised under the `dwg7/kaga0` design-master division of labor: their local
+  copy is a mechanical path substitution on top of what's merged here, not an independent
+  fork — design changes land here first.

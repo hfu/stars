@@ -129,7 +129,14 @@ originally written to describe, most of which has not been implemented.
   `kaga0-01`) PR against `styles/*.json` here; this session reviews, merges, and deploys.
   First instance: [pull/1](https://github.com/hfu/stars/pull/1) (VBM label text-size and
   onsen icon-size fixes, found while tuning `dwg7/kaga0` on a real 1440p display). Second:
-  [pull/2](https://github.com/hfu/stars/pull/2) (thinned VBM road line-width ~40%).
+  [pull/2](https://github.com/hfu/stars/pull/2) (thinned VBM road line-width ~40%). Third:
+  [pull/3](https://github.com/hfu/stars/pull/3) (staggered 35 point/symbol/line layers'
+  `minzoom` across z10-14 instead of 38 layers switching on simultaneously at z11 —
+  the "z11 団子" fix; style-only, no tile/data change; user-confirmed improvement on
+  kaga's real hardware 2026-08-30). pull/3 was also the first PR under the
+  `dwg7/kaga0`-proposed division of labor: `hfu/stars` stays the design master, and
+  `dwg7/kaga0`'s local copy carries only a mechanical source/glyphs/sprite path
+  substitution on top of it — design changes always land here first.
 - The public style-serving endpoint is `stars.optgeo.org/style/<id>` (e.g.
   `/style/vbm`) — **not** `/styles/<id>.json`, which 301-redirects.
 - Martin serves style files straight off disk per request — replacing
