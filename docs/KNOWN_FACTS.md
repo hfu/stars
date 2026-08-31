@@ -79,6 +79,17 @@ originally written to describe, most of which has not been implemented.
   It combines directory auto-discovery (`pmtiles.paths: [/home/stars/data]`, which
   publishes every `*.pmtiles` file under a source ID derived from the filename) with a
   few explicit `sources:` entries for custom IDs/URLs (e.g. `bvmap`,
+  **Confirmed by reading Martin's source (2026-08-30, `martin-core/src/resources/walk.rs`,
+  `walk_files`):** this directory scan is **recursive** (walks subdirectories) but
+  **strict-extension-filtered** (exact, case-sensitive match on `.pmtiles` only;
+  everything else — `.glb`, `.json`, `.subtree`, etc. — is silently skipped, not an
+  error). So dropping non-pmtiles data (e.g. 3D Tiles) into a subdirectory under
+  `/home/stars/data` is safe from Martin's perspective; it just won't be discovered as a
+  tile source. One caveat: since Martin v1.11.0 (in production as of the 1.14.0 upgrade)
+  watches this directory for filesystem changes and reloads, uploading many small files
+  (e.g. via `rsync`) can trigger repeated rescans while the transfer is in progress —
+  harmless, but staging the upload elsewhere and `mv`-ing it in as one atomic operation
+  avoids the churn.
   `openstreetmap_jp_planet`, and — as of 2026-08-28 — `pmtiles_jma_1saibun_hkd` and
   `pmtiles_ksj_n03_hkd`, deployed from this repo's `data/` using the same source IDs as
   the local `config/martin.yaml`). It also declares a `styles.paths` pointing at
@@ -117,6 +128,13 @@ originally written to describe, most of which has not been implemented.
   - `stars.optgeo.org` → `http://localhost:3000` (the Martin process above)
   - `depot.optgeo.org` → `http://localhost:8080` (a separate, unrelated service — do not
     assume changes here are stars-only)
+  - **Confirmed 2026-08-30** (`/etc/caddy/Caddyfile`, world-readable, no sudo needed):
+    `:8080` is a plain Caddy `file_server browse` with `root * /home/stars/data` and
+    permissive CORS (`Access-Control-Allow-Origin *`) — i.e. `depot.optgeo.org` is a raw
+    directory listing/download of the **exact same** `/home/stars/data` directory Martin
+    scans for pmtiles. Dropping a file there makes it both raw-downloadable via
+    `depot.optgeo.org/<path>` and (if it's a `.pmtiles` file) auto-discovered by Martin —
+    the two aren't independent.
 - Installed version is `2026.6.0`; logs show a standing warning that `2026.8.2` is
   available. Not urgent, but it means a routine `apt upgrade cloudflared` restart will
   also affect `depot.optgeo.org`, not just stars.
