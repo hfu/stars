@@ -1,0 +1,85 @@
+{
+  "version": 8,
+  "id": "glup2030-zoning",
+  "name": "GLUP2030 Vientiane Zoning",
+  "metadata": {
+    "attribution": "Virgo (MPWT Laos)"
+  },
+  "glyphs": "https://tile.openstreetmap.jp/fonts/{fontstack}/{range}.pbf",
+  "sources": {
+    "zoning": {
+      "type": "vector",
+      "tiles": ["https://stars.optgeo.org/glup2030_zoning/{z}/{x}/{y}"],
+      "minzoom": 0,
+      "maxzoom": 11,
+      "attribution": "Virgo (MPWT Laos)"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": { "background-color": "rgba(0,0,0,0)" }
+    },
+    {
+      "id": "zoning-fill",
+      "type": "fill",
+      "source": "zoning",
+      "source-layer": "zoning",
+      "paint": {
+        "fill-color": [
+          "match",
+          ["get", "zoning"],
+          "Zpp-Ua", "#7030A0",
+          "Zpp-Ub", "#5A2A82",
+          "UAa", "#FF0101",
+          "UBa", "#D60093",
+          "UBb", "#FF66CC",
+          "UCa", "#FFC002",
+          "UCb", "#FFD966",
+          "UDa", "#FFF2CC",
+          "UDb", "#F5EC3D",
+          "UF", "#7F6000",
+          "UEa", "#9DC3E6",
+          "UEb", "#2E75B6",
+          "UEi", "#C9C9C9",
+          "T", "#8BE1E5",
+          "Ta", "#8BE1E5",
+          "Ef", "#8BE1E5",
+          "Em", "#8E7536",
+          "N", "#A6D86E",
+          "NE", "#278A22",
+          "#cccccc"
+        ],
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "zoning-outline",
+      "type": "line",
+      "source": "zoning",
+      "source-layer": "zoning",
+      "paint": {
+        "line-color": "#808080",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 8, 0.5, 16, 1.5]
+      }
+    },
+    {
+      "id": "zoning-label",
+      "type": "symbol",
+      "source": "zoning",
+      "source-layer": "zoning",
+      "minzoom": 11,
+      "layout": {
+        "text-field": ["get", "zoning"],
+        "text-size": 11,
+        "text-font": ["Noto Sans Regular"]
+      },
+      "paint": {
+        "text-color": "#333333",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1
+      }
+    }
+  ]
+}
