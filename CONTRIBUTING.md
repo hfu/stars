@@ -85,3 +85,18 @@ back once it's live.
   keep contributor and reviewer roles separate, and the contributor filed it themselves
   as normal. Also went through one review round (a `background` fallback layer was
   proposed, discussed, and then dropped by the contributor before merge).
+- [PR #7](https://github.com/hfu/stars/pull/7) — registered `glup2030_zoning` as a local
+  `pmtiles` source in `config/martin.yaml`, for `dwg7/vientiane-planning-map` (a sister
+  project of `dwg7/height-coverage`). First PR to exercise the "file doesn't exist on
+  production yet" path documented above: the PR touched only the config line, the
+  gatekeeper session read the actual `.pmtiles` file directly from the contributor's
+  local path (same machine) and transferred it to `/home/stars/data` itself. Also the
+  PR that corrected an earlier wrong answer from the gatekeeper session — it initially
+  suggested committing the data file into `data/` in this repo, which contradicts
+  `data/.gitignore` and this file's own "what you can't PR" section; the contributor
+  caught the inconsistency before opening the PR.
+- [PR #8](https://github.com/hfu/stars/pull/8) — added `styles/glup2030-zoning.json`, a
+  translucent zoning-fill overlay for the `glup2030_zoning` source (#7), using Virgo's
+  official GLUP2030 palette (19 zone codes). Review included independently re-fetching
+  Virgo's own `GetLegendGraphic` endpoint and diffing all 19 colors against the PR's
+  `match` expression by code (not by author-supplied description) — full match.
