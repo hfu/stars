@@ -5,6 +5,7 @@ pmtiles:
     pmtiles_jma_1saibun_hkd: /home/stars/data/jma_1saibun_hkd.pmtiles
     pmtiles_ksj_n03_hkd: /home/stars/data/ksj_n03_hkd.pmtiles
     japan-seamless-aerial-z18: /home/stars/data/z18.pmtiles
+    glup2030_zoning: /home/stars/data/glup2030_zoning.pmtiles
     bvmap: https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles
     openstreetmap_jp_planet: https://tile.openstreetmap.jp/static/planet.pmtiles
     overture_buildings: https://dev.smellman.org/static/overture-latest/buildings.pmtiles
