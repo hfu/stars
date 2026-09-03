@@ -14,6 +14,8 @@ pmtiles:
     overture_divisions: https://dev.smellman.org/static/overture-latest/divisions.pmtiles
     overture_places: https://dev.smellman.org/static/overture-latest/places.pmtiles
     overture_transportation: https://dev.smellman.org/static/overture-latest/transportation.pmtiles
+    gaez-aez33: /home/stars/data/gaez-aez33.pmtiles
+    gaez-aez57: /home/stars/data/gaez-aez57.pmtiles
 
 styles:
   paths:
