@@ -29,6 +29,17 @@ production's live files.
   references third-party glyph/sprite URLs (GSI, OSM Japan). A font/sprite *reference*
   change is just a URL edit inside a `styles/*.json` file, already covered above.
 
+## Static files (no PR, no Martin involvement at all)
+
+For very small, standalone files that don't need tiling — a handful of GeoJSON
+features, say — `depot.optgeo.org` (a plain Caddy `file_server` over the same
+`/home/stars/data` directory Martin scans, with permissive CORS already configured) can
+serve them directly at `depot.optgeo.org/<filename>`. No `config/martin.yaml` entry, no
+PR, no Martin restart — just get the file transferred (same out-of-band process as
+pmtiles data above) and it's live. Reserve this for genuinely tiny files; anything worth
+tiling should go through `config/martin.yaml` as a pmtiles source instead. First used for
+`dwg7/ferspas57`'s seven small GeoJSON files (2026-09-03, see Precedent below).
+
 ## How to submit
 
 1. Open a PR against `hfu/stars` touching only the file(s) your fix actually needs.
@@ -100,3 +111,14 @@ back once it's live.
   official GLUP2030 palette (19 zone codes). Review included independently re-fetching
   Virgo's own `GetLegendGraphic` endpoint and diffing all 19 colors against the PR's
   `match` expression by code (not by author-supplied description) — full match.
+- [PR #9](https://github.com/hfu/stars/pull/9) and
+  [PR #10](https://github.com/hfu/stars/pull/10) — 16 new `pmtiles` sources
+  (`gaez-aez33`/`gaez-aez57`, and 14 FAO Hand-in-Hand DR Congo layers) for
+  `dwg7/ferspas57`, split into two independent PRs as agreed in advance. First
+  contribution to touch 23 files at once (16 pmtiles + 7 static GeoJSON, see "Static
+  files" above) — all transferred same-machine, checksum-verified before either PR was
+  even opened. Merging PR #9 first put PR #10 into a trivial adjacent-line conflict
+  (both PRs appended entries near the same spot in `config/martin.yaml`); the gatekeeper
+  session resolved it directly by rebasing the contributor's branch (mechanical, no
+  content judgment involved — both sets of entries had already been reviewed
+  independently) rather than sending it back to the contributor.
