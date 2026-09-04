@@ -30,6 +30,12 @@ pmtiles:
     hih-cod-palmoil-score: /home/stars/data/hih-cod-palmoil-score.pmtiles
     hih-cod-wheat-score: /home/stars/data/hih-cod-wheat-score.pmtiles
     hih-cod-livestock-score: /home/stars/data/hih-cod-livestock-score.pmtiles
+    hih-caf-cassava-score: /home/stars/data/hih-caf-cassava-score.pmtiles
+    hih-civ-cereal-score: /home/stars/data/hih-civ-cereal-score.pmtiles
+    hih-civ-fruits-score: /home/stars/data/hih-civ-fruits-score.pmtiles
+    hih-civ-vegetables-score: /home/stars/data/hih-civ-vegetables-score.pmtiles
+    hih-civ-dairy-score: /home/stars/data/hih-civ-dairy-score.pmtiles
+    hih-civ-livestock-score: /home/stars/data/hih-civ-livestock-score.pmtiles
 
 styles:
   paths:
