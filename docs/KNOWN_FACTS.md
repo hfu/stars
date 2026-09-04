@@ -208,6 +208,21 @@ originally written to describe, most of which has not been implemented.
   → get explicit user confirmation before restarting (this briefly takes down all tile
   serving, not just one source) → restart → verify via cache-busted `curl .../catalog` →
   delete the backup.
+  **Correction (2026-09-04):** the restart is specifically for registering a *new*
+  source ID. **Swapping an existing pmtiles file's content at its already-registered path
+  needs no restart** — confirmed live when `dwg7/ferspas57` atomically replaced 6
+  `.pmtiles` files in place (`scp` to `.new`, then `mv`); Martin served the new content
+  (different bounds/zoom in TileJSON) within seconds. This is Martin's fs-watch reload
+  for local PMTiles/COG sources (upstream since v1.11.0, active here since the 1.14.0
+  upgrade) — pmtiles now behaves the same as styles/*.json for same-path content swaps.
+- **Trusted contributors can have direct SSH/scp access to `/home/stars/data`,
+  independent of this session (added 2026-09-04).** The ferspas57 overwrite above
+  happened without the gatekeeper doing the file transfer — confirmed directly with the
+  user, whose stated reason: pmtiles files can be very large, so routing every data
+  change through the gatekeeper doesn't scale. This doesn't change who gatekeeps
+  `config.yaml`/`styles/*.json` (still this session, via PR), but it means the contents
+  of `/home/stars/data` shouldn't be assumed to only ever change via this session's own
+  transfers — verify current state rather than trusting memory of what was transferred.
 
 ### Practical implication for future changes
 - Restarting the Martin process affects only `stars.optgeo.org` (nothing else routes to
