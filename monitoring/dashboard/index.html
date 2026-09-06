@@ -7,7 +7,7 @@
 <style>
   html, body { height: 100%; margin: 0; }
   #app { height: 100%; }
-  .stars-overview {
+  .stars-view {
     font-family: Arial, Helvetica, sans-serif;
     color: #e0e0e0;
     padding: 16px;
@@ -15,20 +15,20 @@
     box-sizing: border-box;
     overflow-y: auto;
   }
-  .stars-overview h1 { font-size: 16px; margin: 0 0 12px; color: #fff; }
-  .stars-overview .panel {
+  .stars-view h1 { font-size: 16px; margin: 0 0 12px; color: #fff; }
+  .stars-view .panel {
     background: #2b2e37;
     border-radius: 4px;
     padding: 10px 14px;
     margin-bottom: 10px;
   }
-  .stars-overview .panel h2 { font-size: 12px; margin: 0 0 6px; color: #9aa; font-weight: normal; }
-  .stars-overview .panel .value { font-size: 20px; font-weight: bold; color: #fff; }
-  .stars-overview .panel .value.ok { color: #5c5; }
-  .stars-overview .panel .value.bad { color: #e55; }
-  .stars-overview .panel svg { display: block; margin-top: 6px; }
-  .stars-overview .restart-list { font-size: 11px; color: #ccc; max-height: 80px; overflow-y: auto; }
-  .stars-overview .stale-notice { color: #e94; font-size: 11px; margin-top: 4px; }
+  .stars-view .panel h2 { font-size: 12px; margin: 0 0 6px; color: #9aa; font-weight: normal; }
+  .stars-view .panel .value { font-size: 20px; font-weight: bold; color: #fff; }
+  .stars-view .panel .value.ok { color: #5c5; }
+  .stars-view .panel .value.bad { color: #e55; }
+  .stars-view .panel svg { display: block; margin-top: 6px; }
+  .stars-view .restart-list { font-size: 11px; color: #ccc; max-height: 80px; overflow-y: auto; }
+  .stars-view .stale-notice { color: #e94; font-size: 11px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -47,6 +47,7 @@
 
   const TELEMETRY_URL = "./telemetry/uptime.jsonl";
   const STALE_AFTER_MS = 30 * 60 * 1000; // no fresh scrape in 30min => flag stale
+  const REFRESH_MS = 2 * 60 * 1000; // client-side poll; data itself updates ~every 10min
 
   function fmtTs(iso) {
     return iso.replace("T", " ").replace("Z", " UTC");
@@ -108,31 +109,45 @@
     return null;
   }
 
-  function renderHtml(rows) {
-    if (rows.length === 0) {
-      return "<p>まだデータがありません。</p>";
-    }
+  // --- Per-instrument panel renderers ---------------------------------
+  // Each function renders exactly one panel's HTML from the full row
+  // history. The "overview" object concatenates all of them; each
+  // "instrument" object renders just its own. Splitting it this way (rather
+  // than one monolithic dashboard object) follows the pattern independently
+  // converged on by sas0/mapterhorn-monitor/m3xx-fleet, per dwg7/cafebabe's
+  // patterns/open-mct.md: one shared instrument type, one objects.addProvider
+  // backed by a plain Map (no per-type branching), composition.addProvider
+  // for the parent-child tree, and objectViews.addProvider doing the actual
+  // per-key rendering -- Telemetry API / Plot deliberately not used (three
+  // independent projects hit dead ends with it when Open MCT is CDN-loaded).
 
+  function renderLiveness(rows) {
     const last = rows[rows.length - 1];
     const staleMs = Date.now() - new Date(last.ts).getTime();
     const isStale = staleMs > STALE_AFTER_MS;
-
     const upNow = last.up === true;
-    const upHtml =
+    return (
       `<div class="panel"><h2>死活</h2>` +
       `<div class="value ${upNow ? "ok" : "bad"}">${upNow ? "● 稼働中" : "● 応答なし"}</div>` +
       `<div>最終スクレイプ: ${fmtTs(last.ts)}</div>` +
       (isStale ? `<div class="stale-notice">⚠ 30分以上更新がありません(収集ジョブ自体の停止の可能性)</div>` : "") +
-      `</div>`;
+      `</div>`
+    );
+  }
 
+  function renderLatency(rows) {
     const latVals = rows.map((r) => r.tile_latency_avg_ms);
     const lastLat = lastDefined(rows, "tile_latency_avg_ms");
-    const latHtml =
+    return (
       `<div class="panel"><h2>タイル配信 平均レイテンシ</h2>` +
       `<div class="value">${lastLat !== null ? lastLat.toFixed(1) + " ms" : "—"}</div>` +
       sparkline(latVals) +
-      `</div>`;
+      `</div>`
+    );
+  }
 
+  function renderRequests(rows) {
+    const last = rows[rows.length - 1];
     const reqVals = rows.map((r) => r.requests_per_min);
     const lastReq = lastDefined(rows, "requests_per_min");
     const err4 = last.requests_4xx || 0;
@@ -141,7 +156,7 @@
     const ok3 = last.requests_3xx || 0;
     const total = err4 + err5 + ok2 + ok3;
     const errRate = total > 0 ? ((err4 + err5) / total) * 100 : null;
-    const reqHtml =
+    return (
       `<div class="panel"><h2>タイル配信リクエスト量 / エラー率</h2>` +
       `<div class="value">${lastReq !== null ? lastReq.toFixed(1) + " req/min" : "—"}` +
       (errRate !== null
@@ -149,18 +164,24 @@
         : "") +
       `</div>` +
       sparkline(reqVals, { color: "#9b7dd0" }) +
-      `</div>`;
+      `</div>`
+    );
+  }
 
+  function renderCache(rows) {
     const cacheVals = rows.map((r) => (r.cache_hit_rate === null || r.cache_hit_rate === undefined ? null : r.cache_hit_rate * 100));
     const lastCache = lastDefined(rows, "cache_hit_rate");
-    const cacheHtml =
+    return (
       `<div class="panel"><h2>pmtilesディレクトリキャッシュ ヒット率</h2>` +
       `<div class="value">${lastCache !== null ? (lastCache * 100).toFixed(1) + "%" : "—"}</div>` +
       sparkline(cacheVals, { color: "#5cc0a0" }) +
-      `</div>`;
+      `</div>`
+    );
+  }
 
+  function renderRestarts(rows) {
     const restarts = rows.filter((r) => r.restarted === true);
-    const restartHtml =
+    return (
       `<div class="panel"><h2>再起動イベント(直近${rows.length}件のスクレイプ中)</h2>` +
       `<div class="value">${restarts.length} 件</div>` +
       `<div class="restart-list">${
@@ -170,41 +191,70 @@
           .map((r) => fmtTs(r.ts))
           .join("<br/>") || "(なし)"
       }</div>` +
-      `</div>`;
+      `</div>`
+    );
+  }
 
+  function renderHost(rows) {
+    const last = rows[rows.length - 1];
     const hostOk = last.host_ok === true;
+    if (!hostOk) {
+      return `<div class="panel"><h2>ホスト状態(uptime / load / 温度)</h2><div class="value">—</div></div>`;
+    }
     const loadVals = rows.map((r) => r.host_load1);
     const tempVals = rows.map((r) => r.host_temp_c);
-    const hostHtml = !hostOk
-      ? `<div class="panel"><h2>ホスト状態(uptime / load / 温度)</h2><div class="value">—</div></div>`
-      : `<div class="panel"><h2>ホスト状態(uptime / load / 温度)</h2>` +
-        `<div class="value">uptime ${lastDefined(rows, "host_uptime_days").toFixed(1)}日 / load1 ${lastDefined(rows, "host_load1").toFixed(2)} / ${lastDefined(rows, "host_temp_c").toFixed(1)}°C</div>` +
-        sparkline(loadVals, { color: "#e0a860" }) +
-        sparkline(tempVals, { color: "#e07070" }) +
-        `</div>`;
+    return (
+      `<div class="panel"><h2>ホスト状態(uptime / load / 温度)</h2>` +
+      `<div class="value">uptime ${lastDefined(rows, "host_uptime_days").toFixed(1)}日 / load1 ${lastDefined(rows, "host_load1").toFixed(2)} / ${lastDefined(rows, "host_temp_c").toFixed(1)}°C</div>` +
+      sparkline(loadVals, { color: "#e0a860" }) +
+      sparkline(tempVals, { color: "#e07070" }) +
+      `</div>`
+    );
+  }
 
+  function renderDisk(rows) {
     const diskVals = rows.map((r) => r.host_disk_avail_gb);
     const lastDiskAvail = lastDefined(rows, "host_disk_avail_gb");
     const lastDiskPct = lastDefined(rows, "host_disk_used_pct");
-    const diskHtml =
+    return (
       `<div class="panel"><h2>ディスク空き容量(/home/stars/data)</h2>` +
       `<div class="value">${lastDiskAvail !== null ? lastDiskAvail.toFixed(1) + " GB" : "—"}` +
       (lastDiskPct !== null ? ` <span style="font-size:13px;color:${lastDiskPct > 90 ? "#e55" : "#9aa"}">(使用率 ${lastDiskPct}%)</span>` : "") +
       `</div>` +
       sparkline(diskVals, { color: "#6ab0e0" }) +
-      `</div>`;
-
-    return (
-      `<h1>stars.optgeo.org — 死活・レイテンシ監視</h1>` +
-      upHtml + latHtml + reqHtml + cacheHtml + restartHtml + hostHtml + diskHtml
+      `</div>`
     );
   }
 
+  const INSTRUMENTS = [
+    { key: "liveness", name: "死活", render: renderLiveness },
+    { key: "latency", name: "タイル配信 平均レイテンシ", render: renderLatency },
+    { key: "requests", name: "タイル配信リクエスト量 / エラー率", render: renderRequests },
+    { key: "cache", name: "pmtilesディレクトリキャッシュ ヒット率", render: renderCache },
+    { key: "restarts", name: "再起動イベント", render: renderRestarts },
+    { key: "host", name: "ホスト状態(uptime / load / 温度)", render: renderHost },
+    { key: "disk", name: "ディスク空き容量", render: renderDisk },
+  ];
+  const INSTRUMENTS_BY_KEY = new Map(INSTRUMENTS.map((i) => [i.key, i]));
+
+  function renderOverview(rows) {
+    if (rows.length === 0) return "<p>まだデータがありません。</p>";
+    return `<h1>stars.optgeo.org — 死活・レイテンシ監視</h1>` + INSTRUMENTS.map((i) => i.render(rows)).join("");
+  }
+
+  function renderInstrument(key, rows) {
+    if (rows.length === 0) return "<p>まだデータがありません。</p>";
+    const inst = INSTRUMENTS_BY_KEY.get(key);
+    return `<h1>${inst.name}</h1>` + inst.render(rows);
+  }
+
   // --- Open MCT wiring -----------------------------------------------
-  // Per m3xx-fleet-ops's implementation notes: the stock Plot view doesn't
-  // behave well when Open MCT is embedded via CDN without the full build
-  // tooling, so telemetry here is rendered as hand-built SVG inside a
-  // custom object type + view provider, rather than through the Plot API.
+  // Structure per dwg7/cafebabe's patterns/open-mct.md: one namespace, one
+  // objects.addProvider backed by a plain Map (no per-type branching logic
+  // needed at this scale), a fixed-identifier addRoot, one
+  // composition.addProvider exposing the 7 instruments as the root's
+  // children, and a single shared "stars.instrument" type -- used only to
+  // pick a view, not as a branching device.
 
   const openmct = window.openmct;
   openmct.setAssetPath("https://unpkg.com/openmct@4.3.1/dist/");
@@ -215,54 +265,90 @@
     end: Date.now(),
   });
 
-  openmct.types.addType("stars.overview", {
-    name: "stars 死活・レイテンシ監視",
-    description: "stars.optgeo.org の /_/metrics から集計した死活・レイテンシ・キャッシュ状況の一覧",
-    cssClass: "icon-object",
+  const NAMESPACE = "stars";
+  const ROOT_IDENTIFIER = { namespace: NAMESPACE, key: "root" };
+
+  const objectDefs = new Map();
+  objectDefs.set("root", {
+    identifier: ROOT_IDENTIFIER,
+    name: "stars.optgeo.org 監視",
+    type: "stars.overview",
+    location: "ROOT",
+  });
+  INSTRUMENTS.forEach((inst) => {
+    objectDefs.set(inst.key, {
+      identifier: { namespace: NAMESPACE, key: inst.key },
+      name: inst.name,
+      type: "stars.instrument",
+      location: openmct.objects.makeKeyString(ROOT_IDENTIFIER),
+    });
   });
 
-  const ROOT_IDENTIFIER = { namespace: "stars", key: "overview" };
+  openmct.types.addType("stars.overview", {
+    name: "stars 監視ダッシュボード(まとめ)",
+    description: "7計器をまとめて表示する、stars.optgeo.org監視のトップ",
+    cssClass: "icon-folder",
+  });
+  openmct.types.addType("stars.instrument", {
+    name: "stars 計器",
+    description: "stars.optgeo.org監視の個別計器(死活・レイテンシ等)",
+    cssClass: "icon-object",
+    creatable: false,
+  });
 
   openmct.objects.addRoot(ROOT_IDENTIFIER);
-  openmct.objects.addProvider("stars", {
-    get: async (identifier) => {
-      if (identifier.key === "overview") {
-        return {
-          identifier,
-          name: "stars.optgeo.org 監視",
-          type: "stars.overview",
-          location: "ROOT",
-        };
-      }
-      return undefined;
-    },
+  openmct.objects.addProvider(NAMESPACE, {
+    get: async (identifier) => objectDefs.get(identifier.key),
   });
+
+  openmct.composition.addProvider({
+    appliesTo: (domainObject) =>
+      domainObject.identifier.namespace === NAMESPACE && domainObject.identifier.key === "root",
+    load: async () => INSTRUMENTS.map((inst) => ({ namespace: NAMESPACE, key: inst.key })),
+  });
+
+  function makeView(renderFn) {
+    return (domainObject) => {
+      let el;
+      let cancelled = false;
+      let timer;
+      const refresh = () => {
+        loadRows()
+          .then((rows) => {
+            if (!cancelled) el.innerHTML = renderFn(rows);
+          })
+          .catch((e) => {
+            if (!cancelled) el.innerHTML = "<p>テレメトリの読み込みに失敗しました: " + e.message + "</p>";
+          });
+      };
+      return {
+        show(element) {
+          el = element;
+          el.classList.add("stars-view");
+          el.innerHTML = "読み込み中…";
+          refresh();
+          timer = setInterval(refresh, REFRESH_MS);
+        },
+        destroy() {
+          cancelled = true;
+          clearInterval(timer);
+        },
+      };
+    };
+  }
 
   openmct.objectViews.addProvider({
     key: "stars-overview-view",
     name: "Overview",
     canView: (domainObject) => domainObject.type === "stars.overview",
-    view: (domainObject) => {
-      let el;
-      let cancelled = false;
-      return {
-        show(element) {
-          el = element;
-          el.classList.add("stars-overview");
-          el.innerHTML = "読み込み中…";
-          loadRows()
-            .then((rows) => {
-              if (!cancelled) el.innerHTML = renderHtml(rows);
-            })
-            .catch((e) => {
-              if (!cancelled) el.innerHTML = "<p>テレメトリの読み込みに失敗しました: " + e.message + "</p>";
-            });
-        },
-        destroy() {
-          cancelled = true;
-        },
-      };
-    },
+    view: makeView(renderOverview),
+  });
+
+  openmct.objectViews.addProvider({
+    key: "stars-instrument-view",
+    name: "Instrument",
+    canView: (domainObject) => domainObject.type === "stars.instrument",
+    view: (domainObject) => makeView((rows) => renderInstrument(domainObject.identifier.key, rows))(domainObject),
   });
 
   openmct.start(document.getElementById("app"));
