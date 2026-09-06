@@ -39,7 +39,11 @@ jobs:
         run: python3 monitoring/collect.py pages/telemetry/uptime.jsonl
 
       - name: Sync dashboard assets
-        run: rsync -a --delete --exclude 'telemetry' monitoring/dashboard/ pages/
+        # --exclude '.git' is load-bearing: without it, --delete removes the
+        # worktree's .git link file (it's not part of monitoring/dashboard/),
+        # which silently collapses `pages` back into a plain subdirectory of
+        # the main checkout instead of the gh-pages worktree.
+        run: rsync -a --delete --exclude 'telemetry' --exclude '.git' monitoring/dashboard/ pages/
 
       - name: Commit and push
         working-directory: pages
