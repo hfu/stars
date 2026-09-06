@@ -172,9 +172,31 @@
       }</div>` +
       `</div>`;
 
+    const hostOk = last.host_ok === true;
+    const loadVals = rows.map((r) => r.host_load1);
+    const tempVals = rows.map((r) => r.host_temp_c);
+    const hostHtml = !hostOk
+      ? `<div class="panel"><h2>ホスト状態(uptime / load / 温度)</h2><div class="value">—</div></div>`
+      : `<div class="panel"><h2>ホスト状態(uptime / load / 温度)</h2>` +
+        `<div class="value">uptime ${lastDefined(rows, "host_uptime_days").toFixed(1)}日 / load1 ${lastDefined(rows, "host_load1").toFixed(2)} / ${lastDefined(rows, "host_temp_c").toFixed(1)}°C</div>` +
+        sparkline(loadVals, { color: "#e0a860" }) +
+        sparkline(tempVals, { color: "#e07070" }) +
+        `</div>`;
+
+    const diskVals = rows.map((r) => r.host_disk_avail_gb);
+    const lastDiskAvail = lastDefined(rows, "host_disk_avail_gb");
+    const lastDiskPct = lastDefined(rows, "host_disk_used_pct");
+    const diskHtml =
+      `<div class="panel"><h2>ディスク空き容量(/home/stars/data)</h2>` +
+      `<div class="value">${lastDiskAvail !== null ? lastDiskAvail.toFixed(1) + " GB" : "—"}` +
+      (lastDiskPct !== null ? ` <span style="font-size:13px;color:${lastDiskPct > 90 ? "#e55" : "#9aa"}">(使用率 ${lastDiskPct}%)</span>` : "") +
+      `</div>` +
+      sparkline(diskVals, { color: "#6ab0e0" }) +
+      `</div>`;
+
     return (
       `<h1>stars.optgeo.org — 死活・レイテンシ監視</h1>` +
-      upHtml + latHtml + reqHtml + cacheHtml + restartHtml
+      upHtml + latHtml + reqHtml + cacheHtml + restartHtml + hostHtml + diskHtml
     );
   }
 
