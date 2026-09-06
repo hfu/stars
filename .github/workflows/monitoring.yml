@@ -1,0 +1,51 @@
+name: monitoring
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  push:
+    branches: [main]
+    paths:
+      - "monitoring/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stars-monitoring
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare gh-pages worktree
+        run: |
+          git fetch origin gh-pages || true
+          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git worktree add pages gh-pages
+          else
+            git worktree add --orphan -b gh-pages pages
+          fi
+
+      - name: Collect metrics
+        run: python3 monitoring/collect.py pages/telemetry/uptime.jsonl
+
+      - name: Sync dashboard assets
+        run: rsync -a --delete --exclude 'telemetry' monitoring/dashboard/ pages/
+
+      - name: Commit and push
+        working-directory: pages
+        run: |
+          git config user.name "stars-monitoring-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "telemetry update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push origin HEAD:gh-pages

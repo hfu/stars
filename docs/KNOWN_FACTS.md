@@ -99,7 +99,24 @@ a change to that ongoing convention.
     gatekeeps `config.yaml`/`styles/*.json` (still this session, via PR) — but don't
     assume the directory's contents only ever change via this session's own transfers.
 - Log: `/home/stars/martin.log` (plain redirected stdout, not journald) — mostly
-  historical now that the service runs under proper systemd supervision.
+  historical now that the service runs under proper systemd supervision. Request-level
+  text logging via `RUST_LOG` is not currently configured (unset in the systemd unit), so
+  `journalctl --user -u martin` retains zero entries.
+- **Prometheus metrics endpoint, confirmed live in production (2026-09-06):** `/_/metrics`
+  (not `/metrics` — that 404s) returns HTTP 200 with real counters
+  (`curl https://stars.optgeo.org/_/metrics`), even though this is gated behind a
+  non-default upstream Cargo feature (`metrics`) with no flag or note anywhere in this
+  repo — the prebuilt 1.14.0 release binary apparently already has it built in. Exposes
+  `martin_http_requests_total` / `martin_http_requests_duration_seconds` (labeled by
+  **route pattern**, e.g. `/{source_ids}/{z}/{x}/{y}`, plus method/status — **not** by
+  concrete source ID) and `martin_tile_cache_requests_total` /
+  `martin_cache_requests_total` (pmtiles-directory cache hit/miss, broken down by zoom
+  level). Counters reset on every Martin restart. No per-source-id breakdown is available
+  from this endpoint as shipped; Martin's own changelog explicitly invites metric feature
+  requests upstream. Being origin-side, these metrics (like any Martin-side logging) only
+  see Cloudflare edge-cache **misses** — a tile response served straight from Cloudflare's
+  edge cache (see cloudflared section below) never reaches Martin and is invisible here;
+  real end-user demand for a popular/cached tileset can't be measured this way.
 
 ### cloudflared
 - Managed by systemd (`cloudflared.service`, real, `enabled`, long-running) — the one
