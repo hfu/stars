@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>stars.optgeo.org monitoring</title>
+<link rel="stylesheet" href="https://unpkg.com/openmct@4.3.1/dist/espressoTheme.css" />
+<style>
+  html, body { height: 100%; margin: 0; }
+  #app { height: 100%; }
+  .stars-overview {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #e0e0e0;
+    padding: 16px;
+    height: 100%;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+  .stars-overview h1 { font-size: 16px; margin: 0 0 12px; color: #fff; }
+  .stars-overview .panel {
+    background: #2b2e37;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+  }
+  .stars-overview .panel h2 { font-size: 12px; margin: 0 0 6px; color: #9aa; font-weight: normal; }
+  .stars-overview .panel .value { font-size: 20px; font-weight: bold; color: #fff; }
+  .stars-overview .panel .value.ok { color: #5c5; }
+  .stars-overview .panel .value.bad { color: #e55; }
+  .stars-overview .panel svg { display: block; margin-top: 6px; }
+  .stars-overview .restart-list { font-size: 11px; color: #ccc; max-height: 80px; overflow-y: auto; }
+  .stars-overview .stale-notice { color: #e94; font-size: 11px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+  // CDN-loaded Open MCT tries to spin up a SharedWorker for cross-tab time
+  // sync; that fails with a cross-origin error when the page + worker script
+  // are served from unpkg's CDN origin instead of the page's own origin.
+  window.SharedWorker = undefined;
+</script>
+<script src="https://unpkg.com/openmct@4.3.1/dist/openmct.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  const TELEMETRY_URL = "./telemetry/uptime.jsonl";
+  const STALE_AFTER_MS = 30 * 60 * 1000; // no fresh scrape in 30min => flag stale
+
+  function fmtTs(iso) {
+    return iso.replace("T", " ").replace("Z", " UTC");
+  }
+
+  async function loadRows() {
+    const res = await fetch(TELEMETRY_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("telemetry fetch failed: " + res.status);
+    const text = await res.text();
+    return text
+      .split("\n")
+      .filter((l) => l.trim().length > 0)
+      .map((l) => {
+        try {
+          return JSON.parse(l);
+        } catch (e) {
+          return null;
+        }
+      })
+      .filter((r) => r !== null);
+  }
+
+  function sparkline(values, opts) {
+    opts = opts || {};
+    const w = opts.width || 260;
+    const h = opts.height || 36;
+    const color = opts.color || "#5b9dd9";
+    const nums = values.filter((v) => typeof v === "number" && isFinite(v));
+    if (nums.length < 2) {
+      return `<svg width="${w}" height="${h}"></svg>`;
+    }
+    const min = Math.min(...nums);
+    const max = Math.max(...nums);
+    const range = max - min || 1;
+    const n = values.length;
+    let path = "";
+    let started = false;
+    values.forEach((v, i) => {
+      const x = (i / (n - 1)) * (w - 4) + 2;
+      if (typeof v !== "number" || !isFinite(v)) {
+        started = false;
+        return;
+      }
+      const y = h - 2 - ((v - min) / range) * (h - 4);
+      path += (started ? "L" : "M") + x.toFixed(1) + "," + y.toFixed(1) + " ";
+      started = true;
+    });
+    return (
+      `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
+      `<path d="${path}" fill="none" stroke="${color}" stroke-width="1.5"/>` +
+      `</svg>`
+    );
+  }
+
+  function lastDefined(rows, key) {
+    for (let i = rows.length - 1; i >= 0; i--) {
+      if (rows[i][key] !== undefined && rows[i][key] !== null) return rows[i][key];
+    }
+    return null;
+  }
+
+  function renderHtml(rows) {
+    if (rows.length === 0) {
+      return "<p>まだデータがありません。</p>";
+    }
+
+    const last = rows[rows.length - 1];
+    const staleMs = Date.now() - new Date(last.ts).getTime();
+    const isStale = staleMs > STALE_AFTER_MS;
+
+    const upNow = last.up === true;
+    const upHtml =
+      `<div class="panel"><h2>死活</h2>` +
+      `<div class="value ${upNow ? "ok" : "bad"}">${upNow ? "● 稼働中" : "● 応答なし"}</div>` +
+      `<div>最終スクレイプ: ${fmtTs(last.ts)}</div>` +
+      (isStale ? `<div class="stale-notice">⚠ 30分以上更新がありません(収集ジョブ自体の停止の可能性)</div>` : "") +
+      `</div>`;
+
+    const latVals = rows.map((r) => r.tile_latency_avg_ms);
+    const lastLat = lastDefined(rows, "tile_latency_avg_ms");
+    const latHtml =
+      `<div class="panel"><h2>タイル配信 平均レイテンシ</h2>` +
+      `<div class="value">${lastLat !== null ? lastLat.toFixed(1) + " ms" : "—"}</div>` +
+      sparkline(latVals) +
+      `</div>`;
+
+    const reqVals = rows.map((r) => r.requests_per_min);
+    const lastReq = lastDefined(rows, "requests_per_min");
+    const err4 = last.requests_4xx || 0;
+    const err5 = last.requests_5xx || 0;
+    const ok2 = last.requests_2xx || 0;
+    const ok3 = last.requests_3xx || 0;
+    const total = err4 + err5 + ok2 + ok3;
+    const errRate = total > 0 ? ((err4 + err5) / total) * 100 : null;
+    const reqHtml =
+      `<div class="panel"><h2>タイル配信リクエスト量 / エラー率</h2>` +
+      `<div class="value">${lastReq !== null ? lastReq.toFixed(1) + " req/min" : "—"}` +
+      (errRate !== null
+        ? ` <span style="font-size:13px;color:${errRate > 5 ? "#e55" : "#9aa"}">(エラー率 ${errRate.toFixed(1)}%)</span>`
+        : "") +
+      `</div>` +
+      sparkline(reqVals, { color: "#9b7dd0" }) +
+      `</div>`;
+
+    const cacheVals = rows.map((r) => (r.cache_hit_rate === null || r.cache_hit_rate === undefined ? null : r.cache_hit_rate * 100));
+    const lastCache = lastDefined(rows, "cache_hit_rate");
+    const cacheHtml =
+      `<div class="panel"><h2>pmtilesディレクトリキャッシュ ヒット率</h2>` +
+      `<div class="value">${lastCache !== null ? (lastCache * 100).toFixed(1) + "%" : "—"}</div>` +
+      sparkline(cacheVals, { color: "#5cc0a0" }) +
+      `</div>`;
+
+    const restarts = rows.filter((r) => r.restarted === true);
+    const restartHtml =
+      `<div class="panel"><h2>再起動イベント(直近${rows.length}件のスクレイプ中)</h2>` +
+      `<div class="value">${restarts.length} 件</div>` +
+      `<div class="restart-list">${
+        restarts
+          .slice(-10)
+          .reverse()
+          .map((r) => fmtTs(r.ts))
+          .join("<br/>") || "(なし)"
+      }</div>` +
+      `</div>`;
+
+    return (
+      `<h1>stars.optgeo.org — 死活・レイテンシ監視</h1>` +
+      upHtml + latHtml + reqHtml + cacheHtml + restartHtml
+    );
+  }
+
+  // --- Open MCT wiring -----------------------------------------------
+  // Per m3xx-fleet-ops's implementation notes: the stock Plot view doesn't
+  // behave well when Open MCT is embedded via CDN without the full build
+  // tooling, so telemetry here is rendered as hand-built SVG inside a
+  // custom object type + view provider, rather than through the Plot API.
+
+  const openmct = window.openmct;
+  openmct.setAssetPath("https://unpkg.com/openmct@4.3.1/dist/");
+  openmct.install(openmct.plugins.UTCTimeSystem());
+  openmct.time.setTimeSystem("utc");
+  openmct.time.setBounds({
+    start: Date.now() - 24 * 60 * 60 * 1000,
+    end: Date.now(),
+  });
+
+  openmct.types.addType("stars.overview", {
+    name: "stars 死活・レイテンシ監視",
+    description: "stars.optgeo.org の /_/metrics から集計した死活・レイテンシ・キャッシュ状況の一覧",
+    cssClass: "icon-object",
+  });
+
+  const ROOT_IDENTIFIER = { namespace: "stars", key: "overview" };
+
+  openmct.objects.addRoot(ROOT_IDENTIFIER);
+  openmct.objects.addProvider("stars", {
+    get: async (identifier) => {
+      if (identifier.key === "overview") {
+        return {
+          identifier,
+          name: "stars.optgeo.org 監視",
+          type: "stars.overview",
+          location: "ROOT",
+        };
+      }
+      return undefined;
+    },
+  });
+
+  openmct.objectViews.addProvider({
+    key: "stars-overview-view",
+    name: "Overview",
+    canView: (domainObject) => domainObject.type === "stars.overview",
+    view: (domainObject) => {
+      let el;
+      let cancelled = false;
+      return {
+        show(element) {
+          el = element;
+          el.classList.add("stars-overview");
+          el.innerHTML = "読み込み中…";
+          loadRows()
+            .then((rows) => {
+              if (!cancelled) el.innerHTML = renderHtml(rows);
+            })
+            .catch((e) => {
+              if (!cancelled) el.innerHTML = "<p>テレメトリの読み込みに失敗しました: " + e.message + "</p>";
+            });
+        },
+        destroy() {
+          cancelled = true;
+        },
+      };
+    },
+  });
+
+  openmct.start(document.getElementById("app"));
+})();
+</script>
+</body>
+</html>
