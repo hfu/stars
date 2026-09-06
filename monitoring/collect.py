@@ -12,6 +12,7 @@ import urllib.request
 from datetime import datetime, timezone
 
 METRICS_URL = "https://stars.optgeo.org/_/metrics"
+HOST_STATUS_URL = "https://depot.optgeo.org/host-status.json"
 TILE_ENDPOINT = "/{source_ids}/{z}/{x}/{y}"
 MAX_LINES = 12000
 TIMEOUT_S = 15
@@ -35,6 +36,18 @@ def fetch_metrics():
         if resp.status != 200:
             raise RuntimeError(f"unexpected status {resp.status}")
         return resp.read().decode("utf-8", errors="replace")
+
+
+def fetch_host_status():
+    """Fetch the small JSON snapshot host-status.sh writes on the host itself.
+    Independent of Martin's own liveness -- the OS can be fine even if Martin
+    isn't, or vice versa."""
+    url = f"{HOST_STATUS_URL}?cb={int(time.time())}"
+    req = urllib.request.Request(url, headers={"User-Agent": "stars-monitoring/1.0"})
+    with urllib.request.urlopen(req, timeout=TIMEOUT_S) as resp:
+        if resp.status != 200:
+            raise RuntimeError(f"unexpected status {resp.status}")
+        return json.loads(resp.read().decode("utf-8", errors="replace"))
 
 
 def parse_metrics(text):
@@ -110,13 +123,32 @@ def find_last_raw(path):
     return None
 
 
-def build_row(agg_or_none, prev_row, up):
+def apply_host_status(row, host_status):
+    """host-status.sh reports point-in-time gauges, not cumulative counters,
+    so these are copied straight across -- no delta/rate math needed."""
+    if host_status is None:
+        row["host_ok"] = False
+        return
+    row["host_ok"] = True
+    row["host_uptime_days"] = round(host_status["uptime_s"] / 86400.0, 2)
+    row["host_load1"] = host_status["load1"]
+    row["host_load5"] = host_status["load5"]
+    row["host_load15"] = host_status["load15"]
+    row["host_temp_c"] = host_status["temp_c"]
+    row["host_disk_avail_gb"] = host_status["disk_avail_gb"]
+    row["host_disk_used_pct"] = host_status["disk_used_pct"]
+
+
+def build_row(agg_or_none, prev_row, up, host_status=None):
     ts = now_iso()
     if not up or agg_or_none is None:
-        return {"ts": ts, "up": False}
+        row = {"ts": ts, "up": False}
+        apply_host_status(row, host_status)
+        return row
 
     agg = agg_or_none
     row = {"ts": ts, "up": True, "restarted": False, "_raw": agg}
+    apply_host_status(row, host_status)
 
     if prev_row is None:
         return row
@@ -168,13 +200,19 @@ def main():
     prev_row = find_last_raw(out_path)
 
     try:
+        host_status = fetch_host_status()
+    except (urllib.error.URLError, RuntimeError, TimeoutError, ValueError, KeyError) as e:
+        print(f"host-status scrape failed: {e}", file=sys.stderr)
+        host_status = None
+
+    try:
         text = fetch_metrics()
         samples = parse_metrics(text)
         agg = aggregate(samples)
-        row = build_row(agg, prev_row, up=True)
+        row = build_row(agg, prev_row, up=True, host_status=host_status)
     except (urllib.error.URLError, RuntimeError, TimeoutError) as e:
         print(f"scrape failed: {e}", file=sys.stderr)
-        row = build_row(None, prev_row, up=False)
+        row = build_row(None, prev_row, up=False, host_status=host_status)
 
     with out_path.open("a") as f:
         f.write(json.dumps(row, separators=(",", ":")) + "\n")

@@ -200,6 +200,41 @@ a change to that ongoing convention.
   all tile serving) → restart → verify via cache-busted `curl .../catalog` → delete the
   backup.
 
+### Monitoring dashboard (added 2026-09-06/07)
+- `monitoring/collect.py` (GitHub Actions, cron every 10 min, see
+  `.github/workflows/monitoring.yml`) scrapes Martin's `/_/metrics` endpoint (see above)
+  and `https://depot.optgeo.org/host-status.json`, and appends one row to
+  `telemetry/uptime.jsonl` on the `gh-pages` branch (capped at 12,000 lines, ~83 days at
+  this cadence). The dashboard (`monitoring/dashboard/index.html`, a real Open MCT
+  object/view loaded from the unpkg CDN, custom SVG panels rather than the stock Plot
+  view per `dwg7/m3xx-fleet-ops`'s implementation notes) is synced to the same branch and
+  served at `https://hfu.github.io/stars/`.
+- **`host-status.service`/`host-status.timer`, confirmed live in production**: unlike
+  every other file in [systemd/](../systemd/) (which is target-design only, see Section
+  B), these two **are** actually deployed — user-level units
+  (`/home/stars/.config/systemd/user/host-status.{service,timer}`), running
+  `/home/stars/.local/bin/host-status.sh` every 2 minutes. The script snapshots
+  uptime/load average/temperature (`vcgencmd measure_temp` — confirmed available; this
+  host is a real Raspberry Pi 4 Model B, not just aarch64 in the abstract) and
+  `/home/stars/data` disk headroom into `/home/stars/data/host-status.json` (atomic
+  write-then-`mv`), which `depot.optgeo.org`'s static file serving then exposes
+  automatically — no new Martin/Cloudflare config needed, and no SSH credentials in
+  GitHub Actions (a deliberate choice after `dwg7/m3xx-fleet-ops` reported their own
+  fleet-status collector runs from a personal machine's `launchd`, SSHing into their
+  bastion, specifically because GitHub-hosted Actions runners can't reach either fleet's
+  internal network — not viable for stars' design goal of no SSH secrets in CI).
+- Gotcha hit while building the collector: Prometheus label values can themselves contain
+  literal `{`/`}` (Martin's own `endpoint` label is literally
+  `/{source_ids}/{z}/{x}/{y}`) — a naive `\{([^}]*)\}` regex stops at the first `}` inside
+  the value itself and silently truncates, not errors. Match greedily through the *last*
+  `}` on the line instead.
+- Gotcha hit deploying the GitHub Actions workflow: `rsync --delete` deleted the
+  `gh-pages` git worktree's `.git` link file on the first two runs (it isn't part of the
+  dashboard source being synced in, so `--delete` treated it as cruft to remove) — this
+  silently collapsed the worktree back into a plain subdirectory of the main checkout,
+  so both commits landed on `main`'s own tree instead of an isolated `gh-pages` branch.
+  Fixed by adding `--exclude '.git'` alongside the existing `--exclude 'telemetry'`.
+
 ### Practical implication for future changes
 - Restarting the Martin process affects only `stars.optgeo.org` (nothing else routes to
   port 3000).

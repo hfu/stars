@@ -1,0 +1,6 @@
+[Unit]
+Description=Snapshot stars host status (uptime/load/temp/disk) to /home/stars/data/host-status.json
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/host-status.sh
