@@ -85,6 +85,41 @@ a change to that ongoing convention.
     Registering a **new** source ID in `config.yaml` still needs
     `systemctl --user restart martin` — Martin only discovers the *set* of configured
     sources at startup/config-reload, not by scanning for new config entries live.
+  - **`name`/`description`/`attribution` shown in `/catalog` come from the pmtiles file's
+    own embedded metadata, not config.yaml** — Martin's `PmtConfig` struct has no
+    per-source override field for these (confirmed by reading
+    `martin/src/config/file/tiles/pmtiles.rs` upstream). To fix a bad name/description,
+    edit the file itself: `pmtiles show --metadata <file>` to dump the current JSON,
+    edit it, then `pmtiles edit <file> --metadata=<edited.json>` (the `pmtiles` CLI is at
+    `/home/stars/.local/bin/pmtiles`). Picked up live via the same fs-watch reload as
+    above — no restart needed, confirmed by testing on `hih-fishfarm-open.pmtiles`
+    (2026-09-07). **Caveat: `pmtiles edit` rewrites the entire file**, not just a small
+    header patch (confirmed even on a 1.2 MB test file — "writing file 100%") — treat
+    this as a full-file operation for sizing/risk purposes, not a lightweight metadata
+    tweak. Not viable for very large files (e.g. `kitaphoto17.pmtiles`, 190 GB) without
+    healthy disk headroom for the rewrite. Only works on locally-stored files in the
+    first place — sources pointing at a remote URL (`bvmap`, `openstreetmap_jp_planet`,
+    `overture_*`) can't be fixed this way at all; `bvmap`'s current `name` (a leaked
+    internal file-path concatenation string from GSI's own pipeline) is a known,
+    currently-unfixable-from-here defect for exactly this reason.
+  - **Gotcha: Martin silently drops `name` from `/catalog` if it equals the source ID.**
+    Confirmed in `martin-core/src/tiles/source.rs`:
+    `name: tilejson.name.as_ref().filter(|v| *v != id).cloned()`. Hit this directly
+    (2026-09-07) setting `kitaphoto`'s embedded name to literally `"kitaphoto"` (matching
+    its config.yaml/catalog source ID) — the edit was on disk and correct, but `/catalog`
+    kept showing no `name` at all, which looks identical to the edit having silently
+    failed or not propagated. It hadn't — the value just needs to differ from the id.
+  - **2026-09-07 metadata cleanup**: 23 locally-stored sources' `name`/`description` were
+    rewritten from pipeline-default placeholders (`{id}_raw`, or empty) to human-readable
+    text, sourced from the contributing projects' own docs (`dwg7/ferspas57` for the 21
+    FAO GAEZ/Hand-in-Hand layers, `kitaphoto17-navara-18` for `kitaphoto`,
+    `faceless-cartographer-8b`/mapterhorn-japan-bridge for
+    `mapterhorn-japan-bridge-lineage`) rather than guessed. Still open: `freetown-mapterhorn`
+    (no confirmed owning project — don't invent text for it), `kitaphoto17.pmtiles` (190 GB)
+    and `mapterhorn-japan-bridge.pmtiles` (315 GB, confirmed via SSH — it's the 1.5号
+    archive, not 1号, despite the stable filename) both deferred as too large for a
+    full-file `pmtiles edit` rewrite against current disk headroom, and `bvmap` (remote,
+    unfixable from here, see above).
 - Data lives at `/home/stars/data`, several hundred GB to low-TB scale across large
   pmtiles files (`z18.pmtiles` 424 GB, `seamlessphoto512.pmtiles` 767 GB,
   `kitaphoto17.pmtiles` 190 GB, `mapterhorn-japan-bridge.pmtiles` ~220 GB, plus many
