@@ -120,11 +120,31 @@ a change to that ongoing convention.
     archive, not 1号, despite the stable filename) both deferred as too large for a
     full-file `pmtiles edit` rewrite against current disk headroom, and `bvmap` (remote,
     unfixable from here, see above).
-- Data lives at `/home/stars/data`, several hundred GB to low-TB scale across large
-  pmtiles files (`z18.pmtiles` 424 GB, `seamlessphoto512.pmtiles` 767 GB,
-  `kitaphoto17.pmtiles` 190 GB, `mapterhorn-japan-bridge.pmtiles` ~220 GB, plus many
-  smaller files from various consumer projects). `abidjan.tif` (COG) has not been
-  deployed — still no COG support in the production Martin build.
+- **2026-09-11: `japan-seamless-aerial-z18` and `seamlessphoto512` switched from local
+  files to remote Source Cooperative URLs** (`data.source.coop/smartmaps/japan-seamlessphoto/pmtiles/{z18,seamlessphoto512}.pmtiles`
+  — same pattern already used by `bvmap`/`openstreetmap_jp_planet`/`overture_*`), and the
+  now-redundant local copies (`z18.pmtiles` 424 GB, `seamlessphoto512.pmtiles` 767 GB)
+  deleted, freeing `/home/stars/data` from 76% to **13%** used (announced in advance via
+  [UNopenGIS/7#999](https://github.com/UNopenGIS/7/issues/999), no objections in the
+  comment window). Remote serving confirmed *before* deletion by renaming the local file
+  aside and re-testing (not just inferring from timing) — both sources kept serving
+  fresh, never-before-requested tile coordinates successfully.
+  - **Gotcha hit along the way**: switching `japan-seamless-aerial-z18`'s config value
+    from a local path to a remote URL freed up that local file path from being "claimed"
+    by an explicit source, so `pmtiles.paths` auto-discovery picked `z18.pmtiles` back up
+    as a *separate* bare-id `z18` source (duplicate of `japan-seamless-aerial-z18`,
+    same content) until the local file was actually deleted. Registering
+    `seamlessphoto512` as an explicit source while the identically-named local file was
+    still auto-discovered under the same id did *not* produce a visible duplicate in
+    `/catalog` (only one `seamlessphoto512` entry ever showed) — the explicit entry won
+    the id collision silently; confirmed by the same rename-and-retest method, not by
+    trusting that just because only one entry was visible.
+- Data lives at `/home/stars/data`, currently a few hundred GB (13% used as of
+  2026-09-11, see above) across pmtiles files from various consumer projects — sizes
+  worth knowing: `kitaphoto17.pmtiles` 190 GB, `mapterhorn-japan-bridge.pmtiles` 315 GB
+  (confirmed 2026-09-07, it's actually the 1.5号 archive despite the stable filename).
+  `abidjan.tif` (COG) has not been deployed — still no COG support in the production
+  Martin build.
   - Disk usage moves day to day (files get added/removed regularly) — always re-check
     with `df -h` rather than trusting a previously-recorded percentage.
   - **Trusted contributors can have their own direct SSH/scp access to
