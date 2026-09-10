@@ -88,8 +88,14 @@
     return iso.replace("T", " ").replace("Z", " UTC");
   }
 
+  // `cache: no-store` only bypasses the *browser* cache; GitHub Pages' CDN
+  // will happily keep serving an older response (including a 404 captured in
+  // the window between a gh-pages push and the Pages deploy finishing), so
+  // every data fetch carries a cache-buster too.
+  const bust = (url) => url + "?cb=" + Date.now();
+
   async function loadRows() {
-    const res = await fetch(TELEMETRY_URL, { cache: "no-store" });
+    const res = await fetch(bust(TELEMETRY_URL), { cache: "no-store" });
     if (!res.ok) throw new Error("telemetry fetch failed: " + res.status);
     const text = await res.text();
     return text
@@ -508,7 +514,7 @@
   });
 
   async function loadSpec() {
-    const res = await fetch(SPECS_URL, { cache: "no-store" });
+    const res = await fetch(bust(SPECS_URL), { cache: "no-store" });
     if (!res.ok) throw new Error("specs fetch failed: " + res.status);
     return res.json();
   }
@@ -519,20 +525,24 @@
       let el;
       let cancelled = false;
       let timer;
+      // Open MCT rewrites the view container's className (to add
+      // `is-object-type-<type>`), which silently drops any class we add to
+      // that element ourselves -- so scope our styles with a wrapper div we
+      // own outright rather than classing the container.
+      const wrap = (html) => '<div class="stars-view">' + html + "</div>";
       const refresh = () => {
         load()
           .then((data) => {
-            if (!cancelled) el.innerHTML = renderFn(data);
+            if (!cancelled) el.innerHTML = wrap(renderFn(data));
           })
           .catch((e) => {
-            if (!cancelled) el.innerHTML = "<p>データの読み込みに失敗しました: " + esc(e.message) + "</p>";
+            if (!cancelled) el.innerHTML = wrap("<p>データの読み込みに失敗しました: " + esc(e.message) + "</p>");
           });
       };
       return {
         show(element) {
           el = element;
-          el.classList.add("stars-view");
-          el.innerHTML = "読み込み中…";
+          el.innerHTML = wrap("読み込み中…");
           refresh();
           timer = setInterval(refresh, REFRESH_MS);
         },
