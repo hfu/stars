@@ -279,10 +279,24 @@ a change to that ongoing convention.
     (repo is canonical, production is the deploy target) continuously checked rather
     than checked by hand. Verified working; all 7 matched at first run.
   - **Catalog-vs-disk reconciliation** — cross-checks Martin's catalog against
-    `host-inventory.json` (below). This is the check that would have immediately
-    surfaced `mapterhorn-japan-bridge.pmtiles` (315 GB) disappearing from disk sometime
-    between 2026-09-07 and 2026-09-11 — deleted by another party with direct access, not
-    by this session.
+    `host-inventory.json` (below), in both directions (configured but no file on disk /
+    file on disk that nothing serves).
+    - **Known blind spot, found immediately in practice:** this check cannot see an
+      *auto-discovered* source vanishing, because when its file goes away the source
+      disappears from the catalog at the same moment — so both sides agree and the
+      reconciliation reports "clean". `mapterhorn-japan-bridge.pmtiles` going missing on
+      2026-09-11 was in fact caught by the **snapshot diff** (`dataset_removed` in
+      `changes.jsonl`), not by reconciliation. Only explicitly-registered sources are
+      protected by reconciliation itself.
+    - That particular disappearance turned out to be a **publish in progress**, not a
+      deletion: `dwg7/mapterhorn-japan-bridge` was mid-transfer of a new 258 GB archive,
+      staged as a dotfile (`.mapterhorn-japan-bridge.pmtiles.new.<rand>`) — invisible
+      both to Martin's `*.pmtiles` scan and to `host-inventory.sh`'s own glob. Verified
+      independently via SSH rather than taken on the peer's word. Their publish script
+      deleted the old archive *before* transferring the new one (a leftover from when
+      stars had no headroom); with 1.5 TB now free they've switched to
+      transfer-then-swap (their D159/D160), so this gap shouldn't recur. **When a large
+      source vanishes, check for a staged dotfile before concluding it was deleted.**
   - Caution when reading it: a dataset with no stars-hosted style is **not** unused —
     only 5 of 41 are dressed in a stars-hosted style, and the rest are consumed by
     external projects shipping their own. The view is worded to avoid that misreading;
