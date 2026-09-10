@@ -294,6 +294,22 @@ a change to that ongoing convention.
   `depot.optgeo.org`. Deliberately separate from `host-status.sh` (every 2 min): this
   payload is larger and changes rarely, and it must **not** be folded into
   `uptime.jsonl`'s per-row telemetry (12,000 rows × ~3 KB would be tens of MB in git).
+- **Two dashboard gotchas found while verifying the specs views on the live site**
+  (2026-09-11), both of which had been silently wrong before anyone looked closely:
+  - **Open MCT rewrites a view container's `className`** (to add
+    `is-object-type-<type>`), which silently drops any class the view adds to that
+    element in `show()`. The dashboard's own CSS had therefore never actually applied in
+    production — what looked "styled" was Open MCT's theme plus browser defaults. Scope
+    custom styles with a wrapper `<div>` the view owns, not by classing the container.
+  - **`fetch(..., {cache: "no-store"})` only bypasses the *browser* cache, not the CDN.**
+    GitHub Pages served a `404` that its CDN had captured during the window between a
+    `gh-pages` push and the Pages deploy finishing, so the specs view kept reporting
+    "specs fetch failed: 404" well after the file was live. Cache-bust data fetches with
+    a query string, exactly as required against `stars.optgeo.org` (see cloudflared
+    section). Note Pages also sends `cache-control: max-age=600` on `index.html` itself,
+    so a browser can keep running the previous dashboard build for up to 10 minutes
+    after a deploy — expected, not a bug, but it makes "did my fix deploy?" checks
+    misleading unless the URL is varied.
 - **Cloudflare 403s requests with Python's default `urllib` User-Agent** (curl is fine).
   Any collector must send an explicit `User-Agent` — hit this while surveying TileJSON
   endpoints, where all 41 returned `403 Forbidden` until a UA header was added.
