@@ -264,6 +264,39 @@ a change to that ongoing convention.
   object/view loaded from the unpkg CDN, custom SVG panels rather than the stock Plot
   view per `dwg7/m3xx-fleet-ops`'s implementation notes) is synced to the same branch and
   served at `https://hfu.github.io/stars/`.
+- **Specs snapshot (added 2026-09-11)**: `monitoring/collect-specs.py` runs daily at
+  **19:00 UTC / 04:00 JST** (`.github/workflows/specs.yml`) and writes
+  `specs/specs.json` + an append-only `specs/changes.jsonl` to `gh-pages`, surfaced as a
+  「諸元」folder in the dashboard. Separate cadence from telemetry on purpose: 41 TileJSON
+  + 7 style fetches every 10 minutes would be ~7k pointless origin requests/day. It
+  captures three things nothing else does:
+  - **Per-dataset provenance from TileJSON** — builder and version (`tippecanoe`,
+    `tile-join`, `planetiler:version`/`buildtime`/`githash`) and, for
+    `openstreetmap_jp_planet`, `planetiler:osm:osmosisreplicationtime` (i.e. how stale
+    the OSM extract is).
+  - **Repo-vs-production style drift** — hashes `styles/*.json` here against what
+    `/style/<id>` actually serves, making the CLAUDE.md gatekeeper invariant
+    (repo is canonical, production is the deploy target) continuously checked rather
+    than checked by hand. Verified working; all 7 matched at first run.
+  - **Catalog-vs-disk reconciliation** — cross-checks Martin's catalog against
+    `host-inventory.json` (below). This is the check that would have immediately
+    surfaced `mapterhorn-japan-bridge.pmtiles` (315 GB) disappearing from disk sometime
+    between 2026-09-07 and 2026-09-11 — deleted by another party with direct access, not
+    by this session.
+  - Caution when reading it: a dataset with no stars-hosted style is **not** unused —
+    only 5 of 41 are dressed in a stars-hosted style, and the rest are consumed by
+    external projects shipping their own. The view is worded to avoid that misreading;
+    keep it that way.
+- **`host-inventory.service`/`host-inventory.timer` (added 2026-09-11)**: hourly
+  user-level timer running `/home/stars/.local/bin/host-inventory.sh`, writing the
+  `*.pmtiles` file inventory (name/size/mtime, ~3 KB) to
+  `/home/stars/data/host-inventory.json` for the daily specs collector to read via
+  `depot.optgeo.org`. Deliberately separate from `host-status.sh` (every 2 min): this
+  payload is larger and changes rarely, and it must **not** be folded into
+  `uptime.jsonl`'s per-row telemetry (12,000 rows × ~3 KB would be tens of MB in git).
+- **Cloudflare 403s requests with Python's default `urllib` User-Agent** (curl is fine).
+  Any collector must send an explicit `User-Agent` — hit this while surveying TileJSON
+  endpoints, where all 41 returned `403 Forbidden` until a UA header was added.
 - **`host-status.service`/`host-status.timer`, confirmed live in production**: unlike
   every other file in [systemd/](../systemd/) (which is target-design only, see Section
   B), these two **are** actually deployed — user-level units

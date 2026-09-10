@@ -1,0 +1,10 @@
+[Unit]
+Description=Run host-inventory.service hourly
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1h
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

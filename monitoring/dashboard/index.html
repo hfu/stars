@@ -29,6 +29,26 @@
   .stars-view .panel svg { display: block; margin-top: 6px; }
   .stars-view .restart-list { font-size: 11px; color: #ccc; max-height: 80px; overflow-y: auto; }
   .stars-view .stale-notice { color: #e94; font-size: 11px; margin-top: 4px; }
+  .stars-view .note { font-size: 11px; color: #99a; margin: 4px 0 0; line-height: 1.5; }
+  .stars-view .scroll { overflow-x: auto; }
+  .stars-view table { border-collapse: collapse; font-size: 11px; width: 100%; }
+  .stars-view th, .stars-view td {
+    text-align: left; padding: 4px 8px; border-bottom: 1px solid #3a3d47;
+    white-space: nowrap; vertical-align: top;
+  }
+  .stars-view th { color: #9aa; font-weight: normal; position: sticky; top: 0; background: #2b2e37; }
+  .stars-view td.wrap {
+    white-space: normal; min-width: 200px; max-width: 340px;
+    overflow-wrap: anywhere;
+  }
+  .stars-view .tag {
+    display: inline-block; padding: 1px 6px; border-radius: 3px;
+    font-size: 10px; background: #3a3d47; color: #ccd;
+  }
+  .stars-view .tag.remote { background: #2f4a5c; color: #9cf; }
+  .stars-view .tag.local { background: #34482f; color: #ad9; }
+  .stars-view .tag.warn { background: #5c3a2f; color: #fb9; }
+  .stars-view .muted { color: #778; }
 </style>
 </head>
 <body>
@@ -46,8 +66,23 @@
   "use strict";
 
   const TELEMETRY_URL = "./telemetry/uptime.jsonl";
+  const SPECS_URL = "./specs/specs.json";
   const STALE_AFTER_MS = 30 * 60 * 1000; // no fresh scrape in 30min => flag stale
   const REFRESH_MS = 2 * 60 * 1000; // client-side poll; data itself updates ~every 10min
+
+  function esc(s) {
+    return String(s === null || s === undefined ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function fmtBytes(n) {
+    if (typeof n !== "number") return "—";
+    const u = ["B", "KB", "MB", "GB", "TB"];
+    let i = 0;
+    while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+    return n.toFixed(i === 0 ? 0 : 1) + " " + u[i];
+  }
 
   function fmtTs(iso) {
     return iso.replace("T", " ").replace("Z", " UTC");
@@ -226,6 +261,135 @@
     );
   }
 
+  // --- Specs renderers (daily snapshot, not the 10-minute telemetry) -----
+
+  function renderSpecsDatasets(spec) {
+    const s = spec.summary;
+    const disk = spec.disk || {};
+    const ds = spec.datasets;
+    const ids = Object.keys(ds).sort();
+
+    const rows = ids.map((id) => {
+      const d = ds[id];
+      const zoom = d.minzoom !== undefined ? `z${d.minzoom}–${d.maxzoom}` : "—";
+      const backing = d.backing === "remote"
+        ? `<span class="tag remote">remote</span> <span class="muted">${esc(d.remote_host || "")}</span>`
+        : `<span class="tag local">${esc(d.backing)}</span>`;
+      const prov = d["planetiler:version"]
+        ? `planetiler ${esc(d["planetiler:version"])}`
+        : d.generator ? esc(d.generator) : "";
+      const osm = d["planetiler:osm:osmosisreplicationtime"]
+        ? `<div class="muted">OSM ${esc(String(d["planetiler:osm:osmosisreplicationtime"]).slice(0, 10))}</div>` : "";
+      return `<tr>
+        <td>${esc(id)}${d.error ? ' <span class="tag warn">error</span>' : ""}</td>
+        <td class="wrap">${esc(d.name || "")}</td>
+        <td>${backing}</td>
+        <td>${esc(d.format || "")}</td>
+        <td>${zoom}</td>
+        <td>${d.layer_count !== undefined ? d.layer_count : ""}</td>
+        <td>${d.referenced_by_stars_style ? "✓" : '<span class="muted">—</span>'}</td>
+        <td class="wrap">${prov}${osm}</td>
+      </tr>`;
+    }).join("");
+
+    const mismatch =
+      (disk.served_but_missing_on_disk || []).length +
+      (disk.on_disk_not_served || []).length;
+
+    return (
+      `<div class="panel"><h2>概要</h2>` +
+      `<div class="value">${s.dataset_count} データセット</div>` +
+      `<div class="note">内訳: local ${s.backing.local} / local-auto ${s.backing["local-auto"]} / remote ${s.backing.remote}` +
+      ` — うち ${s.styled_by_stars} 件が stars ホストのスタイルから参照されています。` +
+      `<br>残りが未使用という意味ではありません — 大半は外部の消費者プロジェクトが自前のスタイルで利用しています。</div>` +
+      `<div class="note">スナップショット取得: ${esc(spec.ts)}(日次)</div>` +
+      `</div>` +
+
+      `<div class="panel"><h2>カタログ ↔ ディスク突合</h2>` +
+      (disk.available
+        ? `<div class="value ${mismatch ? "bad" : "ok"}">${mismatch ? mismatch + " 件の不一致" : "一致"}</div>` +
+          `<div class="note">ディスク上 ${disk.file_count} ファイル / 合計 ${fmtBytes(disk.total_bytes)}` +
+          `(インベントリ取得: ${esc(disk.collected_at)})` +
+          ((disk.served_but_missing_on_disk || []).length
+            ? `<br><span class="tag warn">配信設定あり・実体なし</span> ${esc(disk.served_but_missing_on_disk.join(", "))}` : "") +
+          ((disk.on_disk_not_served || []).length
+            ? `<br><span class="tag warn">実体あり・未配信</span> ${esc(disk.on_disk_not_served.join(", "))}` : "") +
+          `</div>`
+        : `<div class="value">—</div><div class="note">インベントリ未取得: ${esc(disk.error || "")}</div>`) +
+      `</div>` +
+
+      `<div class="panel"><h2>データセット一覧</h2><div class="scroll"><table>` +
+      `<thead><tr><th>ID</th><th>名称</th><th>配信元</th><th>形式</th><th>ズーム</th>` +
+      `<th>レイヤ</th><th>starsスタイル</th><th>生成来歴</th></tr></thead>` +
+      `<tbody>${rows}</tbody></table></div></div>`
+    );
+  }
+
+  function renderSpecsStyles(spec) {
+    const st = spec.styles;
+    const ids = Object.keys(st).sort();
+    const drifted = spec.summary.styles_with_drift || [];
+
+    const rows = ids.map((id) => {
+      const s = st[id];
+      const srcs = Object.entries(s.sources || {}).map(([n, v]) => {
+        const ext = v.host && v.host !== "stars.optgeo.org";
+        return `${esc(n)} <span class="tag ${ext ? "remote" : "local"}">${esc(v.host || "?")}</span>`;
+      }).join("<br>");
+      const extHost = (h) =>
+        !h ? '<span class="muted">—</span>'
+           : h === "stars.optgeo.org" ? `<span class="tag local">self</span>`
+           : `<span class="tag remote">${esc(h)}</span>`;
+      const drift = s.drift === true
+        ? '<span class="tag warn">DRIFT</span>'
+        : s.drift === false ? "✓"
+        : '<span class="muted">—</span>';
+      return `<tr>
+        <td>${esc(id)}</td>
+        <td class="wrap">${esc(s.name || "")}</td>
+        <td>${s.layer_count !== undefined ? s.layer_count : ""}</td>
+        <td class="wrap">${srcs}</td>
+        <td>${extHost(s.glyphs_host)}</td>
+        <td>${extHost(s.sprite_host)}</td>
+        <td>${drift}</td>
+      </tr>`;
+    }).join("");
+
+    const deps = spec.external_dependencies || {};
+    const depRows = Object.keys(deps).map((h) =>
+      `<tr><td>${esc(h)}</td><td>${deps[h].length}</td>` +
+      `<td class="wrap">${esc(deps[h].join(", "))}</td></tr>`
+    ).join("");
+
+    return (
+      `<div class="panel"><h2>リポジトリ ↔ 本番の一致</h2>` +
+      `<div class="value ${drifted.length ? "bad" : "ok"}">` +
+      `${drifted.length ? drifted.length + " 件が乖離" : "全 " + ids.length + " 件一致"}</div>` +
+      (drifted.length ? `<div class="note">乖離: ${esc(drifted.join(", "))}</div>` : "") +
+      `<div class="note">この repo の <code>styles/</code> が正、<code>/home/stars/styles</code> が配備先です` +
+      `(CLAUDE.md のゲートキーパー規約)。乖離は本番が直接編集されたことを意味します。</div>` +
+      `</div>` +
+
+      `<div class="panel"><h2>スタイル一覧</h2><div class="scroll"><table>` +
+      `<thead><tr><th>ID</th><th>名称</th><th>レイヤ</th><th>ソース</th>` +
+      `<th>glyphs</th><th>sprite</th><th>一致</th></tr></thead>` +
+      `<tbody>${rows}</tbody></table></div></div>` +
+
+      `<div class="panel"><h2>外部依存(stars 以外のホスト)</h2>` +
+      `<div class="value">${Object.keys(deps).length} ホスト</div>` +
+      `<div class="scroll"><table><thead><tr><th>ホスト</th><th>件数</th><th>参照元</th></tr></thead>` +
+      `<tbody>${depRows}</tbody></table></div>` +
+      `<div class="note">これらが停止すると、該当スタイルはラベル・アイコン等を描画できなくなります` +
+      `(stars 自身の自立性の指標)。</div></div>`
+    );
+  }
+
+  const SPECS = [
+    { key: "specs-datasets", name: "データセット諸元", render: renderSpecsDatasets },
+    { key: "specs-styles", name: "スタイル諸元", render: renderSpecsStyles },
+  ];
+  const SPECS_BY_KEY = new Map(SPECS.map((s) => [s.key, s]));
+
   const INSTRUMENTS = [
     { key: "liveness", name: "死活", render: renderLiveness },
     { key: "latency", name: "タイル配信 平均レイテンシ", render: renderLatency },
@@ -267,6 +431,7 @@
 
   const NAMESPACE = "stars";
   const ROOT_IDENTIFIER = { namespace: NAMESPACE, key: "root" };
+  const SPECS_IDENTIFIER = { namespace: NAMESPACE, key: "specs" };
 
   const objectDefs = new Map();
   objectDefs.set("root", {
@@ -283,6 +448,20 @@
       location: openmct.objects.makeKeyString(ROOT_IDENTIFIER),
     });
   });
+  objectDefs.set("specs", {
+    identifier: SPECS_IDENTIFIER,
+    name: "諸元",
+    type: "stars.specs",
+    location: openmct.objects.makeKeyString(ROOT_IDENTIFIER),
+  });
+  SPECS.forEach((sp) => {
+    objectDefs.set(sp.key, {
+      identifier: { namespace: NAMESPACE, key: sp.key },
+      name: sp.name,
+      type: "stars.specview",
+      location: openmct.objects.makeKeyString(SPECS_IDENTIFIER),
+    });
+  });
 
   openmct.types.addType("stars.overview", {
     name: "stars 監視ダッシュボード(まとめ)",
@@ -295,6 +474,18 @@
     cssClass: "icon-object",
     creatable: false,
   });
+  openmct.types.addType("stars.specs", {
+    name: "stars 諸元",
+    description: "配信中のデータセット・スタイルの諸元情報(日次スナップショット)",
+    cssClass: "icon-folder",
+    creatable: false,
+  });
+  openmct.types.addType("stars.specview", {
+    name: "stars 諸元ビュー",
+    description: "データセット/スタイルごとの諸元一覧",
+    cssClass: "icon-object",
+    creatable: false,
+  });
 
   openmct.objects.addRoot(ROOT_IDENTIFIER);
   openmct.objects.addProvider(NAMESPACE, {
@@ -304,21 +495,37 @@
   openmct.composition.addProvider({
     appliesTo: (domainObject) =>
       domainObject.identifier.namespace === NAMESPACE && domainObject.identifier.key === "root",
-    load: async () => INSTRUMENTS.map((inst) => ({ namespace: NAMESPACE, key: inst.key })),
+    load: async () => [
+      ...INSTRUMENTS.map((inst) => ({ namespace: NAMESPACE, key: inst.key })),
+      SPECS_IDENTIFIER,
+    ],
   });
 
-  function makeView(renderFn) {
+  openmct.composition.addProvider({
+    appliesTo: (domainObject) =>
+      domainObject.identifier.namespace === NAMESPACE && domainObject.identifier.key === "specs",
+    load: async () => SPECS.map((sp) => ({ namespace: NAMESPACE, key: sp.key })),
+  });
+
+  async function loadSpec() {
+    const res = await fetch(SPECS_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("specs fetch failed: " + res.status);
+    return res.json();
+  }
+
+  function makeView(renderFn, loadFn) {
+    const load = loadFn || loadRows;
     return (domainObject) => {
       let el;
       let cancelled = false;
       let timer;
       const refresh = () => {
-        loadRows()
-          .then((rows) => {
-            if (!cancelled) el.innerHTML = renderFn(rows);
+        load()
+          .then((data) => {
+            if (!cancelled) el.innerHTML = renderFn(data);
           })
           .catch((e) => {
-            if (!cancelled) el.innerHTML = "<p>テレメトリの読み込みに失敗しました: " + e.message + "</p>";
+            if (!cancelled) el.innerHTML = "<p>データの読み込みに失敗しました: " + esc(e.message) + "</p>";
           });
       };
       return {
@@ -349,6 +556,32 @@
     name: "Instrument",
     canView: (domainObject) => domainObject.type === "stars.instrument",
     view: (domainObject) => makeView((rows) => renderInstrument(domainObject.identifier.key, rows))(domainObject),
+  });
+
+  openmct.objectViews.addProvider({
+    key: "stars-specs-view",
+    name: "Specs",
+    canView: (domainObject) => domainObject.type === "stars.specs",
+    view: makeView(
+      (spec) =>
+        `<h1>諸元</h1>` +
+        `<div class="panel"><h2>収録内容</h2>` +
+        `<div class="value">${spec.summary.dataset_count} データセット / ${spec.summary.style_count} スタイル</div>` +
+        `<div class="note">左のツリーから「データセット諸元」「スタイル諸元」を開いてください。` +
+        `<br>スナップショット取得: ${esc(spec.ts)}(日次 04:00 JST)</div></div>`,
+      loadSpec
+    ),
+  });
+
+  openmct.objectViews.addProvider({
+    key: "stars-specview-view",
+    name: "Spec",
+    canView: (domainObject) => domainObject.type === "stars.specview",
+    view: (domainObject) =>
+      makeView((spec) => {
+        const sp = SPECS_BY_KEY.get(domainObject.identifier.key);
+        return `<h1>${esc(sp.name)}</h1>` + sp.render(spec);
+      }, loadSpec)(domainObject),
   });
 
   openmct.start(document.getElementById("app"));

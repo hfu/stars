@@ -1,0 +1,6 @@
+[Unit]
+Description=Snapshot the pmtiles file inventory of /home/stars/data to /home/stars/data/host-inventory.json
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/host-inventory.sh

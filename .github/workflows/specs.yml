@@ -1,30 +1,40 @@
-name: monitoring
+name: specs
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    # 19:00 UTC = 04:00 JST -- a deliberately low-traffic hour for a
+    # Japan-facing service. Specs change rarely, so this runs daily rather
+    # than on the 10-minute telemetry cadence (41 TileJSON + 7 style fetches
+    # every 10 minutes would be ~7k pointless origin requests a day).
+    - cron: "0 19 * * *"
   push:
     branches: [main]
     paths:
-      - "monitoring/**"
+      - "monitoring/collect-specs.py"
+      - "monitoring/dashboard/**"
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
 concurrency:
+  # Shared with the telemetry workflow: both push to gh-pages, and serializing
+  # them is what keeps the two from racing into a non-fast-forward rejection.
   group: stars-monitoring
   cancel-in-progress: false
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Checkout main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Install PyYAML
+        run: pip install --quiet pyyaml
 
       - name: Prepare gh-pages worktree
         run: |
@@ -35,16 +45,10 @@ jobs:
             git worktree add --orphan -b gh-pages pages
           fi
 
-      - name: Collect metrics
-        run: python3 monitoring/collect.py pages/telemetry/uptime.jsonl
+      - name: Collect specs
+        run: python3 monitoring/collect-specs.py . pages/specs
 
       - name: Sync dashboard assets
-        # --exclude '.git' is load-bearing: without it, --delete removes the
-        # worktree's .git link file (it's not part of monitoring/dashboard/),
-        # which silently collapses `pages` back into a plain subdirectory of
-        # the main checkout instead of the gh-pages worktree.
-        # 'telemetry' and 'specs' hold collected data that only lives on
-        # gh-pages, so --delete must not treat them as stale either.
         run: rsync -a --delete --exclude 'telemetry' --exclude 'specs' --exclude '.git' monitoring/dashboard/ pages/
 
       - name: Commit and push
@@ -53,5 +57,5 @@ jobs:
           git config user.name "stars-monitoring-bot"
           git config user.email "actions@users.noreply.github.com"
           git add -A
-          git diff --cached --quiet || git commit -m "telemetry update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git diff --cached --quiet || git commit -m "specs update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           git push origin HEAD:gh-pages
