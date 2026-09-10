@@ -208,11 +208,18 @@ def reconcile_with_disk(datasets, explicit_sources):
         elif backing == "local-auto":
             expected.add(sid)
 
+    # Staged/partial uploads: a source that's mid-replacement is absent from
+    # both the catalog and the served-file list, so without this it reads as
+    # "deleted" rather than "being replaced".
+    staging = inv.get("staging", {})
+
     return {
         "available": True,
         "collected_at": inv.get("ts"),
         "file_count": len(files),
         "total_bytes": sum(f.get("size", 0) for f in files.values()),
+        "staging": staging,
+        "staging_bytes": sum(f.get("size", 0) for f in staging.values()),
         "largest": sorted(
             ({"file": k, "size": v.get("size", 0)} for k, v in files.items()),
             key=lambda x: x["size"], reverse=True,

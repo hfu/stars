@@ -320,9 +320,25 @@
             ? `<br><span class="tag warn">配信設定あり・実体なし</span> ${esc(disk.served_but_missing_on_disk.join(", "))}` : "") +
           ((disk.on_disk_not_served || []).length
             ? `<br><span class="tag warn">実体あり・未配信</span> ${esc(disk.on_disk_not_served.join(", "))}` : "") +
+          `<br>この突合は<strong>明示登録されたソースのみ</strong>を守ります — ` +
+          `ディレクトリ自動検出のソースは実体が消えるとカタログからも同時に消えるため、` +
+          `両者が一致してしまい検出できません(差分ログの <code>dataset_removed</code> で捕捉)。` +
           `</div>`
         : `<div class="value">—</div><div class="note">インベントリ未取得: ${esc(disk.error || "")}</div>`) +
       `</div>` +
+
+      (disk.available && Object.keys(disk.staging || {}).length
+        ? `<div class="panel"><h2>転送中・付随ファイル</h2>` +
+          `<div class="value">${Object.keys(disk.staging).length} 件 / ${fmtBytes(disk.staging_bytes)}</div>` +
+          `<div class="scroll"><table><thead><tr><th>ファイル</th><th>サイズ</th><th>更新</th></tr></thead><tbody>` +
+          Object.keys(disk.staging).sort((a, b) => disk.staging[b].size - disk.staging[a].size)
+            .map((f) => `<tr><td>${esc(f)}</td><td>${fmtBytes(disk.staging[f].size)}</td>` +
+                        `<td>${esc(disk.staging[f].mtime)}</td></tr>`).join("") +
+          `</tbody></table></div>` +
+          `<div class="note">Martin は <code>*.pmtiles</code> しか読まないため、これらは配信対象外です。` +
+          `巨大なものは差し替え途中の転送(<code>.new</code> 等)である可能性が高く、` +
+          `該当ソースが一時的にカタログから消えていても「削除」ではありません。</div></div>`
+        : "") +
 
       `<div class="panel"><h2>データセット一覧</h2><div class="scroll"><table>` +
       `<thead><tr><th>ID</th><th>名称</th><th>配信元</th><th>形式</th><th>ズーム</th>` +
