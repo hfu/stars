@@ -97,7 +97,17 @@ a change to that ongoing convention.
     header patch (confirmed even on a 1.2 MB test file — "writing file 100%") — treat
     this as a full-file operation for sizing/risk purposes, not a lightweight metadata
     tweak. Not viable for very large files (e.g. `kitaphoto17.pmtiles`, 190 GB) without
-    healthy disk headroom for the rewrite. Only works on locally-stored files in the
+    healthy disk headroom for the rewrite. It does write to `<file>.tmp` and rename
+    rather than editing in place, so an interrupted run leaves the original intact —
+    confirmed the hard way on 2026-09-12, when a 13.7 GB rewrite outlived the two-minute
+    SSH command timeout. **The remote `pmtiles edit` kept running after the SSH client
+    gave up**; the right response was to wait for it, not to re-run or clean up. Budget
+    well over two minutes per ~10 GB and run it detached rather than inside a
+    timeout-bounded SSH command. (While checking whether it was still alive, `pgrep -f
+    'pmtiles edit freetown'` reported it running *after* it had finished — the pattern
+    matched the SSH command string doing the checking, exactly the self-match trap noted
+    under "Practical implication" below. `ps -eo pid,comm,args | grep '^ *[0-9]* *pmtiles'`
+    answers it correctly.) Only works on locally-stored files in the
     first place — sources pointing at a remote URL (`bvmap`, `openstreetmap_jp_planet`,
     `overture_*`) can't be fixed this way at all; `bvmap`'s current `name` (a leaked
     internal file-path concatenation string from GSI's own pipeline) is a known,
@@ -114,12 +124,29 @@ a change to that ongoing convention.
     text, sourced from the contributing projects' own docs (`dwg7/ferspas57` for the 21
     FAO GAEZ/Hand-in-Hand layers, `kitaphoto17-navara-18` for `kitaphoto`,
     `faceless-cartographer-8b`/mapterhorn-japan-bridge for
-    `mapterhorn-japan-bridge-lineage`) rather than guessed. Still open: `freetown-mapterhorn`
-    (no confirmed owning project — don't invent text for it), `kitaphoto17.pmtiles` (190 GB)
-    and `mapterhorn-japan-bridge.pmtiles` (315 GB, confirmed via SSH — it's the 1.5号
-    archive, not 1号, despite the stable filename) both deferred as too large for a
-    full-file `pmtiles edit` rewrite against current disk headroom, and `bvmap` (remote,
-    unfixable from here, see above).
+    `mapterhorn-japan-bridge-lineage`) rather than guessed. Still open: `kitaphoto17.pmtiles`
+    (190 GB), and `bvmap` (remote, unfixable from here, see above).
+    `mapterhorn-japan-bridge.pmtiles` is now handled upstream — that project's publish
+    pipeline sets `name`/`description` itself from 2号 onward (`hfu-mapterhorn` commit
+    `010b558`), so no rewrite is needed here; its `pmtiles merge` step carries metadata
+    through from the first input.
+  - **Beware: a contributor's republish silently wipes metadata set here.** The 2026-09-11
+    `mapterhorn-japan-bridge-lineage` replacement dropped the `name`/`description` set on
+    2026-09-07, because their pipeline wrote only `attribution`. Re-applied 2026-09-12,
+    and the durable fix was upstream (above), not repeated manual edits. For any source a
+    contributor republishes on a cycle, get the metadata into *their* pipeline.
+  - **2026-09-12, `freetown-mapterhorn`**: identified without an owning project by
+    matching the archive against OpenAerialMap directly rather than guessing. Its data
+    footprint, probed tile-by-tile at z13, is exactly the OAM record "Freetown Urban with
+    Sensitive Areas Blurred" bbox rounded out to tile boundaries (so: one record, not a
+    merge), and OAM's own TMS returns the same scene at the same z/x/y. Notable finding
+    for anyone else citing OAM: **its top-level `license` field is null on all 30 records
+    covering Freetown** — the real value is in `properties.license`, and those disagree
+    between neighbouring records of the same programme (`CC-BY 4.0` here vs `CC BY-SA 4.0`
+    for `Aberdeen_Freetown`, a materially different licence). `provider` likewise mixes
+    orgs, tools, communities, individuals and companies; `contact` is sometimes a tool's
+    generic address; some drone flights are tagged `platform: aircraft`. Verify a specific
+    record's `properties.license` rather than assuming a programme-wide licence.
 - **2026-09-11: `japan-seamless-aerial-z18` and `seamlessphoto512` switched from local
   files to remote Source Cooperative URLs** (`data.source.coop/smartmaps/japan-seamlessphoto/pmtiles/{z18,seamlessphoto512}.pmtiles`
   — same pattern already used by `bvmap`/`openstreetmap_jp_planet`/`overture_*`), and the
