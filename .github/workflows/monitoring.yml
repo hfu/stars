@@ -49,9 +49,4 @@ jobs:
 
       - name: Commit and push
         working-directory: pages
-        run: |
-          git config user.name "stars-monitoring-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add -A
-          git diff --cached --quiet || git commit -m "telemetry update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          git push origin HEAD:gh-pages
+        run: bash ../monitoring/push-gh-pages.sh "telemetry update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
