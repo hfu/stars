@@ -1,0 +1,46 @@
+{
+ "meta": {
+  "base": "http://192.168.11.14:3000",
+  "tool": "stars loadgen.py",
+  "started_utc": "2026-09-14T23:46:37Z",
+  "target": "mapterhorn-japan-bridge",
+  "zooms": [
+   0,
+   16
+  ],
+  "candidate_tiles": 196,
+  "tile_list": "mjb-F3-meakandake.txt",
+  "hot_set": 0,
+  "bounds": [
+   -180.0,
+   -85.0511,
+   180.0,
+   85.0511
+  ],
+  "format": null,
+  "accept_encoding": true
+ },
+ "steps": [
+  {
+   "mode": "once",
+   "concurrency": 6,
+   "tiles": 196,
+   "wall_s": 2.157,
+   "tiles_per_s": 90.9,
+   "mb": 25.08,
+   "mb_per_s": 11.63,
+   "tile_bytes_mean": 127935,
+   "tile_bytes_p50": 129644,
+   "latency_ms": {
+    "50": 21.3,
+    "90": 100.0,
+    "95": 117.6,
+    "99": 1197.7,
+    "max": 2156.3
+   },
+   "status": {
+    "200": 196
+   }
+  }
+ ]
+}

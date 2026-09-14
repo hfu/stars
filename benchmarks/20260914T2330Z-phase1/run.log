@@ -1,0 +1,48 @@
+[23:30:00Z] run 20260914T2330Z-phase1 starting
+[23:30:07Z] sampler started on Pi; baseline 120s
+[23:32:07Z] test A-vbm-warm: --source vbm --tile-list vbm.txt
+c=  1  rps=    85.9  p50=10.1  p95=18.9  p99=24.9  max=879.5ms  err=0.0  3.63MB/s  tile mean 42269B  status={'200': 2609}
+c=  2  rps=   172.2  p50=10.2  p95=21.2  p99=28.1  max=47.6ms  err=0.0  7.23MB/s  tile mean 41995B  status={'200': 5235}
+c=  4  rps=   235.3  p50=13.9  p95=35.3  p99=60.3  max=123.3ms  err=0.0  9.91MB/s  tile mean 42100B  status={'200': 7162}
+c=  8  rps=   274.9  p50=17.6  p95=93.3  p99=206.5  max=1083.9ms  err=0.0  11.44MB/s  tile mean 41622B  status={'200': 8362}
+c= 16  rps=   279.8  p50=19.0  p95=125.3  p99=819.2  max=5907.7ms  err=0.0  11.64MB/s  tile mean 41593B  status={'200': 8505}
+c= 32  rps=   278.1  p50=30.2  p95=118.9  p99=391.9  max=30451.8ms  err=0.0005  11.65MB/s  tile mean 41912B  status={'200': 8471, 'TimeoutError': 1, 'timeout': 3}
+wrote results/A-vbm-warm.json
+[23:36:41Z] test B-freetown: --source freetown-mapterhorn --tile-list freetown.txt
+c=  1  rps=   250.4  p50=2.6  p95=8.8  p99=11.3  max=13.9ms  err=0.0  3.54MB/s  tile mean 14131B  status={'200': 7610}
+c=  2  rps=   457.9  p50=2.6  p95=10.1  p99=13.8  max=26.2ms  err=0.0  6.69MB/s  tile mean 14600B  status={'200': 13879}
+c=  4  rps=   663.7  p50=5.0  p95=13.8  p99=20.0  max=33.8ms  err=0.0  9.4MB/s  tile mean 14163B  status={'200': 20131}
+c=  8  rps=   801.6  p50=5.2  p95=33.6  p99=86.5  max=350.9ms  err=0.0  11.34MB/s  tile mean 14150B  status={'200': 24305}
+c= 16  rps=   814.1  p50=6.8  p95=36.0  p99=167.3  max=7329.0ms  err=0.0  11.55MB/s  tile mean 14187B  status={'200': 24708}
+c= 32  rps=   595.5  p50=6.4  p95=57.6  p99=122.5  max=30362.2ms  err=0.0  8.44MB/s  tile mean 14167B  status={'200': 24812}
+wrote results/B-freetown.json
+[23:41:26Z] test C-kitaphoto17-cold: --source kitaphoto17 --tile-list kitaphoto17.txt
+c=  1  rps=    88.9  p50=11.3  p95=15.1  p99=16.4  max=19.9ms  err=0.0  7.22MB/s  tile mean 81238B  status={'200': 2699}
+c=  2  rps=   132.0  p50=12.5  p95=28.8  p99=36.1  max=43.7ms  err=0.0  10.78MB/s  tile mean 81659B  status={'200': 4008}
+c=  4  rps=   143.7  p50=13.8  p95=52.8  p99=328.7  max=927.1ms  err=0.0  11.69MB/s  tile mean 81394B  status={'200': 4381}
+c=  8  rps=   143.8  p50=14.8  p95=83.7  p99=298.8  max=19578.3ms  err=0.0  11.72MB/s  tile mean 81552B  status={'200': 4380}
+c= 16  rps=   138.9  p50=41.2  p95=61.3  p99=71.4  max=31692.8ms  err=0.0009  11.28MB/s  tile mean 81272B  status={'200': 4397, 'TimeoutError': 1, 'timeout': 3}
+c= 32  rps=   143.9  p50=120.0  p95=202.4  p99=330.5  max=30479.7ms  err=0.0  11.72MB/s  tile mean 81435B  status={'200': 4386}
+wrote results/C-kitaphoto17-cold.json
+[23:46:02Z] test F1-mjb-once-asahidake: --source mapterhorn-japan-bridge --tile-list mjb-F1-asahidake.txt --concurrency 6 --once
+once c=6 tiles=196 wall=1.662s (117.9 tiles/s, 19.31 MB, 11.61 MB/s, tile mean 98509 B)  p50=14.8 p95=159.0 p99=523.8 max=1640.9ms  status={'200': 196}
+wrote results/F1-mjb-once-asahidake.json
+[23:46:19Z] test F2-mjb-once-tarumae: --source mapterhorn-japan-bridge --tile-list mjb-F2-tarumae.txt --concurrency 6 --once
+once c=6 tiles=196 wall=1.547s (126.7 tiles/s, 18.04 MB, 11.66 MB/s, tile mean 92039 B)  p50=13.9 p95=150.6 p99=397.3 max=1545.9ms  status={'200': 196}
+wrote results/F2-mjb-once-tarumae.json
+[23:46:37Z] test F3-mjb-once-meakandake: --source mapterhorn-japan-bridge --tile-list mjb-F3-meakandake.txt --concurrency 6 --once
+once c=6 tiles=196 wall=2.157s (90.9 tiles/s, 25.08 MB, 11.63 MB/s, tile mean 127935 B)  p50=21.3 p95=117.6 p99=1197.7 max=2156.3ms  status={'200': 196}
+wrote results/F3-mjb-once-meakandake.json
+[23:46:56Z] test E-mjb-z16-c6: --source mapterhorn-japan-bridge --tile-list mjb-z16.txt --concurrency 6 --duration 60
+c=  6  rps=   109.7  p50=20.0  p95=322.7  p99=822.0  max=2382.6ms  err=0.0  11.72MB/s  tile mean 106833B  status={'200': 6620}
+wrote results/E-mjb-z16-c6.json
+[23:48:13Z] test D-vbm-decompress: --source vbm --tile-list vbm.txt --no-accept-encoding
+c=  1  rps=    65.4  p50=13.8  p95=30.1  p99=40.3  max=90.2ms  err=0.0  4.51MB/s  tile mean 68993B  status={'200': 1985}
+c=  2  rps=   106.9  p50=16.2  p95=37.4  p99=56.2  max=122.8ms  err=0.0  7.19MB/s  tile mean 67188B  status={'200': 3242}
+c=  4  rps=   149.3  p50=20.3  p95=63.7  p99=108.9  max=231.2ms  err=0.0  10.15MB/s  tile mean 67981B  status={'200': 4541}
+c=  8  rps=   170.3  p50=27.5  p95=131.2  p99=401.6  max=1959.3ms  err=0.0  11.54MB/s  tile mean 67753B  status={'200': 5175}
+c= 16  rps=   175.5  p50=30.1  p95=270.0  p99=726.4  max=18353.6ms  err=0.0  11.69MB/s  tile mean 66601B  status={'200': 5345}
+c= 32  rps=   173.0  p50=50.3  p95=194.1  p99=1094.0  max=30467.1ms  err=0.0  11.7MB/s  tile mean 67593B  status={'200': 5278}
+wrote results/D-vbm-decompress.json
+[23:52:46Z] run 20260914T2330Z-phase1 finished
+[23:52:51Z] collected results into benchmarks/20260914T2330Z-phase1

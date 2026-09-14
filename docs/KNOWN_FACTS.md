@@ -29,6 +29,17 @@ a change to that ongoing convention.
   serves — including traffic leaving through the Cloudflare tunnel — at ~12.5 MB/s at the
   NIC. `slate.local` on the same LAN also links at 100BASE-TX, so the likely cause is the
   shared switch or cabling rather than the Pi; unconfirmed, needs a physical check.
+- **Measured serving limit (2026-09-15, [BENCHMARKS.md](BENCHMARKS.md) Phase 1): the
+  100 Mb/s link, not the Pi.** LAN-direct to Martin, every tile workload tested
+  plateaued at 11.3–11.7 MB/s of tile bodies (12.40 MB/s on the wire): ~280 rps for
+  `vbm` (42 KB gzip pbf), ~800 rps for `freetown-mapterhorn` (14 KB WebP), ~140 rps for
+  cold random reads from `kitaphoto17` (81 KB, 178 GB). At those plateaus the Pi peaked at
+  69% CPU, ≤ 9% disk busy even on the cold 178 GB reads, and 69.6 °C with no active
+  throttling. A never-fetched ~200-tile z16 block of `mapterhorn-japan-bridge` arrives in
+  about its size ÷ 11.6 MB/s (1.55–2.16 s measured). Gzip vector tiles use far more CPU
+  per request than raster even when passed through (~60% for 280 rps vs ~15% for 800 rps)
+  — the likeliest next limit if the link is ever upgraded. Public viewers also pass through
+  Cloudflare and the ISP uplink, not yet measured.
 - **Thermal margin is already thin without any load test.** At 100 days' uptime,
   `vcgencmd get_throttled` = `0xe0000`: ARM frequency capping, throttling, and the soft
   temperature limit have each *occurred* since boot (under-voltage has not); none active
