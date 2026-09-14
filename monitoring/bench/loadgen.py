@@ -80,6 +80,21 @@ def tile_range(tj, zooms):
     return out
 
 
+def size_stats(sizes):
+    """Per-tile body size of successful responses.
+
+    Latency differences between two tile sets can come from the tiles
+    themselves rather than the server or network: mapterhorn-japan-bridge
+    merges 1 m / 5 m / 10 m DEMs, so a block covered by 1 m survey carries more
+    detail per tile and weighs more. Reporting size next to latency is what
+    lets a reader tell "different place" from "different conditions".
+    """
+    if not sizes:
+        return {"tile_bytes_mean": None, "tile_bytes_p50": None}
+    s = sorted(sizes)
+    return {"tile_bytes_mean": round(sum(s) / len(s)), "tile_bytes_p50": s[len(s) // 2]}
+
+
 def pct(sorted_vals, p):
     if not sorted_vals:
         return None
@@ -105,6 +120,7 @@ class Run:
         self.concurrency, self.duration, self.args = concurrency, duration, args
         self.lock = threading.Lock()
         self.lat, self.status, self.bytes = [], Counter(), 0
+        self.sizes = []  # body bytes of 200 responses, for per-tile size stats
         self.window = deque(maxlen=200)  # recent (ok: bool) for the error-rate brake
         self.stop_reason = None
         self.stop = threading.Event()
@@ -135,6 +151,8 @@ class Run:
                 self.lat.append(dt)
                 self.status[code] += 1
                 self.bytes += n
+                if code == 200:
+                    self.sizes.append(n)
                 self.window.append(ok)
 
     def guard(self):
@@ -182,6 +200,7 @@ class Run:
             "requests": n,
             "rps": round(n / elapsed, 1) if elapsed else None,
             "mb_per_s": round(self.bytes / elapsed / 1e6, 2) if elapsed else None,
+            **size_stats(self.sizes),
             "latency_ms": {p: (round(pct(lat, p), 1) if n else None) for p in (50, 90, 95, 99)}
                           | {"max": round(lat[-1], 1) if n else None},
             "status": {str(k): v for k, v in sorted(self.status.items(), key=lambda kv: str(kv[0]))},
@@ -207,7 +226,7 @@ def run_once(base, paths, concurrency, args):
         headers["Accept-Encoding"] = "gzip, deflate, br"
     queue = deque(paths)
     lock = threading.Lock()
-    lat, status, total = [], Counter(), [0]
+    lat, status, total, sizes = [], Counter(), [0], []
 
     def worker():
         conn = None
@@ -230,6 +249,8 @@ def run_once(base, paths, concurrency, args):
                 lat.append((time.perf_counter() - t) * 1000)
                 status[code] += 1
                 total[0] += n
+                if code == 200:
+                    sizes.append(n)
 
     t0 = time.perf_counter()
     threads = [threading.Thread(target=worker) for _ in range(concurrency)]
@@ -247,6 +268,7 @@ def run_once(base, paths, concurrency, args):
         "tiles_per_s": round(len(s) / wall, 1),
         "mb": round(total[0] / 1e6, 2),
         "mb_per_s": round(total[0] / 1e6 / wall, 2),
+        **size_stats(sizes),
         "latency_ms": {p: round(pct(s, p), 1) for p in (50, 90, 95, 99)} | {"max": round(s[-1], 1)},
         "status": {str(k): v for k, v in sorted(status.items(), key=lambda kv: str(kv[0]))},
     }
@@ -312,8 +334,8 @@ def main():
         res = run_once(a.base, paths, c, a)
         lm = res["latency_ms"]
         print(f"once c={c} tiles={res['tiles']} wall={res['wall_s']}s ({res['tiles_per_s']} tiles/s, "
-              f"{res['mb']} MB, {res['mb_per_s']} MB/s)  p50={lm[50]} p95={lm[95]} p99={lm[99]} "
-              f"max={lm['max']}ms  status={res['status']}", flush=True)
+              f"{res['mb']} MB, {res['mb_per_s']} MB/s, tile mean {res['tile_bytes_mean']} B)  "
+              f"p50={lm[50]} p95={lm[95]} p99={lm[99]} max={lm['max']}ms  status={res['status']}", flush=True)
         if a.out:
             Path(a.out).write_text(json.dumps({"meta": meta, "steps": [res]}, indent=1))
             print(f"wrote {a.out}")
@@ -326,7 +348,8 @@ def main():
         steps.append(res)
         lm = res["latency_ms"]
         print(f"c={c:3d}  rps={res['rps']:>8}  p50={lm[50]}  p95={lm[95]}  p99={lm[99]}  max={lm['max']}ms  "
-              f"err={res['error_rate']}  {res['mb_per_s']}MB/s  status={res['status']}"
+              f"err={res['error_rate']}  {res['mb_per_s']}MB/s  tile mean {res['tile_bytes_mean']}B  "
+              f"status={res['status']}"
               + (f"  STOPPED: {res['stopped_early']}" if res["stopped_early"] else ""), flush=True)
         if res["stopped_early"]:
             break
