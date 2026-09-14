@@ -89,6 +89,16 @@ Latency before saturation (c=1–2) was p50 3–16 ms. Once the link was full, p
    why a multi-hour soak is still worth running.
 6. Martin's RSS grew 81 → 502 MB across the run (caches filling); open file descriptors
    peaked at 64.
+7. **Martin's own timing agrees that the wait was on the wire.** The monitoring
+   telemetry (Martin's server-side `/_/metrics` request-duration histogram, 10-minute
+   windows) averaged **0.55–9 ms per tile** through the run, while clients saw p50 of
+   5–120 ms at saturation. Almost all of the client-side latency was queueing on the
+   link, not work inside Martin.
+
+**Side effect on the dashboard:** the run's requests are counted by `/_/metrics` like any
+others, so the monitoring history shows a spike of up to 13,549 req/min on 2026-09-15
+08:30–08:55 JST. That is this benchmark, not real demand. No 5xx and no downtime were
+recorded in that window.
 
 **Caveats**
 
