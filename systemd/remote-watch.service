@@ -1,0 +1,6 @@
+[Unit]
+Description=Restart Martin when an upstream remote PMTiles archive is replaced
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/remote-watch.sh

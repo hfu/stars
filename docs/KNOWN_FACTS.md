@@ -18,6 +18,21 @@ a change to that ongoing convention.
   the same physical machine.
 - SSH access lands directly as the `stars` user (a regular sudo-capable login user, not a
   nologin system account).
+- **Hardware, confirmed 2026-09-15:** Raspberry Pi 4 Model B Rev 1.5, 8 GB RAM, 4 cores
+  (`scaling_max_freq` 1.8 GHz; the ondemand governor idles it at 900 MHz, which is normal
+  and not throttling). Root and `/home/stars/data` are on a USB-attached SSD
+  (WD Elements SE 1.8 TB); swap is 2 GB zram. Martin listens on `0.0.0.0:3000`, so the
+  origin is reachable directly on the LAN (`http://stars.local:3000`, 192.168.11.14)
+  without going through Cloudflare.
+- **The Pi's Ethernet link negotiates at 100 Mb/s, not gigabit** (`/sys/class/net/eth0/speed`
+  = 100, full duplex), though the Pi 4 supports 1000BASE-T. That caps everything the host
+  serves — including traffic leaving through the Cloudflare tunnel — at ~12.5 MB/s at the
+  NIC. `slate.local` on the same LAN also links at 100BASE-TX, so the likely cause is the
+  shared switch or cabling rather than the Pi; unconfirmed, needs a physical check.
+- **Thermal margin is already thin without any load test.** At 100 days' uptime,
+  `vcgencmd get_throttled` = `0xe0000`: ARM frequency capping, throttling, and the soft
+  temperature limit have each *occurred* since boot (under-voltage has not); none active
+  at the time of reading. Idle runs ~56 °C, with a 60.3 °C maximum over 2026-09-12..15.
 
 ### No repo checkout in production
 - `/opt/stars` exists but is an **empty directory owned by root**, untouched since
@@ -166,6 +181,30 @@ a change to that ongoing convention.
     `/catalog` (only one `seamlessphoto512` entry ever showed) — the explicit entry won
     the id collision silently; confirmed by the same rename-and-retest method, not by
     trusting that just because only one entry was visible.
+- **Remote sources break silently when upstream replaces the file in place.** Martin reads
+  a remote archive's header and directory once at startup and never again; if the file at
+  that URL is replaced, Martin keeps seeking to the old offsets in the new bytes and every
+  uncached tile returns HTTP 500 (`An error occurred with the directory cache: Moka cache
+  fetch error: IO Error Invalid gzip header`). Hit on `openstreetmap_jp_planet` — upstream
+  `planet.pmtiles` was replaced 2026-09-11 14:30 UTC, a few hours after Martin's last
+  start — and it stayed broken ~4 days, taking the stars-hosted `positron` and
+  `openstreetmap_jp_planet` styles with it, until found incidentally on 2026-09-15 while
+  planning a benchmark. `systemctl --user restart martin` fixed it immediately. The
+  dashboard *had* shown it (one telemetry window with 398 of 491 tile requests as 5xx),
+  but nothing alerted on it.
+  - Martin 1.14.0 offers no way around this: there is no reload endpoint (`refresh` /
+    `reload` are merely reserved source-id keywords), and its remote reloader explicitly
+    skips individually-configured URLs, only re-listing prefixes (upstream test
+    `new_skips_remote_individually_configured_sources`). Every remote source here is
+    individually configured.
+  - Error responses carry no `cache-control`, so Cloudflare did not cache the 500s —
+    viewers recovered the moment Martin did.
+  - Recurs on every upstream republish (OSM Japan's planet; `overture-latest/` is a
+    rolling path by name). `monitoring/remote-watch.sh` + `systemd/remote-watch.{service,timer}`
+    were written and tested against it on 2026-09-15 (HEAD each remote URL every 15 min,
+    fingerprint ETag + Last-Modified + Content-Length, restart only after the same new
+    fingerprint is seen on two consecutive runs, at most one restart per 30 min) —
+    **not yet enabled in production**.
 - Data lives at `/home/stars/data`, currently a few hundred GB (13% used as of
   2026-09-11, see above) across pmtiles files from various consumer projects — sizes
   worth knowing: `kitaphoto17.pmtiles` 190 GB, `mapterhorn-japan-bridge.pmtiles` 315 GB

@@ -1,0 +1,13 @@
+[Unit]
+Description=Check upstream remote PMTiles for replacement every 15 minutes
+
+[Timer]
+# A change is acted on only after two consecutive sightings, so upstream
+# replacements are picked up within roughly 15-30 minutes.
+OnBootSec=5min
+OnUnitActiveSec=15min
+AccuracySec=1min
+RandomizedDelaySec=60
+
+[Install]
+WantedBy=timers.target

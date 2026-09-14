@@ -1,0 +1,249 @@
+#!/usr/bin/env python3
+"""Tile load generator for stars benchmark/soak runs. Stdlib only.
+
+Run it from a machine other than the Pi (it measures the Pi, so it must not
+compete with it for CPU). Point it at Martin's origin on the LAN
+(http://stars.local:3000) to measure the Pi itself; the public URL goes through
+Cloudflare's edge cache and would mostly measure Cloudflare instead.
+
+Safety rails, enforced in code rather than left to the operator:
+  * Sources backed by a remote URL in config/martin.yaml are refused: load on
+    them lands on third parties (GSI, OSM Japan, Source Cooperative, ...).
+  * Runs stop early if the error rate over the last window exceeds
+    --max-error-rate, or if the stop file (--stop-file) appears.
+  * Optional --temp-cmd is polled; the run stops at --max-temp-c.
+
+Examples:
+  # calibrate the client itself against a near-free endpoint
+  loadgen.py --base http://stars.local:3000 --health --concurrency 1,4,16 --duration 5
+  # step concurrency on one local source, random tiles across its coverage
+  loadgen.py --base http://stars.local:3000 --source vbm --concurrency 1,2,4,8,16,32 \\
+      --duration 30 --out results.json
+"""
+import argparse
+import http.client
+import json
+import math
+import os
+import random
+import socket
+import subprocess
+import sys
+import threading
+import time
+from collections import Counter, deque
+from pathlib import Path
+from urllib.parse import urlparse
+
+UA = "stars-bench/1.0"
+REPO = Path(__file__).resolve().parents[2]
+
+
+def remote_sources():
+    """Source ids whose config value is a remote URL. Parsed by line so this
+    has no PyYAML dependency; config/martin.yaml is simple and canonical."""
+    ids = set()
+    for line in (REPO / "config" / "martin.yaml").read_text().splitlines():
+        s = line.strip()
+        if ":" in s:
+            key, _, val = s.partition(":")
+            if val.strip().startswith(("http://", "https://")):
+                ids.add(key.strip())
+    return ids
+
+
+def get_json(base, path):
+    u = urlparse(base)
+    c = http.client.HTTPConnection(u.hostname, u.port or 80, timeout=30)
+    c.request("GET", path, headers={"User-Agent": UA})
+    r = c.getresponse()
+    body = r.read()
+    c.close()
+    if r.status != 200:
+        raise RuntimeError(f"GET {path}: {r.status}")
+    return json.loads(body)
+
+
+def tile_range(tj, zooms):
+    """All z/x/y inside the TileJSON bounds for the given zooms."""
+    w, s, e, n = tj["bounds"]
+    out = []
+    for z in zooms:
+        k = 2 ** z
+        x0 = int((w + 180) / 360 * k)
+        x1 = int((e + 180) / 360 * k)
+        y0 = int((1 - math.asinh(math.tan(math.radians(n))) / math.pi) / 2 * k)
+        y1 = int((1 - math.asinh(math.tan(math.radians(s))) / math.pi) / 2 * k)
+        for x in range(max(x0, 0), min(x1, k - 1) + 1):
+            for y in range(max(y0, 0), min(y1, k - 1) + 1):
+                out.append((z, x, y))
+    return out
+
+
+def pct(sorted_vals, p):
+    if not sorted_vals:
+        return None
+    i = min(len(sorted_vals) - 1, int(round(p / 100 * (len(sorted_vals) - 1))))
+    return sorted_vals[i]
+
+
+class Run:
+    def __init__(self, base, paths, concurrency, duration, args):
+        self.base, self.paths = urlparse(base), paths
+        # Resolve once up front. Connecting by name re-resolves on every new
+        # connection, and `stars.local` goes through mDNS, which added ~1s to
+        # each thread's first request in calibration -- enough to pollute p99
+        # and max at every concurrency level. The Host header keeps the name.
+        self.addr = socket.gethostbyname(self.base.hostname)
+        self.host_header = self.base.netloc
+        self.concurrency, self.duration, self.args = concurrency, duration, args
+        self.lock = threading.Lock()
+        self.lat, self.status, self.bytes = [], Counter(), 0
+        self.window = deque(maxlen=200)  # recent (ok: bool) for the error-rate brake
+        self.stop_reason = None
+        self.stop = threading.Event()
+
+    def worker(self, seed):
+        rng = random.Random(seed)
+        conn = None
+        while not self.stop.is_set():
+            path = rng.choice(self.paths)
+            t = time.perf_counter()
+            try:
+                if conn is None:
+                    conn = http.client.HTTPConnection(self.addr, self.base.port or 80, timeout=30)
+                conn.request("GET", path, headers={"User-Agent": UA, "Host": self.host_header})
+                r = conn.getresponse()
+                n = len(r.read())
+                code = r.status
+            except Exception as e:  # connection reset, timeout, ...
+                code, n = type(e).__name__, 0
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+                conn = None
+            dt = (time.perf_counter() - t) * 1000
+            ok = isinstance(code, int) and code < 500
+            with self.lock:
+                self.lat.append(dt)
+                self.status[code] += 1
+                self.bytes += n
+                self.window.append(ok)
+
+    def guard(self):
+        a = self.args
+        next_temp = 0
+        end = time.monotonic() + self.duration
+        while time.monotonic() < end and not self.stop.is_set():
+            time.sleep(0.5)
+            with self.lock:
+                w = list(self.window)
+            if len(w) >= 50 and (w.count(False) / len(w)) > a.max_error_rate:
+                self.stop_reason = f"error rate {w.count(False)/len(w):.1%} > {a.max_error_rate:.0%}"
+                break
+            if a.stop_file and os.path.exists(a.stop_file):
+                self.stop_reason = f"stop file {a.stop_file}"
+                break
+            if a.temp_cmd and time.monotonic() >= next_temp:
+                next_temp = time.monotonic() + a.temp_interval
+                try:
+                    out = subprocess.run(a.temp_cmd, shell=True, capture_output=True, text=True, timeout=20).stdout
+                    temp = float(out.strip()) / (1000 if float(out.strip()) > 200 else 1)
+                    if temp >= a.max_temp_c:
+                        self.stop_reason = f"temperature {temp:.1f}C >= {a.max_temp_c}C"
+                        break
+                except Exception:
+                    pass  # a failed poll must not abort the run by itself
+        self.stop.set()
+
+    def go(self):
+        threads = [threading.Thread(target=self.worker, args=(i,), daemon=True)
+                   for i in range(self.concurrency)]
+        t0 = time.monotonic()
+        for t in threads:
+            t.start()
+        self.guard()
+        for t in threads:
+            t.join(timeout=35)
+        elapsed = time.monotonic() - t0
+        lat = sorted(self.lat)
+        n = len(lat)
+        errors = sum(v for k, v in self.status.items() if not (isinstance(k, int) and k < 500))
+        return {
+            "concurrency": self.concurrency,
+            "elapsed_s": round(elapsed, 2),
+            "requests": n,
+            "rps": round(n / elapsed, 1) if elapsed else None,
+            "mb_per_s": round(self.bytes / elapsed / 1e6, 2) if elapsed else None,
+            "latency_ms": {p: (round(pct(lat, p), 1) if n else None) for p in (50, 90, 95, 99)}
+                          | {"max": round(lat[-1], 1) if n else None},
+            "status": {str(k): v for k, v in sorted(self.status.items(), key=lambda kv: str(kv[0]))},
+            "error_rate": round(errors / n, 4) if n else None,
+            "stopped_early": self.stop_reason,
+        }
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--base", required=True)
+    g = ap.add_mutually_exclusive_group(required=True)
+    g.add_argument("--source", help="local source id to load")
+    g.add_argument("--health", action="store_true", help="hit /health (client calibration)")
+    ap.add_argument("--zooms", help="e.g. 12-17 (default: the source's full zoom range)")
+    ap.add_argument("--hot-set", type=int, default=0,
+                    help="restrict to N random tiles (warm-cache case); 0 = whole coverage (cold)")
+    ap.add_argument("--concurrency", default="1,2,4,8,16")
+    ap.add_argument("--duration", type=float, default=30)
+    ap.add_argument("--pause", type=float, default=10, help="idle seconds between steps")
+    ap.add_argument("--max-error-rate", type=float, default=0.05)
+    ap.add_argument("--stop-file")
+    ap.add_argument("--temp-cmd", help="shell command printing temperature (C or millidegrees)")
+    ap.add_argument("--temp-interval", type=float, default=30)
+    ap.add_argument("--max-temp-c", type=float, default=80)
+    ap.add_argument("--seed", type=int, default=1)
+    ap.add_argument("--out")
+    a = ap.parse_args()
+
+    meta = {"base": a.base, "tool": "stars loadgen.py", "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    if a.health:
+        paths = ["/health"]
+        meta["target"] = "/health"
+    else:
+        if a.source in remote_sources():
+            sys.exit(f"refusing: '{a.source}' is backed by a remote URL; load would land on a third party")
+        tj = get_json(a.base, f"/{a.source}")
+        zooms = range(tj["minzoom"], tj["maxzoom"] + 1)
+        if a.zooms:
+            lo, _, hi = a.zooms.partition("-")
+            zooms = range(int(lo), int(hi or lo) + 1)
+        tiles = tile_range(tj, zooms)
+        rng = random.Random(a.seed)
+        if a.hot_set:
+            tiles = rng.sample(tiles, min(a.hot_set, len(tiles)))
+        paths = [f"/{a.source}/{z}/{x}/{y}" for z, x, y in tiles]
+        meta |= {"target": a.source, "zooms": [min(zooms), max(zooms)], "candidate_tiles": len(paths),
+                 "hot_set": a.hot_set, "bounds": tj["bounds"], "format": tj.get("format")}
+
+    steps = []
+    levels = [int(c) for c in a.concurrency.split(",")]
+    for i, c in enumerate(levels):
+        res = Run(a.base, paths, c, a.duration, a).go()
+        steps.append(res)
+        lm = res["latency_ms"]
+        print(f"c={c:3d}  rps={res['rps']:>8}  p50={lm[50]}  p95={lm[95]}  p99={lm[99]}  max={lm['max']}ms  "
+              f"err={res['error_rate']}  {res['mb_per_s']}MB/s  status={res['status']}"
+              + (f"  STOPPED: {res['stopped_early']}" if res["stopped_early"] else ""), flush=True)
+        if res["stopped_early"]:
+            break
+        if i < len(levels) - 1:
+            time.sleep(a.pause)
+
+    report = {"meta": meta, "steps": steps}
+    if a.out:
+        Path(a.out).write_text(json.dumps(report, indent=1))
+        print(f"wrote {a.out}")
+
+
+if __name__ == "__main__":
+    main()
