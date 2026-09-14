@@ -98,6 +98,11 @@ run A-vbm-warm           --source vbm --tile-list vbm.txt
 run B-freetown           --source freetown-mapterhorn --tile-list freetown.txt
 # C: 178 GB archive vs 8 GB RAM, random tiles -> cold reads from the USB SSD
 run C-kitaphoto17-cold   --source kitaphoto17 --tile-list kitaphoto17.txt
+# E: a real consumer's access pattern. tokachi20260911 samples
+# mapterhorn-japan-bridge (258 GB terrarium) in contiguous z16 blocks, 6 in
+# parallel; this is a 60x60 z16 block around Tokachidake at exactly c=6.
+# (Later --concurrency/--duration override the defaults; argparse keeps the last.)
+run E-mjb-z16-c6         --source mapterhorn-japan-bridge --tile-list mjb-z16.txt --concurrency 6 --duration 60
 # D: same as A but forcing on-the-fly gzip decompression -> CPU-bound variant
 run D-vbm-decompress     --source vbm --tile-list vbm.txt --no-accept-encoding
 
