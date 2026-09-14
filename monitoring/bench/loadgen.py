@@ -95,7 +95,13 @@ class Run:
         # each thread's first request in calibration -- enough to pollute p99
         # and max at every concurrency level. The Host header keeps the name.
         self.addr = socket.gethostbyname(self.base.hostname)
-        self.host_header = self.base.netloc
+        self.headers = {"User-Agent": UA, "Host": self.base.netloc}
+        # Browsers always send Accept-Encoding. Without it Martin *decompresses*
+        # gzip-stored vector tiles on the fly and returns bodies ~2-2.4x larger
+        # (measured on vbm), i.e. a code path real viewers never hit. Off only
+        # via --no-accept-encoding, as a deliberate CPU-bound variant.
+        if not args.no_accept_encoding:
+            self.headers["Accept-Encoding"] = "gzip, deflate, br"
         self.concurrency, self.duration, self.args = concurrency, duration, args
         self.lock = threading.Lock()
         self.lat, self.status, self.bytes = [], Counter(), 0
@@ -112,7 +118,7 @@ class Run:
             try:
                 if conn is None:
                     conn = http.client.HTTPConnection(self.addr, self.base.port or 80, timeout=30)
-                conn.request("GET", path, headers={"User-Agent": UA, "Host": self.host_header})
+                conn.request("GET", path, headers=self.headers)
                 r = conn.getresponse()
                 n = len(r.read())
                 code = r.status
@@ -190,6 +196,10 @@ def main():
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--source", help="local source id to load")
     g.add_argument("--health", action="store_true", help="hit /health (client calibration)")
+    ap.add_argument("--tile-list", help="file of z/x/y lines (from pmtiles_list.py) -- real tiles "
+                                        "only; without it, coordinates are enumerated from bounds")
+    ap.add_argument("--no-accept-encoding", action="store_true",
+                    help="omit Accept-Encoding (forces Martin to decompress gzip tiles: CPU-bound variant)")
     ap.add_argument("--zooms", help="e.g. 12-17 (default: the source's full zoom range)")
     ap.add_argument("--hot-set", type=int, default=0,
                     help="restrict to N random tiles (warm-cache case); 0 = whole coverage (cold)")
@@ -217,13 +227,20 @@ def main():
         if a.zooms:
             lo, _, hi = a.zooms.partition("-")
             zooms = range(int(lo), int(hi or lo) + 1)
-        tiles = tile_range(tj, zooms)
+        if a.tile_list:
+            tiles = [tuple(int(v) for v in ln.split("/")) for ln in Path(a.tile_list).read_text().split()
+                     if not ln.startswith("#")]
+            tiles = [t for t in tiles if t[0] in zooms]
+        else:
+            tiles = tile_range(tj, zooms)
         rng = random.Random(a.seed)
         if a.hot_set:
             tiles = rng.sample(tiles, min(a.hot_set, len(tiles)))
         paths = [f"/{a.source}/{z}/{x}/{y}" for z, x, y in tiles]
         meta |= {"target": a.source, "zooms": [min(zooms), max(zooms)], "candidate_tiles": len(paths),
-                 "hot_set": a.hot_set, "bounds": tj["bounds"], "format": tj.get("format")}
+                 "tile_list": a.tile_list, "hot_set": a.hot_set, "bounds": tj["bounds"],
+                 "format": tj.get("format")}
+    meta["accept_encoding"] = not a.no_accept_encoding
 
     steps = []
     levels = [int(c) for c in a.concurrency.split(",")]
