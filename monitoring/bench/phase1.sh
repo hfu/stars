@@ -98,9 +98,18 @@ run A-vbm-warm           --source vbm --tile-list vbm.txt
 run B-freetown           --source freetown-mapterhorn --tile-list freetown.txt
 # C: 178 GB archive vs 8 GB RAM, random tiles -> cold reads from the USB SSD
 run C-kitaphoto17-cold   --source kitaphoto17 --tile-list kitaphoto17.txt
-# E: a real consumer's access pattern. tokachi20260911 samples
-# mapterhorn-japan-bridge (258 GB terrarium) in contiguous z16 blocks, 6 in
-# parallel; this is a 60x60 z16 block around Tokachidake at exactly c=6.
+# F: a real consumer's access pattern, as tokachi20260911 described it: one
+# never-before-fetched ~200-tile contiguous z16 block of mapterhorn-japan-bridge
+# (258 GB terrarium), 6 in parallel, fetched exactly once -- the number that
+# matters is how long until the whole block is there. Three separate blocks
+# (Asahidake, Tarumae, Meakandake) that don't overlap each other or E, so each
+# is a cold fetch; run before E so nothing has warmed them.
+run F1-mjb-once-asahidake  --source mapterhorn-japan-bridge --tile-list mjb-F1-asahidake.txt  --concurrency 6 --once
+run F2-mjb-once-tarumae    --source mapterhorn-japan-bridge --tile-list mjb-F2-tarumae.txt    --concurrency 6 --once
+run F3-mjb-once-meakandake --source mapterhorn-japan-bridge --tile-list mjb-F3-meakandake.txt --concurrency 6 --once
+# E: sustained c=6 over a 60x60 z16 block around Tokachidake. Harsher than that
+# consumer's real usage (it caches and never refetches a block), so read it as
+# an upper bound on their wait, not as their wait.
 # (Later --concurrency/--duration override the defaults; argparse keeps the last.)
 run E-mjb-z16-c6         --source mapterhorn-japan-bridge --tile-list mjb-z16.txt --concurrency 6 --duration 60
 # D: same as A but forcing on-the-fly gzip decompression -> CPU-bound variant

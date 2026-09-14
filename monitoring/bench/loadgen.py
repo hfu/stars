@@ -190,6 +190,68 @@ class Run:
         }
 
 
+def run_once(base, paths, concurrency, args):
+    """Fetch every path exactly once, `concurrency` at a time, and report how
+    long the whole batch took to complete.
+
+    This is the question a caching consumer actually has ("how long until this
+    block of tiles is all here?"), and it differs from sustained throughput: a
+    consumer that caches never fetches the same block twice, so a timed loop
+    over the same tiles overstates its wait once the Pi's page cache warms up.
+    Use a block nothing has requested recently if the point is a cold fetch.
+    """
+    u = urlparse(base)
+    addr = socket.gethostbyname(u.hostname)
+    headers = {"User-Agent": UA, "Host": u.netloc}
+    if not args.no_accept_encoding:
+        headers["Accept-Encoding"] = "gzip, deflate, br"
+    queue = deque(paths)
+    lock = threading.Lock()
+    lat, status, total = [], Counter(), [0]
+
+    def worker():
+        conn = None
+        while True:
+            with lock:
+                if not queue:
+                    break
+                path = queue.popleft()
+            t = time.perf_counter()
+            try:
+                if conn is None:
+                    conn = http.client.HTTPConnection(addr, u.port or 80, timeout=30)
+                conn.request("GET", path, headers=headers)
+                r = conn.getresponse()
+                n, code = len(r.read()), r.status
+            except Exception as e:
+                n, code = 0, type(e).__name__
+                conn = None
+            with lock:
+                lat.append((time.perf_counter() - t) * 1000)
+                status[code] += 1
+                total[0] += n
+
+    t0 = time.perf_counter()
+    threads = [threading.Thread(target=worker) for _ in range(concurrency)]
+    for th in threads:
+        th.start()
+    for th in threads:
+        th.join()
+    wall = time.perf_counter() - t0
+    s = sorted(lat)
+    return {
+        "mode": "once",
+        "concurrency": concurrency,
+        "tiles": len(s),
+        "wall_s": round(wall, 3),
+        "tiles_per_s": round(len(s) / wall, 1),
+        "mb": round(total[0] / 1e6, 2),
+        "mb_per_s": round(total[0] / 1e6 / wall, 2),
+        "latency_ms": {p: round(pct(s, p), 1) for p in (50, 90, 95, 99)} | {"max": round(s[-1], 1)},
+        "status": {str(k): v for k, v in sorted(status.items(), key=lambda kv: str(kv[0]))},
+    }
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--base", required=True)
@@ -198,6 +260,9 @@ def main():
     g.add_argument("--health", action="store_true", help="hit /health (client calibration)")
     ap.add_argument("--tile-list", help="file of z/x/y lines (from pmtiles_list.py) -- real tiles "
                                         "only; without it, coordinates are enumerated from bounds")
+    ap.add_argument("--once", action="store_true",
+                    help="fetch each listed tile exactly once and report batch wall time "
+                         "(uses the first --concurrency value)")
     ap.add_argument("--no-accept-encoding", action="store_true",
                     help="omit Accept-Encoding (forces Martin to decompress gzip tiles: CPU-bound variant)")
     ap.add_argument("--zooms", help="e.g. 12-17 (default: the source's full zoom range)")
@@ -241,6 +306,18 @@ def main():
                  "tile_list": a.tile_list, "hot_set": a.hot_set, "bounds": tj["bounds"],
                  "format": tj.get("format")}
     meta["accept_encoding"] = not a.no_accept_encoding
+
+    if a.once:
+        c = int(a.concurrency.split(",")[0])
+        res = run_once(a.base, paths, c, a)
+        lm = res["latency_ms"]
+        print(f"once c={c} tiles={res['tiles']} wall={res['wall_s']}s ({res['tiles_per_s']} tiles/s, "
+              f"{res['mb']} MB, {res['mb_per_s']} MB/s)  p50={lm[50]} p95={lm[95]} p99={lm[99]} "
+              f"max={lm['max']}ms  status={res['status']}", flush=True)
+        if a.out:
+            Path(a.out).write_text(json.dumps({"meta": meta, "steps": [res]}, indent=1))
+            print(f"wrote {a.out}")
+        return
 
     steps = []
     levels = [int(c) for c in a.concurrency.split(",")]
