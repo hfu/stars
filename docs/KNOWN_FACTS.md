@@ -204,7 +204,13 @@ a change to that ongoing convention.
     were written and tested against it on 2026-09-15 (HEAD each remote URL every 15 min,
     fingerprint ETag + Last-Modified + Content-Length, restart only after the same new
     fingerprint is seen on two consecutive runs, at most one restart per 30 min) —
-    **not yet enabled in production**.
+    **not yet enabled in production**. *Update: enabled 2026-09-15 07:19 JST* (user-level
+    `remote-watch.timer`; first run recorded all 10 remote fingerprints without
+    restarting). Its log lines, including any automatic restart, are in
+    `journalctl _SYSTEMD_USER_UNIT=remote-watch.service` — not `journalctl --user`, see
+    the journal correction under "Log" below. It is cause-based (upstream fingerprint);
+    Martin's own `Invalid gzip header` ERROR lines are the matching symptom signal, and
+    nothing alerts on those yet.
 - Data lives at `/home/stars/data`, currently a few hundred GB (13% used as of
   2026-09-11, see above) across pmtiles files from various consumer projects — sizes
   worth knowing: `kitaphoto17.pmtiles` 190 GB, `mapterhorn-japan-bridge.pmtiles` 315 GB
@@ -223,6 +229,33 @@ a change to that ongoing convention.
   historical now that the service runs under proper systemd supervision. Request-level
   text logging via `RUST_LOG` is not currently configured (unset in the systemd unit), so
   `journalctl --user -u martin` retains zero entries.
+  - **Correction (2026-09-15): that conclusion was wrong — it was the query, not the
+    logs.** User-unit output here goes into the *system* journal (persistent,
+    `/var/log/journal`, oldest entry 2026-04-21), tagged `_SYSTEMD_USER_UNIT`, and there
+    is no separate user journal, so `journalctl --user -u martin` shows nothing even
+    though everything is recorded. Query it as
+    `journalctl _SYSTEMD_USER_UNIT=martin.service` (the `stars` user is in `adm`, so no
+    sudo needed); same for `host-status.service`, `remote-watch.service`, etc. It held
+    14,447 Martin lines going back to June at the time of correction — startup, WARNs,
+    and every tile ERROR with its message. What *is* still true: there is no per-request
+    access log (no path/status line per request at the default level), and ERROR lines
+    don't name the source.
+  - **These logs would have caught both directory-cache outages.** Every failing request
+    logs `An error occurred with the directory cache: Moka cache fetch error: IO Error
+    Invalid gzip header` (~3 lines per request). Grouping by Martin PID shows two separate
+    episodes, not one: **2026-09-04** (~97 failing requests; ended by a restart that day at
+    20:30 JST done for an unrelated config change — fixed by accident; source unknown,
+    since the log line doesn't say) and **after the 2026-09-11 upstream replacement**
+    (errors began 2026-09-15 05:26 JST, ~536 failing requests, once traffic reached
+    directory ranges Martin hadn't cached before the swap). So "broken ~4 days" above is
+    better read as "broken since the swap, visibly failing only once uncached areas were
+    requested" — and it had happened once before.
+  - **Self-inflicted watcher noise, found in the same logs:** `host-status.sh` and
+    `host-inventory.sh` write `*.json.tmp` *inside* the watched `/home/stars/data` before
+    renaming, so Martin's fs-watch reacts to every write and occasionally logs
+    `failed to canonicalize path ".../host-status.json.tmp"` when the rename wins the race
+    (42 times in 24 h). Harmless, but it's a rescan trigger every two minutes; staging the
+    temp file outside the watched tree on the same filesystem would avoid it.
 - **Prometheus metrics endpoint, confirmed live in production (2026-09-06):** `/_/metrics`
   (not `/metrics` — that 404s) returns HTTP 200 with real counters
   (`curl https://stars.optgeo.org/_/metrics`), even though this is gated behind a
