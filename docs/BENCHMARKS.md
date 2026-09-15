@@ -15,6 +15,15 @@ Confirmed limits are also carried into [KNOWN_FACTS.md](KNOWN_FACTS.md) Section 
   its own jitter (RTT stddev 20 ms, p99 57 ms on a near-free endpoint); the wired
   `slate.local` gives RTT 0.5 ms and reached 15,298 rps on Martin's `/health` at 32
   concurrent connections, so the client is not what caps any tile result below.
+- **Confirm the generator machine is free with whoever else uses it — before every run,
+  even for load that looks network-only.** `slate.local` is shared: during Phase 1 (and
+  its 07:26 JST calibration) it was also running `tokachi20260911`'s ODM repeatability
+  experiment, which measures run-to-run variance and whose non-determinism comes from
+  thread completion order — exactly what a concurrent load generator can perturb. That
+  project had said ODM was running there; it was used anyway without asking, and two of
+  their three runs lost their equal-conditions premise. The stars results themselves
+  are unaffected (the generator had >10× headroom and the link was the limit), but the
+  cost landed on someone else's measurement.
 - **Only local sources.** `loadgen.py` refuses any source backed by a remote URL in
   `config/martin.yaml` — load on those lands on third parties (GSI, OSM Japan, Source
   Cooperative, smellman's server).

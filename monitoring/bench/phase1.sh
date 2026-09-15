@@ -7,6 +7,11 @@
 #   $GEN          - load generator (must be wired; Wi-Fi measured Wi-Fi jitter)
 #   $PI           - the Pi under test; runs host-sampler.sh only
 #
+# BEFORE RUNNING: confirm $GEN is free with whoever else uses it. slate.local is
+# shared, and on 2026-09-15 this script ran on it during another project's
+# run-to-run variance experiment, spoiling their equal-conditions premise.
+# See docs/BENCHMARKS.md "Method".
+#
 # Everything lands in benchmarks/<run id>/ in this repo.
 set -euo pipefail
 
