@@ -293,6 +293,10 @@ a change to that ongoing convention.
     `failed to canonicalize path ".../host-status.json.tmp"` when the rename wins the race
     (42 times in 24 h). Harmless, but it's a rescan trigger every two minutes; staging the
     temp file outside the watched tree on the same filesystem would avoid it.
+    **Fixed 2026-09-15 20:13 JST:** both scripts now stage their temp file in
+    `~/.local/state/stars-monitoring/` (same filesystem as `/home/stars/data`, so the
+    final `mv` is still an atomic rename) and only the finished `.json` lands in the
+    watched directory. Baseline before the fix: 38 such warnings in the preceding 24 h.
 - **Prometheus metrics endpoint, confirmed live in production (2026-09-06):** `/_/metrics`
   (not `/metrics` — that 404s) returns HTTP 200 with real counters
   (`curl https://stars.optgeo.org/_/metrics`), even though this is gated behind a

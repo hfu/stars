@@ -6,7 +6,14 @@
 set -euo pipefail
 
 OUT="${HOST_STATUS_OUT:-/home/stars/data/host-status.json}"
-TMP="${OUT}.tmp"
+# Stage the temp file outside /home/stars/data: Martin fs-watches that directory, and a
+# temp file inside it triggered a rescan on every write plus an occasional
+# "failed to canonicalize path ...json.tmp" warning when the rename won the race (38 in
+# 24 h). The staging dir must stay on the same filesystem so the mv is still an atomic
+# rename.
+STAGE_DIR="${HOST_STATUS_STAGE_DIR:-${HOME:-/home/stars}/.local/state/stars-monitoring}"
+mkdir -p "$STAGE_DIR"
+TMP="$STAGE_DIR/$(basename "$OUT").tmp"
 
 ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 uptime_s=$(awk '{print $1}' /proc/uptime)
