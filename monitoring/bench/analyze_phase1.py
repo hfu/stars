@@ -40,10 +40,17 @@ def fnum(rows, key):
     out = []
     for r in rows:
         try:
-            out.append(float(r[key]))
+            out.append(float(r.get(key)))
         except (TypeError, ValueError):
             pass
     return out
+
+
+def counter_delta(rows, key):
+    """Increase of a cumulative counter across a window; '-' when the column is
+    absent (older CSVs) or empty (driver without that stat)."""
+    vals = fnum(rows, key)
+    return f"{vals[-1] - vals[0]:.0f}" if len(vals) >= 2 else "-"
 
 
 def step_windows(run_log):
@@ -74,8 +81,8 @@ def main():
                f"A step is **link-bound** when body throughput >= {LINK_FULL_FRACTION:.0%} of that "
                f"({LINK_BYTES_S*LINK_FULL_FRACTION/1e6:.2f} MB/s).")
     out.append("")
-    out.append("| test | c | rps | MB/s | tile KB | p50 | p95 | p99 | max ms | err | Pi CPU% max | disk busy% max | temp °C max | verdict |")
-    out.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|")
+    out.append("| test | c | rps | MB/s | tile KB | p50 | p95 | p99 | max ms | err | Pi CPU% max | disk busy% max | temp °C max | tx err Δ | rx pause Δ | verdict |")
+    out.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|")
 
     for i, (name, t0) in enumerate(starts[:-1]):
         t_end = starts[i + 1][1]
@@ -102,7 +109,8 @@ def main():
                 f"| {name} | {s['concurrency']} | {rps} | {mbps} | "
                 f"{(s.get('tile_bytes_mean') or 0)/1000:.0f} | {lat['50']} | {lat['95']} | {lat['99']} | "
                 f"{lat['max']} | {s.get('error_rate', 0)} | "
-                f"{max(cpu) if cpu else '-':>} | {max(disk) if disk else '-'} | {max(temp) if temp else '-'} | {verdict} |"
+                f"{max(cpu) if cpu else '-':>} | {max(disk) if disk else '-'} | {max(temp) if temp else '-'} | "
+                f"{counter_delta(w, 'net_tx_errors')} | {counter_delta(w, 'net_rx_pause')} | {verdict} |"
             )
 
     base = window(host, host[0]["_t"], starts[0][1])
