@@ -42,6 +42,15 @@ the link does?
 12.40 MB/s peak on the wire against a 12.5 MB/s line rate — while the Pi still had
 headroom in CPU, disk and temperature.
 
+> **Correction, same day (found reading the kernel log after the run):** "the Pi did
+> not give out" holds for the Pi's *compute* — CPU, disk, temperature — but **not for
+> its network interface.** During the heaviest test (D at c=16 and c=32, 08:51:38–08:52:30
+> JST) the Ethernet driver logged **103 `bcmgenet … eth0: NETDEV WATCHDOG: transmit queue
+> timed out` events**, each a transmit stall of 2.0–6.0 s. It had never happened before in
+> 100+ days of uptime (all 103 are from that one minute), and the interface's `tx_errors`
+> counter — 103 — accounts for exactly those events. The link stayed up and recovered
+> without intervention; no further events after 08:52:30. See finding 8.
+
 Environment: Pi 4 Model B Rev 1.5, 8 GB, kernel 6.12.75+rpt-rpi-v8, Martin 1.14.0,
 USB SSD (WD Elements SE), eth0 **100 Mb/s**; generator `slate.local` (Apple M4, wired
 100BASE-TX); concurrency steps 1–32, 30 s each; repo commit `da10829`.
@@ -66,8 +75,9 @@ Latency before saturation (c=1–2) was p50 3–16 ms. Once the link was full, p
 1. **The 100 Mb/s link is the binding limit for every tile type tested**, including the
    one designed to stress the disk (C: 178 GB of random reads against 8 GB of RAM kept
    the SSD ≤ 9% busy) and the one designed to stress the CPU (D: forced decompression
-   peaked at 69%). Upgrading the link is what would raise stars' ceiling; the Pi is not
-   yet the constraint.
+   peaked at 69%). Upgrading the link is what would raise stars' ceiling; the Pi's
+   compute is not yet the constraint — but see finding 8 for what the network interface
+   did at saturation.
 2. **The batch time for a cold block is simply bytes ÷ link rate.** F1–F3 took
    1.66 s / 1.55 s / 2.16 s for 19.3 / 18.0 / 25.1 MB — each exactly its size over
    ~11.6 MB/s. The heavier block (F3, 128 KB/tile) is slower because its tiles are
@@ -95,6 +105,21 @@ Latency before saturation (c=1–2) was p50 3–16 ms. Once the link was full, p
    5–120 ms at saturation. Almost all of the client-side latency was queueing on the
    link, not work inside Martin.
 
+8. **At full saturation the Pi's Ethernet driver stalls.** 103 transmit-queue watchdog
+   timeouts (2.0–6.0 s each) occurred during D at c=16/32 and nowhere else in the run or
+   in the preceding 100+ days. This is a failure mode, not just a throughput ceiling: a
+   multi-second TX stall freezes *everything* leaving the host, including the Cloudflare
+   tunnel that carries both public traffic and SSH management. The 18–30 s worst-case
+   latencies in D line up with it. Why only D, which was the last and most CPU-heavy
+   test, is not established. One plausible mechanism: the link negotiates with
+   `flow control rx/tx`, so a congested 100 Mb/s switch sending PAUSE frames could hold
+   the NIC's queue past the watchdog. That can't be confirmed without `ethtool` pause
+   statistics, and `ethtool` isn't installed. The 30 s outliers in A–C are *not*
+   explained by it — no watchdog events were logged during those tests.
+   **Practical consequence:** keep any future load test below full saturation, or accept
+   that management access can freeze for seconds; and treat sustained link saturation
+   from real traffic as a risk to the host's availability, not merely to speed.
+
 **Side effect on the dashboard:** the run's requests are counted by `/_/metrics` like any
 others, so the monitoring history shows a spike of up to 13,549 req/min on 2026-09-15
 08:30–08:55 JST. That is this benchmark, not real demand. No 5xx and no downtime were
@@ -110,6 +135,10 @@ recorded in that window.
   asked (the Pi had headroom either way).
 - Public traffic shares the same saturated link, so viewers were slowed during the run.
 
-**Next:** add TCP retransmit counters to sampling (to confirm finding 4); Phase 2
+**Next:** check the switch the Pi and `slate.local` share — `slate.local`'s NIC supports
+1000BASE-T yet also autoselects 100BASE-TX, so the shared switch (not the Pi) is the
+likeliest reason both links are at 100 Mb/s; sample interface `tx_errors` alongside the
+existing columns and install `ethtool` (needs sudo) for pause-frame counters, to pin down
+finding 8; add TCP retransmit counters to sampling (to confirm finding 4); Phase 2
 (through Cloudflare, low rate) to find the uplink limit; Phase 3 soak for thermal
 behaviour over hours; profile finding 3 before any link upgrade.

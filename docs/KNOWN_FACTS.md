@@ -40,6 +40,16 @@ a change to that ongoing convention.
   per request than raster even when passed through (~60% for 280 rps vs ~15% for 800 rps)
   — the likeliest next limit if the link is ever upgraded. Public viewers also pass through
   Cloudflare and the ISP uplink, not yet measured.
+  - **Correction, same day: the network interface did give out at full saturation.**
+    During the heaviest test (08:51:38–08:52:30 JST) the kernel logged 103
+    `bcmgenet … eth0: NETDEV WATCHDOG: transmit queue timed out` events — 2–6 s transmit
+    stalls — the first ever in 100+ days (`eth0` `tx_errors` = 103 accounts for exactly
+    them). The link stayed up and recovered on its own. A TX stall freezes everything
+    leaving the host, SSH management over the tunnel included, so sustained saturation is
+    an availability risk, not only a speed ceiling. Cause unconfirmed; see
+    BENCHMARKS.md finding 8. Separately, `slate.local`'s NIC supports 1000BASE-T yet also
+    negotiates 100BASE-TX, pointing at the shared switch as the reason both links are at
+    100 Mb/s. Kernel log: `journalctl -k`.
 - **Thermal margin is already thin without any load test.** At 100 days' uptime,
   `vcgencmd get_throttled` = `0xe0000`: ARM frequency capping, throttling, and the soft
   temperature limit have each *occurred* since boot (under-voltage has not); none active
