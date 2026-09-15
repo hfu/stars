@@ -20,8 +20,11 @@ Confirmed limits are also carried into [KNOWN_FACTS.md](KNOWN_FACTS.md) Section 
   its 07:26 JST calibration) it was also running `tokachi20260911`'s ODM repeatability
   experiment, which measures run-to-run variance and whose non-determinism comes from
   thread completion order — exactly what a concurrent load generator can perturb. That
-  project had said ODM was running there; it was used anyway without asking, and two of
-  their three runs lost their equal-conditions premise. The stars results themselves
+  project had said ODM was running there; it was used anyway without asking, and **all
+  three** of their runs lost their equal-conditions premise (e17 overlapped the
+  calibration, e18 tests A–B, e19 tests B–D), leaving no clean run — the experiment has to
+  be repeated on a quiet machine. (This entry first said "two of three", written from an
+  overlap table that listed only the last run's windows.) The stars results themselves
   are unaffected (the generator had >10× headroom and the link was the limit), but the
   cost landed on someone else's measurement.
 - **Only local sources.** `loadgen.py` refuses any source backed by a remote URL in
