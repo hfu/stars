@@ -24,7 +24,13 @@ Confirmed limits are also carried into [KNOWN_FACTS.md](KNOWN_FACTS.md) Section 
   three** of their runs lost their equal-conditions premise (e17 overlapped the
   calibration, e18 tests A–B, e19 tests B–D), leaving no clean run — the experiment has to
   be repeated on a quiet machine. (This entry first said "two of three", written from an
-  overlap table that listed only the last run's windows.) The stars results themselves
+  overlap table that listed only the last run's windows.) **Convention agreed with
+  `tokachi20260911` afterwards for `slate.local`:** whoever starts a *measurement*
+  (benchmark or repeatability run) there announces "measuring — load nothing" at the
+  start — "in use" is not enough; while anyone is measuring, nobody else loads it, not
+  even near-zero-CPU work; the measurer announces "free" when done. Outside those windows
+  slate is fine to use, so the question to ask before a run is simply "is anyone
+  measuring on slate?". The stars results themselves
   are unaffected (the generator had >10× headroom and the link was the limit), but the
   cost landed on someone else's measurement.
 - **Only local sources.** `loadgen.py` refuses any source backed by a remote URL in
@@ -165,6 +171,11 @@ recorded in that window.
   "generator NIC" as the 100 Mb/s wall. It doesn't change the answer to the question
   asked (the Pi had headroom either way).
 - Public traffic shares the same saturated link, so viewers were slowed during the run.
+
+**Re-run this whole phase if the link speed changes.** Finding 8 (TX stalls at c ≥ 16,
+none at c=6) and every plateau above were measured at 100 Mb/s; at gigabit the pressure on
+the driver takes a different shape, so "fixed the switch, so the stalls are gone" is
+not a safe reading — measure again.
 
 **Next:** check the switch the Pi and `slate.local` share — `slate.local`'s NIC supports
 1000BASE-T yet also autoselects 100BASE-TX, so the shared switch (not the Pi) is the
