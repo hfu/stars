@@ -305,7 +305,9 @@ a change to that ongoing convention.
   cut it ~4×. Not a limit today (the 100 Mb/s link saturates first, at ~56% CPU), but it
   is the first CPU limit for vbm if the link gets faster. A large `tilestats` block in a
   newly contributed archive is a serving cost, not just file size. See
-  `docs/BENCHMARKS.md` finding 3.
+  `docs/BENCHMARKS.md` finding 3. Reproduced on upstream main and reported as
+  [maplibre/martin#3323](https://github.com/maplibre/martin/issues/3323) (2026-09-16), with a
+  measured 2-line `Arc<TileJSON>` fix; if it ships, re-measure vbm after upgrading.
 - **Prometheus metrics endpoint, confirmed live in production (2026-09-06):** `/_/metrics`
   (not `/metrics` — that 404s) returns HTTP 200 with real counters
   (`curl https://stars.optgeo.org/_/metrics`), even though this is gated behind a

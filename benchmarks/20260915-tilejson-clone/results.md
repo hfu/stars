@@ -64,4 +64,5 @@ Martin `main` at d9ab38a (reports 1.16.1), built locally on an Apple M1 with Rus
   vbm full: 0.40 → 0.030 ms). Interleaved main/patched runs: `m1-main-vs-arc.txt`.
   `/catalog`, TileJSON and 50 tile responses byte-identical to main;
   `cargo test -p martin-core --no-default-features --features pmtiles` passes.
-- Draft upstream issue (not posted): `upstream-issue-draft.md`.
+- Upstream issue posted 2026-09-16 (user-approved text = `upstream-issue-draft.md`):
+  https://github.com/maplibre/martin/issues/3323
