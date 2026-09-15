@@ -53,6 +53,19 @@ a change to that ongoing convention.
     BENCHMARKS.md finding 8. Separately, `slate.local`'s NIC supports 1000BASE-T yet also
     negotiates 100BASE-TX, pointing at the shared switch as the reason both links are at
     100 Mb/s. Kernel log: `journalctl -k`.
+  - **`ethtool` settles the 100 Mb/s cause and supports the PAUSE hypothesis** (2026-09-15).
+    `ethtool` *is* installed — `/usr/sbin/ethtool` — but `/usr/sbin` isn't on the `stars`
+    user's SSH `PATH`, so call it by full path; no sudo needed for these reads.
+    `ethtool eth0`: the Pi advertises 10/100/1000baseT, but the **link partner advertises
+    only 10/100** — the switch port is 100 Mb/s-capable only, not a cable fault (a bad cable
+    would still show the partner offering 1000). `ethtool -a eth0`: pause autonegotiated,
+    RX and TX on. `ethtool -S eth0`: **`rx_pause` = 11,659** since boot — the switch has been
+    sending PAUSE frames, telling the Pi to stop transmitting. That is consistent with the
+    TX-queue watchdog stalls being PAUSE-induced, but the counter is cumulative, so how many
+    arrived during the benchmark isn't known; sampling `rx_pause` during a run would confirm.
+  - **Decision 2026-09-15 (user): the switch stays for now**, so the 100 Mb/s link and
+    the stall behaviour above are the standing state. Keep load tests at c ≤ 6. If the
+    link speed ever changes, re-run the benchmark rather than assuming the stalls went away.
 - **Thermal margin is already thin without any load test.** At 100 days' uptime,
   `vcgencmd get_throttled` = `0xe0000`: ARM frequency capping, throttling, and the soft
   temperature limit have each *occurred* since boot (under-voltage has not); none active

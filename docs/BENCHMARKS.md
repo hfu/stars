@@ -151,6 +151,12 @@ Latency before saturation (c=1–2) was p50 3–16 ms. Once the link was full, p
    with `flow control rx/tx`, so a congested 100 Mb/s switch sending PAUSE frames could
    hold the NIC's queue past the watchdog; confirming it needs `ethtool` pause statistics,
    and `ethtool` isn't installed.
+   *Update, same day:* `ethtool` is installed after all (`/usr/sbin/ethtool`, just not on
+   the SSH `PATH`). It shows the switch advertising only 10/100 (so the 100 Mb/s link is
+   the switch port's limit, not the cable) and **`rx_pause` = 11,659** PAUSE frames
+   received since boot. That makes the PAUSE mechanism the leading explanation, though
+   the counter is cumulative; sampling `rx_pause` during the next run would tie it to the
+   stalls directly.
 
    **Practical consequences:** keep future load tests at or below ~c=6 at saturation
    unless deliberately probing this; treat many simultaneous clients saturating the link
@@ -176,6 +182,11 @@ recorded in that window.
 none at c=6) and every plateau above were measured at 100 Mb/s; at gigabit the pressure on
 the driver takes a different shape, so "fixed the switch, so the stalls are gone" is
 not a safe reading — measure again.
+
+**Decision (2026-09-15, user):** the switch stays as it is for now, so stars keeps its
+100 Mb/s link. Operating consequence: run future load tests at c ≤ 6, and treat the TX
+stalls in finding 8 as a standing property of the host rather than something about to be
+fixed.
 
 **Next:** check the switch the Pi and `slate.local` share — `slate.local`'s NIC supports
 1000BASE-T yet also autoselects 100BASE-TX, so the shared switch (not the Pi) is the
