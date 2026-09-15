@@ -1,0 +1,22 @@
+diff --git a/martin-core/src/tiles/pmtiles/source.rs b/martin-core/src/tiles/pmtiles/source.rs
+index a20c874..99dfe6d 100644
+--- a/martin-core/src/tiles/pmtiles/source.rs
++++ b/martin-core/src/tiles/pmtiles/source.rs
+@@ -36,7 +36,7 @@ pub struct PmtilesSource {
+     #[dbg(skip)]
+     pmtiles: Arc<AsyncPmTilesReader<PmtBackend, PmtCacheInstance>>,
+     #[dbg(skip)]
+-    tilejson: TileJSON,
++    tilejson: Arc<TileJSON>,
+     #[dbg(skip)]
+     tile_info: TileInfo,
+     #[dbg(skip)]
+@@ -160,7 +160,7 @@ impl PmtilesSource {
+         Ok(Self {
+             id,
+             pmtiles: Arc::new(reader),
+-            tilejson,
++            tilejson: Arc::new(tilejson),
+             tile_info: format,
+             cache_zoom,
+             location,

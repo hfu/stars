@@ -50,3 +50,18 @@ cost grows with metadata size, not tile size.
 
 vbm 73,533 B · openstreetmap_jp_planet 18,508 · bvmap 15,153 · vlcm 11,953 ·
 pmtiles_ksj_n03_hkd 5,001 · everything else ≤ 2.7 KB.
+
+## Reproduced on upstream main, and a candidate fix (2026-09-16)
+
+Martin `main` at d9ab38a (reports 1.16.1), built locally on an Apple M1 with Rust 1.98.1
+(`--no-default-features --features pmtiles,metrics`). Same probe method on loopback.
+
+- **main:** the cost is still there and scales with TileJSON size. Synthetic metadata on
+  upstream's `tests/fixtures/pmtiles/png.pmtiles`: 0.3 / 9.1 / 26.6 / 87.3 KB TileJSON
+  → 0.037 / 0.12 / 0.28 / 0.83 ms CPU per request. vbm full vs minimal: 0.40 vs 0.035 ms.
+- **`tilejson: Arc<TileJSON>` in `PmtilesSource`** (`arc-tilejson.patch`, 2 lines):
+  ~0.03 ms per request regardless of metadata size (87 KB synthetic: 0.83 → 0.033 ms;
+  vbm full: 0.40 → 0.030 ms). Interleaved main/patched runs: `m1-main-vs-arc.txt`.
+  `/catalog`, TileJSON and 50 tile responses byte-identical to main;
+  `cargo test -p martin-core --no-default-features --features pmtiles` passes.
+- Draft upstream issue (not posted): `upstream-issue-draft.md`.

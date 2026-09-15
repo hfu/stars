@@ -1,0 +1,16 @@
+main     r1 fx0            tilejson=   304B n=3000 non200=0 wall=0.34s rps=8744 cpu=0.11s => 0.037 ms/req
+main     r1 fx100          tilejson= 87293B n=3000 non200=0 wall=2.94s rps=1020 cpu=2.50s => 0.833 ms/req
+main     r1 vbm-full       tilejson= 73538B n=3000 non200=0 wall=1.64s rps=1833 cpu=1.22s => 0.407 ms/req
+main     r1 vbm-minimal    tilejson=  1048B n=3000 non200=0 wall=0.43s rps=6985 cpu=0.12s => 0.040 ms/req
+arc      r1 fx0            tilejson=   304B n=3000 non200=0 wall=0.34s rps=8698 cpu=0.10s => 0.033 ms/req
+arc      r1 fx100          tilejson= 87293B n=3000 non200=0 wall=0.35s rps=8658 cpu=0.10s => 0.033 ms/req
+arc      r1 vbm-full       tilejson= 73538B n=3000 non200=0 wall=0.30s rps=10100 cpu=0.09s => 0.030 ms/req
+arc      r1 vbm-minimal    tilejson=  1048B n=3000 non200=0 wall=0.30s rps=10010 cpu=0.09s => 0.030 ms/req
+main     r1 fx0            tilejson=   304B n=3000 non200=0 wall=0.35s rps=8492 cpu=0.11s => 0.037 ms/req
+main     r1 fx100          tilejson= 87293B n=3000 non200=0 wall=2.95s rps=1016 cpu=2.51s => 0.837 ms/req
+main     r1 vbm-full       tilejson= 73538B n=3000 non200=0 wall=1.56s rps=1921 cpu=1.18s => 0.393 ms/req
+main     r1 vbm-minimal    tilejson=  1048B n=3000 non200=0 wall=0.32s rps=9413 cpu=0.10s => 0.033 ms/req
+arc      r1 fx0            tilejson=   304B n=3000 non200=0 wall=0.35s rps=8656 cpu=0.10s => 0.033 ms/req
+arc      r1 fx100          tilejson= 87293B n=3000 non200=0 wall=0.34s rps=8715 cpu=0.10s => 0.033 ms/req
+arc      r1 vbm-full       tilejson= 73538B n=3000 non200=0 wall=0.30s rps=10087 cpu=0.09s => 0.030 ms/req
+arc      r1 vbm-minimal    tilejson=  1048B n=3000 non200=0 wall=0.30s rps=10075 cpu=0.09s => 0.030 ms/req
