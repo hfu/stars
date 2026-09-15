@@ -25,7 +25,11 @@ disk_stats() { awk -v d="$DISK" '$3==d{print $6*512, $10*512, $13}' /proc/diskst
 svc_pid()    { systemctl $SCOPE show -p MainPID --value "$UNIT" 2>/dev/null || echo 0; }
 
 # Units are spelled out in every column name; all rates are bytes per second.
-echo "ts_utc,uptime_s,load1,cpu_util_pct,cpu_freq_khz,temp_c,mem_available_kb,swap_used_kb,net_rx_bytes_s,net_tx_bytes_s,disk_read_bytes_s,disk_write_bytes_s,disk_busy_pct,svc_rss_kb,svc_threads,svc_fds,throttled_hex" > "$OUT"
+# net_tx_errors (cumulative, from /sys/class/net/<IF>/statistics) was appended after
+# Phase 1: the Pi's Ethernet driver logged 103 transmit-queue watchdog timeouts under
+# high-concurrency load while CPU, disk and temperature all looked fine, so nothing in
+# the original columns showed it. Kept as a trailing column so older CSVs still parse.
+echo "ts_utc,uptime_s,load1,cpu_util_pct,cpu_freq_khz,temp_c,mem_available_kb,swap_used_kb,net_rx_bytes_s,net_tx_bytes_s,disk_read_bytes_s,disk_write_bytes_s,disk_busy_pct,svc_rss_kb,svc_threads,svc_fds,throttled_hex,net_tx_errors" > "$OUT"
 
 read -r c_tot0 c_idle0 < <(cpu_totals)
 read -r rx0 tx0 < <(net_bytes)
@@ -64,12 +68,13 @@ while sleep "$INTERVAL"; do
       -v swt="$(awk '/^SwapTotal:/{print $2}' /proc/meminfo)" \
       -v swf="$(awk '/^SwapFree:/{print $2}' /proc/meminfo)" \
       -v rss="$rss" -v thr="$thr" -v fds="$fds" -v th="$thr_hex" \
+      -v txerr="$(cat "/sys/class/net/$NET_IF/statistics/tx_errors" 2>/dev/null)" \
       'BEGIN{
          dtot=ct1-ct0; util=(dtot>0)?100*(1-(ci1-ci0)/dtot):0
-         printf "%s,%d,%s,%.1f,%s,%.1f,%s,%d,%.0f,%.0f,%.0f,%.0f,%.1f,%s,%s,%s,%s\n",
+         printf "%s,%d,%s,%.1f,%s,%.1f,%s,%d,%.0f,%.0f,%.0f,%.0f,%.1f,%s,%s,%s,%s,%s\n",
            ts, up, load, util, freq, temp/1000, mema, swt-swf,
            (rx1-rx0)/dt, (tx1-tx0)/dt, (dr1-dr0)/dt, (dw1-dw0)/dt,
-           100*(di1-di0)/(dt*1000), rss, thr, fds, th
+           100*(di1-di0)/(dt*1000), rss, thr, fds, th, txerr
        }' >> "$OUT"
 
   c_tot0=$c_tot1; c_idle0=$c_idle1; rx0=$rx1; tx0=$tx1; dr0=$dr1; dw0=$dw1; dio0=$dio1; t0=$t1
