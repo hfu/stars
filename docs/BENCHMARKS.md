@@ -44,12 +44,16 @@ headroom in CPU, disk and temperature.
 
 > **Correction, same day (found reading the kernel log after the run):** "the Pi did
 > not give out" holds for the Pi's *compute* — CPU, disk, temperature — but **not for
-> its network interface.** During the heaviest test (D at c=16 and c=32, 08:51:38–08:52:30
-> JST) the Ethernet driver logged **103 `bcmgenet … eth0: NETDEV WATCHDOG: transmit queue
-> timed out` events**, each a transmit stall of 2.0–6.0 s. It had never happened before in
-> 100+ days of uptime (all 103 are from that one minute), and the interface's `tx_errors`
-> counter — 103 — accounts for exactly those events. The link stayed up and recovered
-> without intervention; no further events after 08:52:30. See finding 8.
+> its network interface.** The Ethernet driver logged **103 `bcmgenet … eth0: NETDEV
+> WATCHDOG: transmit queue timed out` events** — transmit stalls of 2.0–9.9 s — spread
+> across **every sustained test (A, B, C, D), and only in their high-concurrency steps**
+> (c=16/32; c=8 and up for C). None had occurred in the preceding 100+ days of uptime, and
+> the interface's `tx_errors` counter — 103 — accounts for exactly these events. The link
+> stayed up and recovered without intervention; none since the run ended. See finding 8.
+>
+> *(A first version of this correction said all 103 happened in one minute during D. That
+> was read off `journalctl … | tail -20` — the last twenty lines — and generalised to the
+> whole run. Mapping all 103 timestamps onto the test steps showed otherwise.)*
 
 Environment: Pi 4 Model B Rev 1.5, 8 GB, kernel 6.12.75+rpt-rpi-v8, Martin 1.14.0,
 USB SSD (WD Elements SE), eth0 **100 Mb/s**; generator `slate.local` (Apple M4, wired
@@ -90,8 +94,9 @@ Latency before saturation (c=1–2) was p50 3–16 ms. Once the link was full, p
    out of CPU somewhere above 100 Mb/s. Not measured; an inference to test if the link is
    upgraded.
 4. **Overload degrades raster throughput.** B fell from 814 rps to 596 rps (8.4 MB/s) at
-   c=32 with the Pi at 11% CPU — not a Pi limit. Likely TCP congestion or drops on the
-   saturated link/switch; unconfirmed, because TCP retransmit counters weren't sampled.
+   c=32 with the Pi at 11% CPU — not a CPU limit. First written up here as "likely TCP
+   congestion"; the kernel log shows B's c=32 step coincided with 14 NIC transmit-queue
+   stalls of up to 6.0 s (finding 8), which account for the lost throughput.
 5. **Thermal:** 55.5 → 69.6 °C over ~20 minutes of load, highest during the CPU-heavy D;
    `get_throttled` showed no active throttling in any 2 s sample (the sticky
    "has occurred" bits were already set before the run, so only the live bits are
@@ -105,20 +110,34 @@ Latency before saturation (c=1–2) was p50 3–16 ms. Once the link was full, p
    5–120 ms at saturation. Almost all of the client-side latency was queueing on the
    link, not work inside Martin.
 
-8. **At full saturation the Pi's Ethernet driver stalls.** 103 transmit-queue watchdog
-   timeouts (2.0–6.0 s each) occurred during D at c=16/32 and nowhere else in the run or
-   in the preceding 100+ days. This is a failure mode, not just a throughput ceiling: a
-   multi-second TX stall freezes *everything* leaving the host, including the Cloudflare
-   tunnel that carries both public traffic and SSH management. The 18–30 s worst-case
-   latencies in D line up with it. Why only D, which was the last and most CPU-heavy
-   test, is not established. One plausible mechanism: the link negotiates with
-   `flow control rx/tx`, so a congested 100 Mb/s switch sending PAUSE frames could hold
-   the NIC's queue past the watchdog. That can't be confirmed without `ethtool` pause
-   statistics, and `ethtool` isn't installed. The 30 s outliers in A–C are *not*
-   explained by it — no watchdog events were logged during those tests.
-   **Practical consequence:** keep any future load test below full saturation, or accept
-   that management access can freeze for seconds; and treat sustained link saturation
-   from real traffic as a risk to the host's availability, not merely to speed.
+8. **With the link full *and* many concurrent flows, the Pi's Ethernet driver stalls.**
+   All 103 transmit-queue watchdog timeouts, mapped onto the test steps
+   ([`kernel-eth0.log`](../benchmarks/20260914T2330Z-phase1/kernel-eth0.log)):
+
+   | test | c=8 | c=16 | c=32 | longest stall |
+   |---|---:|---:|---:|---:|
+   | A `vbm` | 0 | 1 | 17 | 9.9 s |
+   | B `freetown` | 0 | 1 | 14 | 6.0 s |
+   | C `kitaphoto17` | 11 | 15 | 18 | 5.9 s |
+   | D `vbm` no-AE | 0 | 10 | 16 | 6.0 s |
+
+   None at c ≤ 4 in any test, and **none in E or F (c=6)** — even though C at c=4,
+   E and F all ran the link just as full (11.6–11.7 MB/s). So saturation alone doesn't
+   trigger it; saturation with many concurrent connections does. These stalls line up
+   with the worst latencies in the run (multi-second to 30 s maxima at c ≥ 16) and
+   with B's throughput collapse (finding 4).
+
+   This is a failure mode, not just a ceiling: a multi-second TX stall freezes
+   *everything* leaving the host, including the Cloudflare tunnel that carries both
+   public traffic and SSH management. Cause not established. One candidate: the link runs
+   with `flow control rx/tx`, so a congested 100 Mb/s switch sending PAUSE frames could
+   hold the NIC's queue past the watchdog; confirming it needs `ethtool` pause statistics,
+   and `ethtool` isn't installed.
+
+   **Practical consequences:** keep future load tests at or below ~c=6 at saturation
+   unless deliberately probing this; treat many simultaneous clients saturating the link
+   as a risk to the host's availability, not merely to speed; and a consumer fetching at
+   6 in parallel (as `tokachi20260911` does) did not trigger it.
 
 **Side effect on the dashboard:** the run's requests are counted by `/_/metrics` like any
 others, so the monitoring history shows a spike of up to 13,549 req/min on 2026-09-15
