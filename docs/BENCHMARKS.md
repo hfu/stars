@@ -111,6 +111,17 @@ Latency before saturation (c=1–2) was p50 3–16 ms. Once the link was full, p
    the likeliest *next* limit: on a gigabit link, vector-tile serving would probably run
    out of CPU somewhere above 100 Mb/s. Not measured; an inference to test if the link is
    upgraded.
+   *Update, same day — cause found:* it isn't the tiles at all, it's the **size of the
+   source's TileJSON metadata**. Martin deep-copies the source (including its whole
+   TileJSON) at least twice on every tile request, and vbm's metadata is 73.5 KB, almost
+   all `tilestats`. With identical tile bytes, stripping `tilestats` took vbm from
+   4.0–4.9 ms to 0.9–1.5 ms of Martin CPU per request, and stripping `vector_layers` as
+   well to 0.4–0.8 ms (vlcm: 0.7–1.3 → 0.2–0.5 ms). Gzip pass-through, declared format,
+   file size and the tile cache were each ruled out by experiment. Details, numbers and
+   the upstream code path: `benchmarks/20260915-tilejson-clone/results.md`; reproduce
+   with `monitoring/bench/tilejson-probe.sh`. So the "vector tiles hit CPU first" inference
+   above holds only for sources with large metadata — today vbm, and to a lesser degree
+   the remote openstreetmap_jp_planet (18.5 KB), bvmap (15.2 KB) and vlcm (12.0 KB).
 4. **Overload degrades raster throughput.** B fell from 814 rps to 596 rps (8.4 MB/s) at
    c=32 with the Pi at 11% CPU — not a CPU limit. First written up here as "likely TCP
    congestion"; the kernel log shows B's c=32 step coincided with 14 NIC transmit-queue
@@ -195,3 +206,7 @@ existing columns and install `ethtool` (needs sudo) for pause-frame counters, to
 finding 8; add TCP retransmit counters to sampling (to confirm finding 4); Phase 2
 (through Cloudflare, low rate) to find the uplink limit; Phase 3 soak for thermal
 behaviour over hours; profile finding 3 before any link upgrade.
+*Update, 2026-09-15 evening:* `net_rx_pause`/`net_tx_pause` are now sampled
+(`host-sampler.sh`), and the analyzer prints per-step `tx_errors` and PAUSE deltas.
+Finding 3 is explained (TileJSON cloning); what's left there is a decision — report it
+upstream, and/or trim `tilestats` from vbm's metadata — not more profiling.

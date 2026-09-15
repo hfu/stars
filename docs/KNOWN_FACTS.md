@@ -297,6 +297,15 @@ a change to that ongoing convention.
     `~/.local/state/stars-monitoring/` (same filesystem as `/home/stars/data`, so the
     final `mv` is still an atomic rename) and only the finished `.json` lands in the
     watched directory. Baseline before the fix: 38 such warnings in the preceding 24 h.
+- **Martin's per-tile-request CPU scales with the source's TileJSON size, not the tile
+  (found 2026-09-15):** Martin 1.14.0 deep-copies a source, TileJSON included, at least
+  twice per tile request (still true on upstream main at 1.16.1). vbm's 73.5 KB of
+  metadata (mostly `tilestats`) costs ~4–5 ms of CPU per tile even on tile-cache hits,
+  vs ~0.4–1 ms for sources with small metadata; stripping `tilestats` from a test copy
+  cut it ~4×. Not a limit today (the 100 Mb/s link saturates first, at ~56% CPU), but it
+  is the first CPU limit for vbm if the link gets faster. A large `tilestats` block in a
+  newly contributed archive is a serving cost, not just file size. See
+  `docs/BENCHMARKS.md` finding 3.
 - **Prometheus metrics endpoint, confirmed live in production (2026-09-06):** `/_/metrics`
   (not `/metrics` — that 404s) returns HTTP 200 with real counters
   (`curl https://stars.optgeo.org/_/metrics`), even though this is gated behind a
