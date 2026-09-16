@@ -1,0 +1,19 @@
+run_id: 20260916T1920Z-phase2
+repo_commit: 3187b3c4e27c12f5f85a9447782030af6f229331
+started_utc: 2026-09-16T19:20:37Z
+generator: slate.local (Apple M4 Python 3.9.6 )
+generator_link: media: autoselect (100baseTX <full-duplex,flow-control,energy-efficient-ethernet>)
+lan_base: http://192.168.11.14:3000
+cdn_base: https://stars.optgeo.org
+steps: 1,2,4,6  duration_s: 30  pause_s: 15  max_temp_c: 80
+kernel: 6.12.75+rpt-rpi-v8
+martin: martin 1.14.0
+martin_since: Tue 2026-09-15 06:46:00 JST
+cloudflared: cloudflared version 2026.8.2 (built 2026-08-14-12:17 UTC)
+eth0_speed_mbps: 100
+throttled_at_start: throttled=0xe0000
+temp_at_start: temp=60.8'C
+rx_pause_at_start: 11925
+throttled_at_end: throttled=0xe0000
+temp_at_end: temp=61.3'C
+rx_pause_at_end: 11929

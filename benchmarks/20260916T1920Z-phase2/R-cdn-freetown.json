@@ -1,0 +1,121 @@
+{
+ "meta": {
+  "base": "https://stars.optgeo.org",
+  "tool": "stars loadgen.py",
+  "started_utc": "2026-09-16T19:27:49Z",
+  "target": "freetown-mapterhorn",
+  "zooms": [
+   0,
+   21
+  ],
+  "candidate_tiles": 20000,
+  "tile_list": "freetown.txt",
+  "hot_set": 0,
+  "bounds": [
+   -180.0,
+   -85.0511287,
+   180.0,
+   85.0511287
+  ],
+  "format": null,
+  "accept_encoding": true
+ },
+ "steps": [
+  {
+   "concurrency": 1,
+   "elapsed_s": 30.49,
+   "requests": 588,
+   "rps": 19.3,
+   "mb_per_s": 0.28,
+   "tile_bytes_mean": 14312,
+   "tile_bytes_p50": 582,
+   "latency_ms": {
+    "50": 50.3,
+    "90": 56.7,
+    "95": 59.1,
+    "99": 68.7,
+    "max": 133.4
+   },
+   "status": {
+    "200": 588
+   },
+   "cf_cache_status": {
+    "MISS": 588
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  },
+  {
+   "concurrency": 2,
+   "elapsed_s": 30.5,
+   "requests": 1179,
+   "rps": 38.7,
+   "mb_per_s": 0.57,
+   "tile_bytes_mean": 14841,
+   "tile_bytes_p50": 582,
+   "latency_ms": {
+    "50": 50.8,
+    "90": 57.1,
+    "95": 59.6,
+    "99": 63.9,
+    "max": 148.8
+   },
+   "status": {
+    "200": 1179
+   },
+   "cf_cache_status": {
+    "MISS": 1179
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  },
+  {
+   "concurrency": 4,
+   "elapsed_s": 30.46,
+   "requests": 2417,
+   "rps": 79.3,
+   "mb_per_s": 1.11,
+   "tile_bytes_mean": 13970,
+   "tile_bytes_p50": 582,
+   "latency_ms": {
+    "50": 49.5,
+    "90": 56.5,
+    "95": 59.2,
+    "99": 64.9,
+    "max": 153.8
+   },
+   "status": {
+    "200": 2417
+   },
+   "cf_cache_status": {
+    "MISS": 2417
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  },
+  {
+   "concurrency": 6,
+   "elapsed_s": 30.51,
+   "requests": 3494,
+   "rps": 114.5,
+   "mb_per_s": 1.61,
+   "tile_bytes_mean": 14097,
+   "tile_bytes_p50": 582,
+   "latency_ms": {
+    "50": 51.3,
+    "90": 58.4,
+    "95": 60.8,
+    "99": 67.9,
+    "max": 160.9
+   },
+   "status": {
+    "200": 3494
+   },
+   "cf_cache_status": {
+    "MISS": 3494
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  }
+ ]
+}

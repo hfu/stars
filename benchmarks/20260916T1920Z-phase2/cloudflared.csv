@@ -1,0 +1,1 @@
+ts_utc,uptime_s,load1,cpu_util_pct,cpu_freq_khz,temp_c,mem_available_kb,swap_used_kb,net_rx_bytes_s,net_tx_bytes_s,disk_read_bytes_s,disk_write_bytes_s,disk_busy_pct,svc_rss_kb,svc_threads,svc_fds,throttled_hex,net_tx_errors,net_rx_pause,net_tx_pause

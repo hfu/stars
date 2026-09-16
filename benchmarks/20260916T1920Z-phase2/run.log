@@ -1,0 +1,28 @@
+[19:20:37Z] run 20260916T1920Z-phase2 starting
+[19:20:43Z] samplers started on Pi; baseline 60s
+[19:21:43Z] test P-lan-kitaphoto17 (http://192.168.11.14:3000): --source kitaphoto17 --tile-list kitaphoto17.txt
+c=  1  rps=    88.4  p50=11.3  p95=15.1  p99=16.4  max=872.4ms  err=0.0  7.18MB/s  tile mean 81196B  status={'200': 2682}
+c=  2  rps=   135.6  p50=11.3  p95=34.1  p99=41.6  max=62.9ms  err=0.0  11.08MB/s  tile mean 81687B  status={'200': 4123}
+c=  4  rps=   142.7  p50=12.7  p95=131.7  p99=253.9  max=626.1ms  err=0.0  11.68MB/s  tile mean 81821B  status={'200': 4332}
+c=  6  rps=   143.4  p50=16.1  p95=155.9  p99=596.9  max=3509.9ms  err=0.0  11.72MB/s  tile mean 81695B  status={'200': 4366}
+wrote results/P-lan-kitaphoto17.json
+[19:24:46Z] test Q-cdn-kitaphoto17 (https://stars.optgeo.org): --source kitaphoto17 --tile-list kitaphoto17.txt --cache-bust
+c=  1  rps=    15.4  p50=64.7  p95=73.2  p99=78.0  max=136.7ms  err=0.0  1.25MB/s  tile mean 81071B  status={'200': 470}
+c=  2  rps=    32.0  p50=61.2  p95=73.1  p99=84.2  max=229.7ms  err=0.0  2.62MB/s  tile mean 81716B  status={'200': 976}
+c=  4  rps=    64.7  p50=60.3  p95=73.9  p99=83.1  max=233.6ms  err=0.0  5.26MB/s  tile mean 81426B  status={'200': 1971}
+c=  6  rps=    93.4  p50=62.9  p95=76.6  p99=85.4  max=273.2ms  err=0.0  7.68MB/s  tile mean 82215B  status={'200': 2847}
+wrote results/Q-cdn-kitaphoto17.json
+[19:27:49Z] test R-cdn-freetown (https://stars.optgeo.org): --source freetown-mapterhorn --tile-list freetown.txt --cache-bust
+c=  1  rps=    19.3  p50=50.3  p95=59.1  p99=68.7  max=133.4ms  err=0.0  0.28MB/s  tile mean 14312B  status={'200': 588}
+c=  2  rps=    38.7  p50=50.8  p95=59.6  p99=63.9  max=148.8ms  err=0.0  0.57MB/s  tile mean 14841B  status={'200': 1179}
+c=  4  rps=    79.3  p50=49.5  p95=59.2  p99=64.9  max=153.8ms  err=0.0  1.11MB/s  tile mean 13970B  status={'200': 2417}
+c=  6  rps=   114.5  p50=51.3  p95=60.8  p99=67.9  max=160.9ms  err=0.0  1.61MB/s  tile mean 14097B  status={'200': 3494}
+wrote results/R-cdn-freetown.json
+[19:30:51Z] test S-cdn-cached (https://stars.optgeo.org): --source freetown-mapterhorn --tile-list freetown.txt --hot-set 200
+c=  1  rps=    32.4  p50=25.4  p95=52.5  p99=58.8  max=121.0ms  err=0.0  0.52MB/s  tile mean 15971B  status={'200': 984}
+c=  2  rps=    74.5  p50=26.0  p95=32.2  p99=36.3  max=125.7ms  err=0.0  1.17MB/s  tile mean 15715B  status={'200': 2269}
+c=  4  rps=   144.9  p50=26.5  p95=34.0  p99=39.0  max=153.3ms  err=0.0  2.26MB/s  tile mean 15601B  status={'200': 4411}
+c=  6  rps=   214.1  p50=27.4  p95=35.1  p99=40.1  max=134.7ms  err=0.0  3.29MB/s  tile mean 15367B  status={'200': 6533}
+wrote results/S-cdn-cached.json
+[19:33:54Z] run 20260916T1920Z-phase2 finished
+[19:33:59Z] collected results into benchmarks/20260916T1920Z-phase2

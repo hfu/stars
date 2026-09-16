@@ -1,0 +1,109 @@
+{
+ "meta": {
+  "base": "http://192.168.11.14:3000",
+  "tool": "stars loadgen.py",
+  "started_utc": "2026-09-16T19:21:44Z",
+  "target": "kitaphoto17",
+  "zooms": [
+   2,
+   17
+  ],
+  "candidate_tiles": 50000,
+  "tile_list": "kitaphoto17.txt",
+  "hot_set": 0,
+  "bounds": [
+   137.8125,
+   40.979898,
+   151.875,
+   47.040182
+  ],
+  "format": "jpg",
+  "accept_encoding": true
+ },
+ "steps": [
+  {
+   "concurrency": 1,
+   "elapsed_s": 30.34,
+   "requests": 2682,
+   "rps": 88.4,
+   "mb_per_s": 7.18,
+   "tile_bytes_mean": 81196,
+   "tile_bytes_p50": 84168,
+   "latency_ms": {
+    "50": 11.3,
+    "90": 13.8,
+    "95": 15.1,
+    "99": 16.4,
+    "max": 872.4
+   },
+   "status": {
+    "200": 2682
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  },
+  {
+   "concurrency": 2,
+   "elapsed_s": 30.4,
+   "requests": 4123,
+   "rps": 135.6,
+   "mb_per_s": 11.08,
+   "tile_bytes_mean": 81687,
+   "tile_bytes_p50": 84548,
+   "latency_ms": {
+    "50": 11.3,
+    "90": 29.0,
+    "95": 34.1,
+    "99": 41.6,
+    "max": 62.9
+   },
+   "status": {
+    "200": 4123
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  },
+  {
+   "concurrency": 4,
+   "elapsed_s": 30.35,
+   "requests": 4332,
+   "rps": 142.7,
+   "mb_per_s": 11.68,
+   "tile_bytes_mean": 81821,
+   "tile_bytes_p50": 84378,
+   "latency_ms": {
+    "50": 12.7,
+    "90": 35.2,
+    "95": 131.7,
+    "99": 253.9,
+    "max": 626.1
+   },
+   "status": {
+    "200": 4332
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  },
+  {
+   "concurrency": 6,
+   "elapsed_s": 30.44,
+   "requests": 4366,
+   "rps": 143.4,
+   "mb_per_s": 11.72,
+   "tile_bytes_mean": 81695,
+   "tile_bytes_p50": 84714,
+   "latency_ms": {
+    "50": 16.1,
+    "90": 26.4,
+    "95": 155.9,
+    "99": 596.9,
+    "max": 3509.9
+   },
+   "status": {
+    "200": 4366
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  }
+ ]
+}

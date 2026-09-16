@@ -62,8 +62,12 @@ ssh "$PI" "curl -s http://127.0.0.1:3000/_/metrics" > "$OUT/metrics-before.txt"
 scp -q monitoring/bench/host-sampler.sh "$PI":/tmp/bench/host-sampler.sh
 # Two samplers: Martin's own process, and cloudflared, which carries this route
 # and is the one new moving part compared with Phase 1.
-ssh "$PI" "setsid nohup bash /tmp/bench/host-sampler.sh $PI_CSV 2 martin --user >/dev/null 2>&1 < /dev/null &
-           setsid nohup bash /tmp/bench/host-sampler.sh $PI_CSV_CF 2 cloudflared >/dev/null 2>&1 < /dev/null &"
+# One SSH per sampler: starting both from a single command left the second one
+# dead on the 2026-09-16 run (cloudflared.csv had only its header).
+ssh "$PI" "setsid nohup bash /tmp/bench/host-sampler.sh $PI_CSV 2 martin --user >/dev/null 2>&1 < /dev/null &"
+ssh "$PI" "setsid nohup bash /tmp/bench/host-sampler.sh $PI_CSV_CF 2 cloudflared >/dev/null 2>&1 < /dev/null &"
+sleep 5
+ssh "$PI" "wc -l < $PI_CSV_CF" | awk '{ if ($1 < 2) print "WARNING: cloudflared sampler produced no rows" }' 
 ssh "$GEN" "rm -f $STOP"
 log "samplers started on Pi; baseline ${BASELINE_S}s"
 
