@@ -1,0 +1,23 @@
+[19:56:30Z] run 20260916T1956Z-phase3 starting: c=6, 9 x 600s per source
+[19:56:35Z] sampler started (every 5s); baseline 120s
+[19:58:35Z] soak T-kitaphoto17: --source kitaphoto17 --tile-list kitaphoto17.txt
+c=  6  rps=   143.2  p50=13.8  p95=114.4  p99=138.2  max=11113.3ms  err=0.0  11.72MB/s  tile mean 81810B  status={'200': 85985}
+c=  6  rps=   143.6  p50=36.5  p95=54.8  p99=62.9  max=20960.7ms  err=0.0  11.72MB/s  tile mean 81630B  status={'200': 86163}
+c=  6  rps=   143.6  p50=42.6  p95=61.6  p99=70.3  max=10567.1ms  err=0.0  11.72MB/s  tile mean 81588B  status={'200': 86233}
+c=  6  rps=   143.7  p50=40.2  p95=62.7  p99=100.2  max=9340.9ms  err=0.0  11.73MB/s  tile mean 81616B  status={'200': 86221}
+c=  6  rps=   143.6  p50=36.5  p95=56.5  p99=66.5  max=15068.7ms  err=0.0  11.73MB/s  tile mean 81647B  status={'200': 86180}
+c=  6  rps=   143.7  p50=35.0  p95=51.2  p99=58.8  max=27387.3ms  err=0.0  11.72MB/s  tile mean 81605B  status={'200': 86256}
+c=  6  rps=   133.9  p50=40.3  p95=62.9  p99=215.8  max=9842.7ms  err=0.0  10.93MB/s  tile mean 81584B  status={'200': 80439}
+c=  6  rps=   133.5  p50=34.9  p95=54.0  p99=104.2  max=22109.5ms  err=0.0  10.91MB/s  tile mean 81679B  status={'200': 80133}
+c=  6  rps=   142.0  p50=17.6  p95=170.9  p99=436.4  max=13966.9ms  err=0.0  11.59MB/s  tile mean 81673B  status={'200': 85245}
+wrote results/T-kitaphoto17.json
+[21:29:19Z] soak U-mapterhorn-japan-bridge: --source mapterhorn-japan-bridge --tile-list mjb.txt
+c=  6  rps=   149.1  p50=28.9  p95=73.0  p99=90.5  max=13678.3ms  err=0.0  11.72MB/s  tile mean 78593B  status={'200': 89463}
+c=  6  rps=   147.5  p50=13.9  p95=247.3  p99=580.6  max=2861.1ms  err=0.0  11.71MB/s  tile mean 79408B  status={'200': 88544}
+c=  6  rps=   148.9  p50=16.3  p95=159.2  p99=413.6  max=10410.3ms  err=0.0  11.72MB/s  tile mean 78705B  status={'200': 89399}
+c=  6  rps=   149.0  p50=16.0  p95=191.1  p99=501.3  max=11627.8ms  err=0.0  11.72MB/s  tile mean 78628B  status={'200': 89470}
+c=  6  rps=   148.3  p50=15.3  p95=258.4  p99=523.0  max=4412.7ms  err=0.0  11.71MB/s  tile mean 78943B  status={'200': 89038}
+c=  6  rps=   148.7  p50=15.2  p95=221.7  p99=529.0  max=11644.3ms  err=0.0  11.72MB/s  tile mean 78767B  status={'200': 89298}
+c=  6  rps=   149.3  p50=18.7  p95=74.0  p99=333.7  max=15880.8ms  err=0.0  11.72MB/s  tile mean 78494B  status={'200': 89623}
+c=  6  rps=   148.5  p50=15.2  p95=208.4  p99=514.9  max=10667.7ms  err=0.0  11.72MB/s  tile mean 78920B  status={'200': 89124}
+[22:57:20Z] collected results into benchmarks/20260916T1956Z-phase3

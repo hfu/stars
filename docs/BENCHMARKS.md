@@ -181,6 +181,14 @@ Latency before saturation (c=1–2) was p50 3–16 ms. Once the link was full, p
    unless deliberately probing this; treat many simultaneous clients saturating the link
    as a risk to the host's availability, not merely to speed; and a consumer fetching at
    6 in parallel (as `tokachi20260911` does) did not trigger it.
+   **Correction, 2026-09-17 (Phase 3):** the last clause is wrong, and so is the PAUSE
+   explanation above. A three-hour soak at c=6 produced **729 stalls** (`tx_errors`
+   103 → 832). They simply need minutes to appear, and Phase 1's 30-second steps were too
+   short to see them. Sampling `rx_pause` at the same time also broke the PAUSE
+   hypothesis: 76,000 of the run's 80,005 PAUSE frames arrived in one 60-second burst
+   during which **no** stalls occurred, and across 5-minute buckets the correlation is
+   r = −0.03. Keep c ≤ 6 for load tests because it keeps the rate modest — not because it
+   avoids the stalls. See `benchmarks/20260916T1956Z-phase3/summary.md`.
 
 **Side effect on the dashboard:** the run's requests are counted by `/_/metrics` like any
 others, so the monitoring history shows a spike of up to 13,549 req/min on 2026-09-15
@@ -206,6 +214,19 @@ not a safe reading — measure again.
 100 Mb/s link. Operating consequence: run future load tests at c ≤ 6, and treat the TX
 stalls in finding 8 as a standing property of the host rather than something about to be
 fixed.
+
+## 2026-09-17 — Phase 2 (through Cloudflare) and Phase 3 (3-hour soak)
+
+- **Phase 2** (`benchmarks/20260916T1920Z-phase2/summary.md`): the public route scales
+  linearly to c=6 (7.68 MB/s) with flat ~61 ms latency and no errors, so the uplink
+  ceiling was *not* found — it is at least 61 Mb/s. One connection is limited by round
+  trip, not bandwidth (~1.3 MB/s for 82 KB tiles). The tunnel costs ~5× the LAN latency
+  and ~4× the CPU per request; an edge cache hit halves the wait and keeps the origin out
+  of the path entirely. Hand consumers the Cloudflare number, not the LAN number.
+- **Phase 3** (`benchmarks/20260916T1956Z-phase3/summary.md`): three hours at c=6 held
+  12.29 MB/s with zero errors, temperature plateauing at 66–67 °C and Martin's memory
+  flattening at 732 MB — but produced 729 NIC transmit stalls, which is what retires the
+  "c ≤ 6 avoids them" reading of finding 8 and refutes the PAUSE-frame hypothesis.
 
 **Next:** check the switch the Pi and `slate.local` share — `slate.local`'s NIC supports
 1000BASE-T yet also autoselects 100BASE-TX, so the shared switch (not the Pi) is the

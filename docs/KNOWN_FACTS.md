@@ -297,6 +297,15 @@ a change to that ongoing convention.
     `~/.local/state/stars-monitoring/` (same filesystem as `/home/stars/data`, so the
     final `mv` is still an atomic rename) and only the finished `.json` lands in the
     watched directory. Baseline before the fix: 38 such warnings in the preceding 24 h.
+- **The Pi's NIC stalls under sustained saturation, at any concurrency (2026-09-17):** a
+  three-hour soak at concurrency 6 over the LAN produced 729 `NETDEV WATCHDOG: transmit
+  queue timed out` events (`tx_errors` 103 → 832) while CPU (~7%), temperature (66–67 °C),
+  memory and disk all stayed calm and no request failed. Individual tiles took 2.8–27 s
+  while medians stayed at 13–43 ms. Flow-control PAUSE frames are **not** the cause
+  (r = −0.03 across 5-minute buckets; the largest PAUSE burst coincided with zero stalls).
+  Practical effect: when the 100 Mb/s link is full, a few requests per minute stall for
+  seconds. Consumers see slow tiles, not errors. See `docs/BENCHMARKS.md` finding 8 and
+  its 2026-09-17 correction.
 - **Martin's per-tile-request CPU scales with the source's TileJSON size, not the tile
   (found 2026-09-15):** Martin 1.14.0 deep-copies a source, TileJSON included, at least
   twice per tile request (still true on upstream main at 1.16.1). vbm's 73.5 KB of

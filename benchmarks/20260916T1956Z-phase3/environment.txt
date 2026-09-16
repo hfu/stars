@@ -1,0 +1,25 @@
+run_id: 20260916T1956Z-phase3
+repo_commit: db069d0a3c4fa9db3a6fce3d45cc7f3c7aff0919
+started_utc: 2026-09-16T19:56:30Z
+generator: slate.local (Apple M4 Python 3.9.6 )
+generator_link: media: autoselect (100baseTX <full-duplex,flow-control,energy-efficient-ethernet>)
+generator_note: nodeodm container resident but idle on slate.local (tokachi20260911)
+base: http://192.168.11.14:3000
+concurrency: 6  leg_s: 600  legs_per_source: 9  max_temp_c: 80
+kernel: 6.12.75+rpt-rpi-v8
+martin: martin 1.14.0
+martin_since: Tue 2026-09-15 06:46:00 JST
+eth0_speed_mbps: 100
+throttled_at_start: throttled=0xe0000
+temp_at_start: temp=60.3'C
+rx_pause_at_start: 11929
+tx_errors_at_start: 103
+netdev_watchdog_lines_at_start: 103
+disk_at_start: /dev/sda2       1.8T  702G  1.1T  40% /
+throttled_at_end: throttled=0xe0000
+temp_at_end: temp=61.8'C
+rx_pause_at_end: 91934
+tx_errors_at_end: 832
+netdev_watchdog_lines_at_end: 832
+disk_at_end: /dev/sda2       1.8T  702G  1.1T  40% /
+martin_active_since_at_end: Tue 2026-09-15 06:46:00 JST
