@@ -223,10 +223,14 @@ fixed.
   trip, not bandwidth (~1.3 MB/s for 82 KB tiles). The tunnel costs ~5× the LAN latency
   and ~4× the CPU per request; an edge cache hit halves the wait and keeps the origin out
   of the path entirely. Hand consumers the Cloudflare number, not the LAN number.
-- **Phase 3** (`benchmarks/20260916T1956Z-phase3/summary.md`): three hours at c=6 held
+- **Phase 3** (`benchmarks/20260916T1956Z-phase3/summary.md`): 2 h 58 m at c=6 held
   12.29 MB/s with zero errors, temperature plateauing at 66–67 °C and Martin's memory
   flattening at 732 MB — but produced 729 NIC transmit stalls, which is what retires the
   "c ≤ 6 avoids them" reading of finding 8 and refutes the PAUSE-frame hypothesis.
+  The run ended early because the **generator** (`slate.local`, shared) took a hardware
+  watchdog reset at 07:56:38 JST, 6.5 minutes into the final leg — cause unknown, and
+  unmeasurable because only the Pi was being sampled. Sample the generator too from now
+  on, and treat a shared generator's health as part of the blast radius of a long soak.
 
 **Next:** check the switch the Pi and `slate.local` share — `slate.local`'s NIC supports
 1000BASE-T yet also autoselects 100BASE-TX, so the shared switch (not the Pi) is the
