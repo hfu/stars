@@ -66,6 +66,14 @@ Pi-side, per test: CPU% max 10.6 (P), 26.5 (Q), 20.4 (R), 10.0 (S); eth0 TX max 
 - `--hot-set 200` in S means 200 distinct tiles; a real viewer's working set is larger,
   so S is an optimistic view of the cache-hit path, not a forecast of hit rate.
 
+## Operational consequence
+
+**Quote the route the consumer actually takes.** A consumer fetching from
+`stars.optgeo.org` gets the Cloudflare path, not the LAN: a cold 200-tile / 26 MB block
+at c=6 takes ~3.4 s through Cloudflare, not the ~2.3 s that the LAN's 11.6 MB/s implies.
+`tokachi20260911` had the LAN figure in its handover notes and corrected it after this
+run. The estimate to hand out is: tiles × bytes-per-tile ÷ (1.3 MB/s × concurrency).
+
 ## Next
 
 To find the actual uplink ceiling, the same Q test has to be pushed past c=6 (c=8, 12, 16)
