@@ -52,9 +52,22 @@ def remote_sources():
     return ids
 
 
+def connect(u, addr=None):
+    """One HTTP(S) connection to `u`.
+
+    Phase 2 measures through Cloudflare, so https is supported: there the
+    hostname (not a pre-resolved IP) is used, because the TLS handshake needs
+    SNI and Cloudflare's anycast address is resolved per connection anyway.
+    Plain http keeps the Phase 1 behaviour of connecting to a pinned address.
+    """
+    if u.scheme == "https":
+        return http.client.HTTPSConnection(u.hostname, u.port or 443, timeout=30)
+    return http.client.HTTPConnection(addr or u.hostname, u.port or 80, timeout=30)
+
+
 def get_json(base, path):
     u = urlparse(base)
-    c = http.client.HTTPConnection(u.hostname, u.port or 80, timeout=30)
+    c = connect(u)
     c.request("GET", path, headers={"User-Agent": UA})
     r = c.getresponse()
     body = r.read()
@@ -95,6 +108,19 @@ def size_stats(sizes):
     return {"tile_bytes_mean": round(sum(s) / len(s)), "tile_bytes_p50": s[len(s) // 2]}
 
 
+def bust(path, args):
+    """Append a unique query string so a CDN edge can't answer from cache.
+
+    Phase 2 measures the origin's uplink, not Cloudflare's cache, so every
+    request must miss the edge. Martin ignores unknown query parameters for
+    pmtiles sources, so the tile served is the same one.
+    """
+    if not getattr(args, "cache_bust", False):
+        return path
+    sep = "&" if "?" in path else "?"
+    return f"{path}{sep}cb={random.getrandbits(48):012x}"
+
+
 def pct(sorted_vals, p):
     if not sorted_vals:
         return None
@@ -109,8 +135,11 @@ class Run:
         # connection, and `stars.local` goes through mDNS, which added ~1s to
         # each thread's first request in calibration -- enough to pollute p99
         # and max at every concurrency level. The Host header keeps the name.
-        self.addr = socket.gethostbyname(self.base.hostname)
-        self.headers = {"User-Agent": UA, "Host": self.base.netloc}
+        self.addr = None if self.base.scheme == "https" else socket.gethostbyname(self.base.hostname)
+        self.headers = {"User-Agent": UA}
+        if self.base.scheme != "https":
+            # Only meaningful when connecting to a pinned address.
+            self.headers["Host"] = self.base.netloc
         # Browsers always send Accept-Encoding. Without it Martin *decompresses*
         # gzip-stored vector tiles on the fly and returns bodies ~2-2.4x larger
         # (measured on vbm), i.e. a code path real viewers never hit. Off only
@@ -122,6 +151,7 @@ class Run:
         self.lat, self.status, self.bytes = [], Counter(), 0
         self.sizes = []  # body bytes of 200 responses, for per-tile size stats
         self.window = deque(maxlen=200)  # recent (ok: bool) for the error-rate brake
+        self.cdn = Counter()  # cf-cache-status values, when going through a CDN
         self.stop_reason = None
         self.stop = threading.Event()
 
@@ -129,17 +159,18 @@ class Run:
         rng = random.Random(seed)
         conn = None
         while not self.stop.is_set():
-            path = rng.choice(self.paths)
+            path = bust(rng.choice(self.paths), self.args)
             t = time.perf_counter()
             try:
                 if conn is None:
-                    conn = http.client.HTTPConnection(self.addr, self.base.port or 80, timeout=30)
+                    conn = connect(self.base, self.addr)
                 conn.request("GET", path, headers=self.headers)
                 r = conn.getresponse()
                 n = len(r.read())
                 code = r.status
+                cf = r.getheader("cf-cache-status")
             except Exception as e:  # connection reset, timeout, ...
-                code, n = type(e).__name__, 0
+                code, n, cf = type(e).__name__, 0, None
                 try:
                     conn.close()
                 except Exception:
@@ -153,6 +184,8 @@ class Run:
                 self.bytes += n
                 if code == 200:
                     self.sizes.append(n)
+                if cf:
+                    self.cdn[cf] += 1
                 self.window.append(ok)
 
     def guard(self):
@@ -204,6 +237,7 @@ class Run:
             "latency_ms": {p: (round(pct(lat, p), 1) if n else None) for p in (50, 90, 95, 99)}
                           | {"max": round(lat[-1], 1) if n else None},
             "status": {str(k): v for k, v in sorted(self.status.items(), key=lambda kv: str(kv[0]))},
+            **({"cf_cache_status": dict(self.cdn)} if self.cdn else {}),
             "error_rate": round(errors / n, 4) if n else None,
             "stopped_early": self.stop_reason,
         }
@@ -220,8 +254,10 @@ def run_once(base, paths, concurrency, args):
     Use a block nothing has requested recently if the point is a cold fetch.
     """
     u = urlparse(base)
-    addr = socket.gethostbyname(u.hostname)
-    headers = {"User-Agent": UA, "Host": u.netloc}
+    addr = None if u.scheme == "https" else socket.gethostbyname(u.hostname)
+    headers = {"User-Agent": UA}
+    if u.scheme != "https":
+        headers["Host"] = u.netloc
     if not args.no_accept_encoding:
         headers["Accept-Encoding"] = "gzip, deflate, br"
     queue = deque(paths)
@@ -238,8 +274,8 @@ def run_once(base, paths, concurrency, args):
             t = time.perf_counter()
             try:
                 if conn is None:
-                    conn = http.client.HTTPConnection(addr, u.port or 80, timeout=30)
-                conn.request("GET", path, headers=headers)
+                    conn = connect(u, addr)
+                conn.request("GET", bust(path, args), headers=headers)
                 r = conn.getresponse()
                 n, code = len(r.read()), r.status
             except Exception as e:
@@ -298,6 +334,9 @@ def main():
     ap.add_argument("--temp-cmd", help="shell command printing temperature (C or millidegrees)")
     ap.add_argument("--temp-interval", type=float, default=30)
     ap.add_argument("--max-temp-c", type=float, default=80)
+    ap.add_argument("--cache-bust", action="store_true",
+                    help="unique ?cb= per request, so a CDN edge cannot serve from cache "
+                         "(Phase 2: measuring the origin through Cloudflare)")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--out")
     a = ap.parse_args()
