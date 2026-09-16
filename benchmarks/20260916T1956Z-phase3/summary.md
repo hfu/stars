@@ -41,10 +41,27 @@ stalls, it isn't tracking PAUSE frames.
 
 ## Caveats
 
-- The final leg's result JSON was lost: the SSH session to the generator timed out at the
-  end (`Read from remote host slate.local: Operation timed out`, run exit 255). The
-  per-leg lines survive in `run.log`; only `U-mapterhorn-japan-bridge.json` is missing.
-  17 of 18 planned legs ran.
+- **The run did not finish on its own: the generator rebooted.** `slate.local` came back
+  up at 07:56:38 JST (`kern.boottime`), ~6.5 minutes into the 18th leg and ~3.5 minutes
+  before the run would have ended; that is what produced the SSH timeout
+  (`Read from remote host slate.local: Operation timed out`, run exit 255) and lost
+  `U-mapterhorn-japan-bridge.json`. So: **load ran 2 h 58 m, 17 of 18 legs completed**,
+  and the per-leg lines for those 17 survive in `run.log`. Do not read this run as "three
+  hours, completed".
+- **What the reboot was:** a hardware watchdog reset (`ResetCounter-2026-09-17-075650.diag`:
+  `Boot faults: wdog,reset_in_1`, reset count 1, boot failure count 0), with **no kernel
+  panic report** on the machine. Reported by `tokachi20260911`, verified here directly.
+  The Pi side is unaffected and its sampling is complete to 22:57:11Z.
+- **Whether the load caused it is unknown, and this run cannot say.** The generator was
+  doing modest work for an M4 (6 threads, ~148 req/s, ~11.7 MB/s inbound, bodies
+  discarded) but had been doing it for three hours. Nothing in the run recorded the
+  generator's own CPU, memory or thermals — **only the Pi was sampled**, which is the gap
+  this exposed. The nearest other event on that machine is a `JetsamEvent` at
+  2026-09-16 21:09 JST, ~10.75 h earlier and outside this run. Temporal proximity is not
+  causation; the honest statement is that the machine reset under sustained use and we
+  have no instrumentation to say more.
+- **For future runs:** sample the generator the same way the Pi is sampled. `slate.local`
+  is shared, so a reset there costs other projects, not just this one.
 - The two halves differ in archive *and* in position in the run, so "kitaphoto17 stalls
   more than mapterhorn" cannot be separated from "early stalls more than late".
 - Generator and Pi both negotiate 100BASE-TX; this run says nothing about behaviour at
