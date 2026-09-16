@@ -42,6 +42,11 @@ Confirmed limits are also carried into [KNOWN_FACTS.md](KNOWN_FACTS.md) Section 
 - **Send `Accept-Encoding` like a browser.** Without it Martin decompresses gzip-stored
   vector tiles on the fly and returns bodies 2–2.4× larger — a path real viewers never
   take. Test D omits it on purpose, as a CPU-bound variant.
+- **Sample every machine the run uses, not just the one under test.** `host-sampler.sh`
+  on the Pi, `gen-sampler.sh` on the generator (macOS, no sudo: load, free/inactive
+  memory, swap, interface bytes, top process; no temperature, because Apple Silicon needs
+  `powermetrics` with sudo and an empty column beats an invented one). Added after the
+  2026-09-17 soak ended with a watchdog reset on the generator that nothing had measured.
 - **Pi-side sampling every 2 s** with `host-sampler.sh` (`/proc` + `/sys` only; column
   schema shared with the `rpi-geoserver0` project so Pi 4B hardware limits compare
   across OSes).

@@ -34,6 +34,7 @@ OUT="benchmarks/$RUN_ID"
 PI_CSV="/tmp/bench/$RUN_ID-host.csv"
 PI_CSV_CF="/tmp/bench/$RUN_ID-cloudflared.csv"
 STOP="$GEN_DIR/STOP"
+GEN_CSV="$GEN_DIR/$RUN_ID-gen.csv"
 
 mkdir -p "$OUT"
 log() { echo "[$(date -u +%H:%M:%SZ)] $*" | tee -a "$OUT/run.log"; }
@@ -69,6 +70,10 @@ ssh "$PI" "setsid nohup bash /tmp/bench/host-sampler.sh $PI_CSV_CF 2 cloudflared
 sleep 5
 ssh "$PI" "wc -l < $PI_CSV_CF" | awk '{ if ($1 < 2) print "WARNING: cloudflared sampler produced no rows" }' 
 ssh "$GEN" "rm -f $STOP"
+# Sample the generator too. The 2026-09-17 soak ended with a watchdog reset on the
+# generator and nothing recorded about its state; see docs/BENCHMARKS.md.
+scp -q monitoring/bench/gen-sampler.sh "$GEN":"$GEN_DIR/gen-sampler.sh"
+ssh "$GEN" "cd $GEN_DIR && nohup bash gen-sampler.sh $GEN_CSV 5 en0 >/dev/null 2>&1 < /dev/null &"
 log "samplers started on Pi; baseline ${BASELINE_S}s"
 
 (
@@ -94,6 +99,8 @@ cleanup() {
   ssh "$PI" 'echo "throttled_at_end: $(vcgencmd get_throttled)"
              echo "temp_at_end: $(vcgencmd measure_temp)"
              echo "rx_pause_at_end: $(/usr/sbin/ethtool -S eth0 | awk "/rx_pause:/{print \$2}")"' >> "$OUT/environment.txt" || true
+  ssh "$GEN" 'pkill -f "bash gen-sampler.sh"' || true
+  scp -q "$GEN:$GEN_CSV" "$OUT/generator.csv" || true
   log "collected results into $OUT"
 }
 trap cleanup EXIT

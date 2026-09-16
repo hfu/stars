@@ -32,6 +32,7 @@ SAMPLE_S="${SAMPLE_S:-5}"
 OUT="benchmarks/$RUN_ID"
 PI_CSV="/tmp/bench/$RUN_ID-host.csv"
 STOP="$GEN_DIR/STOP"
+GEN_CSV="$GEN_DIR/$RUN_ID-gen.csv"
 
 mkdir -p "$OUT"
 log() { echo "[$(date -u +%H:%M:%SZ)] $*" | tee -a "$OUT/run.log"; }
@@ -63,6 +64,10 @@ ssh "$PI" "curl -s http://127.0.0.1:3000/_/metrics" > "$OUT/metrics-before.txt"
 scp -q monitoring/bench/host-sampler.sh "$PI":/tmp/bench/host-sampler.sh
 ssh "$PI" "setsid nohup bash /tmp/bench/host-sampler.sh $PI_CSV $SAMPLE_S martin --user >/dev/null 2>&1 < /dev/null &"
 ssh "$GEN" "rm -f $STOP"
+# Sample the generator too. The 2026-09-17 soak ended with a watchdog reset on the
+# generator and nothing recorded about its state; see docs/BENCHMARKS.md.
+scp -q monitoring/bench/gen-sampler.sh "$GEN":"$GEN_DIR/gen-sampler.sh"
+ssh "$GEN" "cd $GEN_DIR && nohup bash gen-sampler.sh $GEN_CSV 5 en0 >/dev/null 2>&1 < /dev/null &"
 log "sampler started (every ${SAMPLE_S}s); baseline ${BASELINE_S}s"
 
 (
@@ -92,6 +97,8 @@ cleanup() {
              echo "disk_at_end: $(df -h /home/stars/data | tail -1)"
              echo "martin_active_since_at_end: $(systemctl --user show martin -p ActiveEnterTimestamp --value)"' >> "$OUT/environment.txt" || true
   ssh "$PI" 'dmesg 2>/dev/null | grep -A3 "NETDEV WATCHDOG" | tail -60' > "$OUT/kernel-eth0.log" 2>/dev/null || true
+  ssh "$GEN" 'pkill -f "bash gen-sampler.sh"' || true
+  scp -q "$GEN:$GEN_CSV" "$OUT/generator.csv" || true
   log "collected results into $OUT"
 }
 trap cleanup EXIT

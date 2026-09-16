@@ -29,6 +29,7 @@ MAX_TEMP_C="${MAX_TEMP_C:-80}"
 OUT="benchmarks/$RUN_ID"
 PI_CSV="/tmp/bench/$RUN_ID-host.csv"
 STOP="$GEN_DIR/STOP"
+GEN_CSV="$GEN_DIR/$RUN_ID-gen.csv"
 
 mkdir -p "$OUT"
 log() { echo "[$(date -u +%H:%M:%SZ)] $*" | tee -a "$OUT/run.log"; }
@@ -56,6 +57,10 @@ ssh "$PI" "curl -s http://127.0.0.1:3000/_/metrics" > "$OUT/metrics-before.txt"
 scp -q monitoring/bench/host-sampler.sh "$PI":/tmp/bench/host-sampler.sh
 ssh "$PI" "setsid nohup bash /tmp/bench/host-sampler.sh $PI_CSV 2 martin --user >/dev/null 2>&1 < /dev/null &"
 ssh "$GEN" "rm -f $STOP"
+# Sample the generator too. The 2026-09-17 soak ended with a watchdog reset on the
+# generator and nothing recorded about its state; see docs/BENCHMARKS.md.
+scp -q monitoring/bench/gen-sampler.sh "$GEN":"$GEN_DIR/gen-sampler.sh"
+ssh "$GEN" "cd $GEN_DIR && nohup bash gen-sampler.sh $GEN_CSV 5 en0 >/dev/null 2>&1 < /dev/null &"
 log "sampler started on Pi; baseline ${BASELINE_S}s"
 
 # Temperature watchdog: the load generator can't see the Pi, this machine can.
@@ -81,6 +86,8 @@ cleanup() {
   scp -q "$PI:$PI_CSV" "$OUT/host.csv" || true
   ssh "$PI" "curl -s http://127.0.0.1:3000/_/metrics" > "$OUT/metrics-after.txt" || true
   ssh "$PI" 'echo "throttled_at_end: $(vcgencmd get_throttled)"; echo "temp_at_end: $(vcgencmd measure_temp)"' >> "$OUT/environment.txt" || true
+  ssh "$GEN" 'pkill -f "bash gen-sampler.sh"' || true
+  scp -q "$GEN:$GEN_CSV" "$OUT/generator.csv" || true
   log "collected results into $OUT"
 }
 trap cleanup EXIT
