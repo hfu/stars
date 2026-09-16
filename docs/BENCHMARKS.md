@@ -47,6 +47,14 @@ Confirmed limits are also carried into [KNOWN_FACTS.md](KNOWN_FACTS.md) Section 
   across OSes).
 - **Brakes:** generator stops a test above 5% errors; the orchestrator's watchdog stops
   the run at 80 °C.
+- **Don't read a difference between steps that was measured once.** Phase 1 ran each
+  concurrency level a single time, so a small gap between two steps (e.g. 279.8 vs 278.1
+  rps) says "same, within noise", not "slightly lower". Where a step is pinned to the
+  line rate that's fine; where it isn't (the CPU-bound test D), repeat the step and report
+  whether the intervals overlap rather than ranking the runs. (Method borrowed from
+  `tokachi20260911`, which hit the same wall selecting among repeated ODM runs: the tool
+  should say "these are indistinguishable" itself. A soak run gets this for free, having
+  many samples over time.)
 - **Report tile size next to latency.** Two tile sets can differ in latency because
   their tiles differ in weight (e.g. 1 m vs 10 m DEM coverage in
   `mapterhorn-japan-bridge`), not because conditions differed.
