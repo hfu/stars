@@ -22,8 +22,14 @@ IF="${3:-en0}"
 PAGE=$(vm_stat | sed -n '1s/.*page size of \([0-9]*\).*/\1/p')
 
 net() { netstat -ibn 2>/dev/null | awk -v i="$IF" '$1==i && $3 ~ /Link/ {print $7, $10; exit}'; }
+# Interface-level health, which is the layer that actually failed on 2026-09-17: the
+# generator's kernel panicked in the PCIe link to its Ethernet controller
+# (apcie[2:lan-1gb] completion timeout), something no CPU/memory/temperature column
+# would have shown. Errors and link state are cheap; take them.
+iferr() { netstat -ib 2>/dev/null | awk -v i="$IF" '$1==i && $3 ~ /Link/ {print $6, $9, $11; exit}'; }
+iflink() { ifconfig "$IF" 2>/dev/null | awk '/status:/{s=$2} /media:/{m=$0} END{gsub(/^[ \t]*media: /,"",m); gsub(/,/,";",m); print s "," m}'; }
 
-echo "ts_utc,load1,load5,mem_free_mb,mem_inactive_mb,swap_used_mb,net_rx_bytes_s,net_tx_bytes_s,top_cpu_pct,top_proc,thermal_note" > "$OUT"
+echo "ts_utc,load1,load5,mem_free_mb,mem_inactive_mb,swap_used_mb,net_rx_bytes_s,net_tx_bytes_s,top_cpu_pct,top_proc,thermal_note,if_ierrs,if_oerrs,if_coll,if_status,if_media" > "$OUT"
 
 read -r rx0 tx0 < <(net)
 t0=$(date +%s)
@@ -41,12 +47,15 @@ while sleep "$INTERVAL"; do
   top_proc=$(echo "$top" | awk '{sub($1 FS,""); n=split($0,a,"/"); print a[n]}' | tr -d ',"')
   # pmset records thermal/performance warnings only when they happen; empty means none.
   therm=$(pmset -g therm 2>/dev/null | awk '/warning level/ && !/No /{print "warned"; exit}')
+  read -r ierr oerr coll < <(iferr)
+  link=$(iflink)
 
-  printf '%s,%s,%s,%d,%d,%s,%d,%d,%s,%s,%s\n' \
+  printf '%s,%s,%s,%d,%d,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s\n' \
     "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$l1" "$l5" \
     "$((free_p * PAGE / 1048576))" "$((inact_p * PAGE / 1048576))" "${swap:-}" \
     "$(( (rx1 - rx0) / dt ))" "$(( (tx1 - tx0) / dt ))" \
-    "${top_pct:-}" "${top_proc:-}" "${therm:-}" >> "$OUT"
+    "${top_pct:-}" "${top_proc:-}" "${therm:-}" \
+    "${ierr:-}" "${oerr:-}" "${coll:-}" "${link:-,}" >> "$OUT"
 
   rx0=$rx1; tx0=$tx1; t0=$t1
 done

@@ -48,10 +48,25 @@ stalls, it isn't tracking PAUSE frames.
   `U-mapterhorn-japan-bridge.json`. So: **load ran 2 h 58 m, 17 of 18 legs completed**,
   and the per-leg lines for those 17 survive in `run.log`. Do not read this run as "three
   hours, completed".
-- **What the reboot was:** a hardware watchdog reset (`ResetCounter-2026-09-17-075650.diag`:
-  `Boot faults: wdog,reset_in_1`, reset count 1, boot failure count 0), with **no kernel
-  panic report** on the machine. Reported by `tokachi20260911`, verified here directly.
-  The Pi side is unaffected and its sampling is complete to 22:57:11Z.
+- **What the reboot was:** a kernel panic at 07:56:48 JST followed by a watchdog reset at
+  07:56:50 (`ResetCounter-2026-09-17-075650.diag`: `Boot faults: wdog,reset_in_1`). The
+  panic is in the PCIe link to the machine's Ethernet controller:
+  `apcie[2:lan-1gb]::handleCompletionTimeoutInterrupt: completion timeout
+  linksts=0x8b000001 pcielint=0x00800010 linkcdmsts=0x00000100 (ltssm 0x11=L0)`
+  @AppleT8132PCIePort.cpp:1404, with `AppleEmbeddedPCIE` / `AppleT8132PCIe` in the
+  backtrace (`panic-full-2026-09-17-075648.0002.panic`, read directly). An earlier note
+  here and in this session's reports said there was *no* panic file: that was wrong — the
+  report is in `DiagnosticReports/Retired/`, not the top-level directory, and "I looked
+  in one place and found nothing" was written up as "there is nothing". The Pi side is
+  unaffected and its sampling is complete to 22:57:11Z, which is independent evidence
+  that only the generator went down.
+- **This is not the Pi's problem in a different place.** The Pi's stalls are its own
+  transmit queue (bcmgenet, inside that chassis); the generator's panic is a PCIe
+  completion timeout between its SoC and its Ethernet controller (inside that chassis).
+  Two different layers at the two ends of the same cable. Whether three hours of
+  saturated transfer contributed to either is unknown. The tempting link to the earlier
+  "both ends negotiate 100BASE-TX, so suspect the switch" observation does not hold:
+  that is outside the chassis, this is inside it.
 - **Whether the load caused it is unknown, and this run cannot say.** The generator was
   doing modest work for an M4 (6 threads, ~148 req/s, ~11.7 MB/s inbound, bodies
   discarded) but had been doing it for three hours. Nothing in the run recorded the
@@ -60,8 +75,12 @@ stalls, it isn't tracking PAUSE frames.
   2026-09-16 21:09 JST, ~10.75 h earlier and outside this run. Temporal proximity is not
   causation; the honest statement is that the machine reset under sustained use and we
   have no instrumentation to say more.
-- **For future runs:** sample the generator the same way the Pi is sampled. `slate.local`
-  is shared, so a reset there costs other projects, not just this one.
+- **For future runs:** sample the generator the same way the Pi is sampled — and sample
+  the *layer that can fail*. CPU, memory and temperature would not have caught this one;
+  interface error counters and link state might. `gen-sampler.sh` now records `Ierrs`,
+  `Oerrs`, collisions and link status/media alongside load and memory. (Point made by
+  `tokachi20260911`: which quantities to record is decided by the layer you suspect.)
+  `slate.local` is shared, so a reset there costs other projects, not just this one.
 - The two halves differ in archive *and* in position in the run, so "kitaphoto17 stalls
   more than mapterhorn" cannot be separated from "early stalls more than late".
 - Generator and Pi both negotiate 100BASE-TX; this run says nothing about behaviour at

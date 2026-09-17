@@ -233,8 +233,9 @@ fixed.
   flattening at 732 MB — but produced 729 NIC transmit stalls, which is what retires the
   "c ≤ 6 avoids them" reading of finding 8 and refutes the PAUSE-frame hypothesis.
   The run ended early because the **generator** (`slate.local`, shared) took a hardware
-  watchdog reset at 07:56:38 JST, 6.5 minutes into the final leg — cause unknown, and
-  unmeasurable because only the Pi was being sampled. Sample the generator too from now
+  watchdog reset at 07:56:38 JST, 6.5 minutes into the final leg, after a kernel panic in
+  the PCIe link to its own Ethernet controller (`apcie[2:lan-1gb]` completion timeout) —
+  a layer nothing in the run was sampling. Sample the generator too from now
   on, and treat a shared generator's health as part of the blast radius of a long soak.
 
 **Next:** check the switch the Pi and `slate.local` share — `slate.local`'s NIC supports
