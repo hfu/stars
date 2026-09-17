@@ -238,6 +238,35 @@ fixed.
   a layer nothing in the run was sampling. Sample the generator too from now
   on, and treat a shared generator's health as part of the blast radius of a long soak.
 
+## Decision, 2026-09-17: the benchmark programme stops here
+
+**The Pi is not the bottleneck, and no further measurement would change what we do.**
+
+- Every test was limited by the 100 Mb/s link, never by the host: at saturation the Pi ran
+  at 7–11% CPU (26% through the tunnel), 66–67 °C against an 80 °C ceiling, flat memory,
+  idle disk, and zero errors in ~1.55 M requests over three hours.
+- Real demand, with our own benchmark windows excluded from 11 days of telemetry: median
+  0 req/min, p95 11.7, p99 76.3, and only 6 samples out of 947 above 100 req/min. Measured
+  capacity is ~8,580 req/min on the LAN and ~5,580 req/min through Cloudflare on cold
+  tiles — roughly **112× the p99 of actual demand**.
+- The two open questions were dropped deliberately. The exact uplink ceiling would not
+  change any advice we give (">= 61 Mb/s, ~1.3 MB/s per connection, scales with
+  concurrency" is enough to size a consumer's fetch), and finding it means deliberately
+  entering the range where the NIC stalls. The cause of the stalls sits in the driver or
+  the hardware, neither of which we would fix; the effect is slow tiles, never errors.
+- What actually changed operations came from the work around the measurements, not the
+  numbers: the silent-breakage watch on remote sources, the TileJSON cloning cost
+  (maplibre/martin#3323), the monitoring gaps this exposed, and the retirement of the
+  false "c ≤ 6 is safe" rule.
+
+**Instead of testing, watch.** `host-status.sh` now reports `net_tx_errors` every two
+minutes and the dashboard shows new stalls per interval, so a saturated link is visible in
+ordinary operation without anyone running a benchmark.
+
+**Re-open the programme only if:** the link speed changes (everything above was measured
+at 100 Mb/s and must be redone); Martin is upgraded, especially past a fix for #3323
+(re-measure vbm); sustained demand exceeds ~1,000 req/min; or the hardware changes.
+
 **Next:** check the switch the Pi and `slate.local` share — `slate.local`'s NIC supports
 1000BASE-T yet also autoselects 100BASE-TX, so the shared switch (not the Pi) is the
 likeliest reason both links are at 100 Mb/s; sample interface `tx_errors` alongside the

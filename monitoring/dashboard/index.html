@@ -249,6 +249,19 @@
       `<div class="value">uptime ${lastDefined(rows, "host_uptime_days").toFixed(1)}日 / load1 ${lastDefined(rows, "host_load1").toFixed(2)} / ${lastDefined(rows, "host_temp_c").toFixed(1)}°C</div>` +
       sparkline(loadVals, { color: "#e0a860" }) +
       sparkline(tempVals, { color: "#e07070" }) +
+      // NIC transmit-queue stalls: these are how a saturated link shows up here. They
+      // cost seconds on individual tiles and never produce an error, so nothing else on
+      // this dashboard moves when they happen. Sum over the window, not the raw counter.
+      (() => {
+        const deltas = rows.map((r) => r.host_net_tx_errors_delta).filter((v) => typeof v === "number");
+        if (!deltas.length) return "";
+        const sum = deltas.reduce((a, b) => a + b, 0);
+        const total = lastDefined(rows, "host_net_tx_errors");
+        return `<div class="note">NIC送信停止: 表示期間中 ${sum} 回` +
+               (total !== null ? ` / 起動以来 ${total} 回` : "") +
+               `${sum > 0 ? "(回線が飽和した時間帯があります)" : ""}</div>` +
+               sparkline(rows.map((r) => r.host_net_tx_errors_delta), { color: "#c07ad0" });
+      })() +
       `</div>`
     );
   }

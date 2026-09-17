@@ -22,6 +22,13 @@ read -r load1 load5 load15 _ < /proc/loadavg
 temp_c=$(/usr/bin/vcgencmd measure_temp 2>/dev/null | sed -n "s/temp=\([0-9.]*\).*/\1/p")
 temp_c="${temp_c:-null}"
 
+# Cumulative NIC transmit errors: each one is a `NETDEV WATCHDOG: transmit queue timed
+# out` event, which is how this host shows link saturation (2026-09-17 soak: 729 of them
+# in three hours at c=6, while CPU, temperature, memory and disk all looked normal).
+# Recording it here means the dashboard notices a stall storm in ordinary operation,
+# without anyone running a benchmark. Counts since boot; read the slope, not the value.
+net_tx_errors=$(cat /sys/class/net/eth0/statistics/tx_errors 2>/dev/null || echo 0)
+
 df_line=$(df -k /home/stars/data | tail -1)
 disk_avail_kb=$(echo "$df_line" | awk '{print $4}')
 disk_used_pct=$(echo "$df_line" | awk '{print $5}' | tr -d '%')
@@ -36,8 +43,10 @@ jq -n \
   --argjson temp_c "$temp_c" \
   --argjson disk_avail_gb "$disk_avail_gb" \
   --argjson disk_used_pct "$disk_used_pct" \
+  --argjson net_tx_errors "$net_tx_errors" \
   '{ts: $ts, uptime_s: $uptime_s, load1: $load1, load5: $load5, load15: $load15,
-    temp_c: $temp_c, disk_avail_gb: $disk_avail_gb, disk_used_pct: $disk_used_pct}' \
+    temp_c: $temp_c, disk_avail_gb: $disk_avail_gb, disk_used_pct: $disk_used_pct,
+    net_tx_errors: $net_tx_errors}' \
   > "$TMP"
 
 mv "$TMP" "$OUT"

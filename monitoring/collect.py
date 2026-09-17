@@ -137,6 +137,13 @@ def apply_host_status(row, host_status):
     row["host_temp_c"] = host_status["temp_c"]
     row["host_disk_avail_gb"] = host_status["disk_avail_gb"]
     row["host_disk_used_pct"] = host_status["disk_used_pct"]
+    # The one cumulative counter in host-status.json: NIC transmit-queue stalls since
+    # boot. Kept as both the raw value and a per-interval delta, because what matters
+    # operationally is "are new ones happening", not the total. A reboot resets the
+    # counter, so a negative delta is reported as None rather than a negative count.
+    tx_err = host_status.get("net_tx_errors")
+    if tx_err is not None:
+        row["host_net_tx_errors"] = tx_err
 
 
 def build_row(agg_or_none, prev_row, up, host_status=None):
@@ -185,6 +192,14 @@ def build_row(agg_or_none, prev_row, up, host_status=None):
     cache_total = d_hit + d_miss
     if cache_total > 0:
         row["cache_hit_rate"] = round(d_hit / cache_total, 4)
+
+    # New NIC transmit-queue stalls since the previous sample. The counter is cumulative
+    # since boot, and what matters is whether new ones are appearing; a host reboot
+    # resets it, which shows up as a negative difference and is reported as no data
+    # rather than a negative count.
+    tx_now, tx_prev = row.get("host_net_tx_errors"), prev_row.get("host_net_tx_errors")
+    if tx_now is not None and tx_prev is not None and tx_now >= tx_prev:
+        row["host_net_tx_errors_delta"] = tx_now - tx_prev
 
     return row
 

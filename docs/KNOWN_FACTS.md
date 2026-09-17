@@ -297,6 +297,11 @@ a change to that ongoing convention.
     `~/.local/state/stars-monitoring/` (same filesystem as `/home/stars/data`, so the
     final `mv` is still an atomic rename) and only the finished `.json` lands in the
     watched directory. Baseline before the fix: 38 such warnings in the preceding 24 h.
+- **Benchmarking stopped 2026-09-17, deliberately:** measured capacity is ~112× the p99 of
+  real demand and the host is never the limit, so further runs would not change any
+  decision. `host-status.json` carries `net_tx_errors` instead, and the dashboard shows
+  new NIC stalls per interval — monitoring in place of testing. Conditions for re-opening
+  are listed in `docs/BENCHMARKS.md`.
 - **The Pi's NIC stalls under sustained saturation, at any concurrency (2026-09-17):** a
   three-hour soak at concurrency 6 over the LAN produced 729 `NETDEV WATCHDOG: transmit
   queue timed out` events (`tx_errors` 103 → 832) while CPU (~7%), temperature (66–67 °C),
