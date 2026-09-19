@@ -6,3 +6,4 @@
 {"ts":"2026-09-16T19:01:35Z","changes":[{"kind":"dataset_changed","id":"mapterhorn-japan-bridge","fields":["description","name"]},{"kind":"dataset_changed","id":"mapterhorn-japan-bridge-lineage","fields":["description"]}]}
 {"ts":"2026-09-17T11:03:33Z","changes":[{"kind":"dataset_changed","id":"bvmap","fields":["generator_options"]}]}
 {"ts":"2026-09-18T19:01:10Z","changes":[{"kind":"dataset_changed","id":"openstreetmap_jp_planet","fields":["planetiler:osm:osmosisreplicationtime"]}]}
+{"ts":"2026-09-19T19:01:34Z","changes":[{"kind":"dataset_changed","id":"mapterhorn-japan-bridge","fields":["bounds"]}]}
