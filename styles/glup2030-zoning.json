@@ -5,7 +5,7 @@
   "metadata": {
     "attribution": "Virgo (MPWT Laos)"
   },
-  "glyphs": "https://tile.openstreetmap.jp/fonts/{fontstack}/{range}.pbf",
+  "glyphs": "https://stars.optgeo.org/font/{fontstack}/{range}",
   "sources": {
     "zoning": {
       "type": "vector",

@@ -38,6 +38,10 @@ pmtiles:
     hih-civ-dairy-score: /home/stars/data/hih-civ-dairy-score.pmtiles
     hih-civ-livestock-score: /home/stars/data/hih-civ-livestock-score.pmtiles
 
+fonts:
+  paths:
+    - /home/stars/fonts
+
 styles:
   paths:
     - /home/stars/styles

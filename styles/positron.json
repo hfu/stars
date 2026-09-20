@@ -28,7 +28,7 @@
     }
   },
   "sprite": "https://openmaptiles.github.io/positron-gl-style/sprite",
-  "glyphs": "https://tile.openstreetmap.jp/fonts/{fontstack}/{range}.pbf",
+  "glyphs": "https://stars.optgeo.org/font/{fontstack}/{range}",
   "layers": [
     {
       "id": "background",

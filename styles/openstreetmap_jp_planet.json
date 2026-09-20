@@ -7,7 +7,7 @@
       "url": "https://stars.optgeo.org/openstreetmap_jp_planet"
     }
   },
-  "glyphs": "https://tile.openstreetmap.jp/fonts/{fontstack}/{range}.pbf",
+  "glyphs": "https://stars.optgeo.org/font/{fontstack}/{range}",
   "center": [
     139.6917,
     35.6895
@@ -247,7 +247,7 @@
           ]
         ],
         "text-font": [
-          "Open Sans Semibold"
+          "Open Sans SemiBold"
         ],
         "text-size": [
           "interpolate",
