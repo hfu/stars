@@ -40,6 +40,13 @@ Production install path is `/home/stars/fonts`; Martin's `fonts.paths` points th
 (`config/martin.yaml`) and serves `https://stars.optgeo.org/font/{fontstack}/{range}` —
 no `.pbf` suffix, unlike the hosts this replaced.
 
+Sprites work the same way ([sprites.json](sprites.json), `assets/fetch-sprites.py`,
+installed under `/home/stars/sprites/<id>/`): Martin builds the sheet from SVG sources at
+startup and serves `/sprite/<id>.json|.png` plus the `@2x` pair. **`sprites.paths` takes
+one directory *per sprite*, and the directory's own name becomes the sprite id** — point
+it at a parent and you get `/sprite/sprites` with icons named `positron/circle-11`, which
+is how the first deploy went before it was corrected.
+
 ## Font names changed with the move
 
 Martin names a font from the file's own family and style, which is not always what the
@@ -60,7 +67,9 @@ these styles offline) need the same names available locally, or their labels dis
   service, so the dependency is the point, not a defect.
 - The GSI sprite (`optimal_bvmap/sprite/std`) is published as a built PNG + JSON with no
   SVG sources, and Martin's sprite support takes SVG. Still to be decided.
-- The positron sprite (two SVG icons, BSD-3-Clause) is straightforward and still to do.
+- ~~The positron sprite~~ — done 2026-09-20: two SVG icons, BSD-3-Clause, now
+  `/sprite/positron`. Upstream's published sheet held exactly those two icons, which is
+  also all the style asks for, so nothing was lost in the move.
 
 The dashboard's 諸元 → styles panel counts these; the number there is the honest measure
 of how much of stars stands on its own.

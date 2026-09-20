@@ -42,6 +42,13 @@ fonts:
   paths:
     - /home/stars/fonts
 
+sprites:
+  paths:
+    # One directory per sprite: Martin takes the directory's own name as the sprite id and
+    # prefixes icon names with any subdirectory, so pointing at the parent would publish
+    # /sprite/sprites with icons called "positron/circle-11".
+    - /home/stars/sprites/positron
+
 styles:
   paths:
     - /home/stars/styles

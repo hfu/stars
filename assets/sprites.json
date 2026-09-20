@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "purpose": "Sprites stars serves itself at /sprite/{id}. Martin builds the sprite sheet from SVG sources at startup, so we copy the icon sources, not a rendered sheet.",
+  "install_path": "/home/stars/sprites",
+  "generated_by": "assets/fetch-sprites.py",
+  "sprites": [
+    {
+      "sprite_id": "positron",
+      "replaces": "https://openmaptiles.github.io/positron-gl-style/sprite",
+      "used_by": [
+        "positron.json"
+      ],
+      "license": {
+        "spdx": "BSD-3-Clause",
+        "url": "https://github.com/openmaptiles/positron-gl-style/blob/master/LICENSE.md"
+      },
+      "attribution": "Positron GL style © MapTiler.com & OpenMapTiles contributors; © 2015 CartoDB Inc. Derived from CartoDB Basemaps, designed by Stamen and Paul Norman, CC-BY 3.0.",
+      "icons": [
+        {
+          "file": "circle-11.svg",
+          "source": {
+            "kind": "github_raw",
+            "repo": "openmaptiles/positron-gl-style",
+            "ref": "3604dbd36710835172dcb292efa2689abf4d1ee1",
+            "path": "icons/circle-11.svg"
+          },
+          "sha256": "f250bfe0bb1f16e4a3c39c004c41489368ea0ee3491bdae100650583d4cf9a3a",
+          "size_bytes": 578
+        },
+        {
+          "file": "star-11.svg",
+          "source": {
+            "kind": "github_raw",
+            "repo": "openmaptiles/positron-gl-style",
+            "ref": "3604dbd36710835172dcb292efa2689abf4d1ee1",
+            "path": "icons/star-11.svg"
+          },
+          "sha256": "7033a0147cdea213ceff1144fcbffe7b0bbbcb969dd70cba6c54c8b9ea7c3337",
+          "size_bytes": 534
+        }
+      ]
+    }
+  ]
+}
