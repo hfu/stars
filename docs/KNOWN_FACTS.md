@@ -297,6 +297,20 @@ a change to that ongoing convention.
     `~/.local/state/stars-monitoring/` (same filesystem as `/home/stars/data`, so the
     final `mv` is still an atomic rename) and only the finished `.json` lands in the
     watched directory. Baseline before the fix: 38 such warnings in the preceding 24 h.
+- **stars serves its own sprites since 2026-09-20:** `/sprite/positron` (2 SVG icons from
+  openmaptiles/positron-gl-style), `/sprite/optimal-bvmap` and `/sprite/bvmap-starlight`
+  (119 GSI icons each, the second greyscaled by `dwg7/bvmap`). GSI publishes only a built
+  sheet, so those SVGs are **cut from the sheet at GSI's own coordinates and wrap the
+  pixels as an embedded PNG** (`assets/build-sprite-from-sheet.py`); Martin bakes the
+  sheet from them. Fidelity: alpha and every fully-opaque pixel identical, colour drifting
+  under one 8-bit level (premultiplied) on soft edges — resvg's premultiplied-alpha round
+  trip. **`sprites.paths` takes one directory per sprite and names the sprite after that
+  directory**, so pointing it at a parent publishes `/sprite/<parent>` with icons named
+  `<subdir>/<icon>`. Registering a sprite needs a Martin restart.
+- **`styles/bvmap-starlight.json` added 2026-09-20** via PR #12 from `dwg7/bvmap`: the
+  first style here whose glyphs, sprite and tiles all come from stars. Note for future
+  reviews: a PR opened from the `hfu` account cannot be approved on GitHub (self-approval
+  is blocked), so the review was posted as a comment instead.
 - **stars serves its own glyphs since 2026-09-20:** Martin's `fonts.paths`
   (`/home/stars/fonts`, 12 files, 13 MB) serves `https://stars.optgeo.org/font/{fontstack}/{range}`
   — **no `.pbf` suffix**, unlike the two hosts it replaced (`gsi-cyberjapan.github.io`,
