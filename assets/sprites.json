@@ -39,6 +39,87 @@
           "size_bytes": 534
         }
       ]
+    },
+    {
+      "sprite_id": "optimal-bvmap",
+      "replaces": "https://gsi-cyberjapan.github.io/optimal_bvmap/sprite/std",
+      "used_by": [
+        "vbm.json",
+        "vlcm.json",
+        "bvmap-dark.json"
+      ],
+      "license": {
+        "spdx": "(GSI content terms)",
+        "url": "https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html"
+      },
+      "attribution": "国土地理院最適化ベクトルタイル（国土地理院コンテンツ利用規約に基づく）",
+      "note": "GSI publishes this sprite only as a built sheet, so the SVG sources are cut out of that sheet by assets/build-gsi-sprite.py at the coordinates GSI's own std.json gives. Verified pixel-identical: all 119 icons matched upstream exactly when Martin rebuilt the sheet. Upstream's std@2x.png is byte-identical to std.png (no high-resolution artwork exists); Martin's @2x is an upscale declared at pixelRatio 2, which sizes icons correctly on retina where upstream's does not.",
+      "kind": "derived_from_sheet",
+      "sheet": [
+        {
+          "file": "std.json",
+          "source": {
+            "kind": "github_raw",
+            "repo": "gsi-cyberjapan/optimal_bvmap",
+            "ref": "98372fbf8e299f698f5de24babc01b4d6eedb187",
+            "path": "sprite/std.json"
+          },
+          "sha256": "f36aa66a1fbfd77e0db38718fd11a131c65a6eba48ca01f8d3e546fbb1b9d0b2",
+          "size_bytes": 11295
+        },
+        {
+          "file": "std.png",
+          "source": {
+            "kind": "github_raw",
+            "repo": "gsi-cyberjapan/optimal_bvmap",
+            "ref": "98372fbf8e299f698f5de24babc01b4d6eedb187",
+            "path": "sprite/std.png"
+          },
+          "sha256": "2df6f77854069918c153d9c4da04fa59ff50d39412340ed767c33323321d9a1f",
+          "size_bytes": 109290
+        }
+      ],
+      "icon_count": 119
+    },
+    {
+      "sprite_id": "bvmap-starlight",
+      "replaces": "(new) grayscale derivative of GSI's optimal_bvmap sprite, for dwg7/bvmap's bvmap-starlight style",
+      "used_by": [
+        "bvmap-starlight.json (pending PR from dwg7/bvmap)"
+      ],
+      "license": {
+        "spdx": "(GSI content terms)",
+        "url": "https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html"
+      },
+      "attribution": "国土地理院最適化ベクトルタイルのスプライトを改変（グレースケール化）して作成。出典: 国土地理院。改変者: dwg7/bvmap。国土地理院コンテンツ利用規約に基づく。",
+      "modified": true,
+      "modification": "GSI's std sprite sheet recoloured to greyscale by dwg7/bvmap to match the bvmap-starlight palette (their docs/decisions/0036). The GSI terms allow adaptation, but require both the source attribution and a statement that the work was modified — hence `modified` here and the wording above, which the consuming style is expected to carry too.",
+      "kind": "derived_from_sheet",
+      "sheet": [
+        {
+          "file": "bvmap-starlight.json",
+          "source": {
+            "kind": "github_raw",
+            "repo": "dwg7/bvmap",
+            "ref": "1410d64bb8142b63b180b61f5ea02e4f94bc2db3",
+            "path": "sprite/bvmap-starlight.json"
+          },
+          "sha256": "f5184d39d765dedfdeef7c98a95f9b6984a27ee74094d0b197a49a60e3842179",
+          "size_bytes": 14146
+        },
+        {
+          "file": "bvmap-starlight.png",
+          "source": {
+            "kind": "github_raw",
+            "repo": "dwg7/bvmap",
+            "ref": "1410d64bb8142b63b180b61f5ea02e4f94bc2db3",
+            "path": "sprite/bvmap-starlight.png"
+          },
+          "sha256": "6c15720829d4a2acf16ae9ea1a2645197167f0b811946577fee40e589fd8cef6",
+          "size_bytes": 109196
+        }
+      ],
+      "icon_count": 119
     }
   ]
 }

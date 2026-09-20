@@ -2,7 +2,7 @@
   "version": 8,
   "name": "GSI optimized vector tile basemap (bvmap), background/roads/labels only, no terrain/hillshade",
   "glyphs": "https://stars.optgeo.org/font/{fontstack}/{range}",
-  "sprite": "https://gsi-cyberjapan.github.io/optimal_bvmap/sprite/std",
+  "sprite": "https://stars.optgeo.org/sprite/optimal-bvmap",
   "sources": {
     "bvmap": {
       "type": "vector",

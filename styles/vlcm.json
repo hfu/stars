@@ -2,7 +2,7 @@
   "version": 8,
   "name": "Hokkaido VLCM (volcanic land condition map, thematic-only)",
   "glyphs": "https://stars.optgeo.org/font/{fontstack}/{range}",
-  "sprite": "https://gsi-cyberjapan.github.io/optimal_bvmap/sprite/std",
+  "sprite": "https://stars.optgeo.org/sprite/optimal-bvmap",
   "sources": {
     "vlcm": {
       "type": "vector",

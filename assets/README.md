@@ -65,8 +65,15 @@ these styles offline) need the same names available locally, or their labels dis
 
 - `styles/std.json` draws GSI's raster tiles directly. That style exists to show GSI's
   service, so the dependency is the point, not a defect.
-- The GSI sprite (`optimal_bvmap/sprite/std`) is published as a built PNG + JSON with no
-  SVG sources, and Martin's sprite support takes SVG. Still to be decided.
+- ~~The GSI sprite~~ — done 2026-09-20. GSI publishes only a built sheet, which looked
+  like it forced either a raster exception or a redraw. Neither was needed: each icon is
+  cut from the sheet at GSI's own coordinates and wrapped in an SVG that embeds those
+  pixels (`assets/build-sprite-from-sheet.py`), so Martin bakes a sheet that is
+  **pixel-identical to GSI's — verified 119/119, live** — while the repo still holds
+  sources rather than a mirrored render. No icon is SDF, so nothing loses recolouring.
+  The same path took `dwg7/bvmap`'s greyscale derivative (`/sprite/bvmap-starlight`,
+  also 119/119). GSI's terms allow that adaptation but require saying it happened, so
+  `sprites.json` carries `modified` and the wording the consuming style must repeat.
 - ~~The positron sprite~~ — done 2026-09-20: two SVG icons, BSD-3-Clause, now
   `/sprite/positron`. Upstream's published sheet held exactly those two icons, which is
   also all the style asks for, so nothing was lost in the move.

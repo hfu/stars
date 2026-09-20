@@ -48,6 +48,8 @@ sprites:
     # prefixes icon names with any subdirectory, so pointing at the parent would publish
     # /sprite/sprites with icons called "positron/circle-11".
     - /home/stars/sprites/positron
+    - /home/stars/sprites/optimal-bvmap
+    - /home/stars/sprites/bvmap-starlight
 
 styles:
   paths:
