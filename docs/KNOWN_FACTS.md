@@ -297,6 +297,17 @@ a change to that ongoing convention.
     `~/.local/state/stars-monitoring/` (same filesystem as `/home/stars/data`, so the
     final `mv` is still an atomic rename) and only the finished `.json` lands in the
     watched directory. Baseline before the fix: 38 such warnings in the preceding 24 h.
+- **stars serves its own glyphs since 2026-09-20:** Martin's `fonts.paths`
+  (`/home/stars/fonts`, 12 files, 13 MB) serves `https://stars.optgeo.org/font/{fontstack}/{range}`
+  — **no `.pbf` suffix**, unlike the two hosts it replaced (`gsi-cyberjapan.github.io`,
+  `tile.openstreetmap.jp`). Glyphs are generated per request (30–55 ms for a CJK range,
+  64 MB font cache); we host the font files, not anyone's rendered PBFs. Martin names a
+  font from its own family + style, so three style font names changed with the move
+  (`NotoSansJP-Regular` → `Noto Sans JP Regular`, `NotoSerifJP-SemiBold` →
+  `Noto Serif JP SemiBold`, `Open Sans Semibold` → `Open Sans SemiBold`) — downstream
+  consumers serving glyphs locally need the same names. Provenance, hashes and licences:
+  `assets/fonts.json`; adding or updating a font goes through `assets/fetch-fonts.py`.
+  **Registering fonts needed a Martin restart** (new source kind), unlike a style edit.
 - **Benchmarking stopped 2026-09-17, deliberately:** measured capacity is ~112× the p99 of
   real demand and the host is never the limit, so further runs would not change any
   decision. `host-status.json` carries `net_tx_errors` instead, and the dashboard shows
