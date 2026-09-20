@@ -68,11 +68,26 @@ these styles offline) need the same names available locally, or their labels dis
 - ~~The GSI sprite~~ — done 2026-09-20. GSI publishes only a built sheet, which looked
   like it forced either a raster exception or a redraw. Neither was needed: each icon is
   cut from the sheet at GSI's own coordinates and wrapped in an SVG that embeds those
-  pixels (`assets/build-sprite-from-sheet.py`), so Martin bakes a sheet that is
-  **pixel-identical to GSI's — verified 119/119, live** — while the repo still holds
-  sources rather than a mirrored render. No icon is SDF, so nothing loses recolouring.
-  The same path took `dwg7/bvmap`'s greyscale derivative (`/sprite/bvmap-starlight`,
-  also 119/119). GSI's terms allow that adaptation but require saying it happened, so
+  pixels (`assets/build-sprite-from-sheet.py`), so Martin bakes a sheet carrying
+  GSI's own pixels, while the repo still holds sources rather than a mirrored render. No
+  icon is SDF, so nothing loses recolouring. The same path took `dwg7/bvmap`'s greyscale
+  derivative (`/sprite/bvmap-starlight`).
+
+  **Fidelity, stated precisely** (this repo first claimed "119/119 pixel-identical",
+  which was wrong — see below): alpha is identical everywhere, every fully-opaque pixel
+  is identical, and colour differs only in semi-transparent edge pixels — 1,267 of 17,228
+  for the GSI sheet (max |dRGB| 16), 12,458 for the greyscale one (max 32). Premultiplied
+  by alpha, which is what gets composited, the largest deviation is **under one 8-bit
+  level** (0.98–0.99/255): resvg works in premultiplied alpha and the round trip back to
+  straight alpha rounds the colour of nearly-transparent pixels.
+
+  **How the wrong claim happened:** the check used Pillow's
+  `ImageChops.difference(a, b).getbbox()`, and since Pillow 10 `getbbox()` defaults to
+  `alpha_only=True` — with matching alpha channels it returns `None` no matter how much
+  the colour channels differ. It proved "alpha identical" and was read as "identical".
+  `dwg7/bvmap` cropped icon by icon, found the RGB deltas, and reported them; the numbers
+  above are this repo's own re-measurement. Compare channels explicitly, and compare the
+  premultiplied product when the question is what reaches the screen. GSI's terms allow that adaptation but require saying it happened, so
   `sprites.json` carries `modified` and the wording the consuming style must repeat.
 - ~~The positron sprite~~ — done 2026-09-20: two SVG icons, BSD-3-Clause, now
   `/sprite/positron`. Upstream's published sheet held exactly those two icons, which is

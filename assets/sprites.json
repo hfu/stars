@@ -53,7 +53,7 @@
         "url": "https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html"
       },
       "attribution": "国土地理院最適化ベクトルタイル（国土地理院コンテンツ利用規約に基づく）",
-      "note": "GSI publishes this sprite only as a built sheet, so the SVG sources are cut out of that sheet by assets/build-gsi-sprite.py at the coordinates GSI's own std.json gives. Verified pixel-identical: all 119 icons matched upstream exactly when Martin rebuilt the sheet. Upstream's std@2x.png is byte-identical to std.png (no high-resolution artwork exists); Martin's @2x is an upscale declared at pixelRatio 2, which sizes icons correctly on retina where upstream's does not.",
+      "note": "GSI publishes this sprite only as a built sheet, so the SVG sources are cut out of that sheet by assets/build-sprite-from-sheet.py at the coordinates GSI's own std.json gives. Fidelity, measured against the pinned upstream sheet: alpha identical everywhere, every fully-opaque pixel identical, and differences confined to semi-transparent edge pixels (1,267 of 17,228, max |dRGB| 16). Premultiplied by alpha -- which is what is composited on screen -- the largest deviation is 0.98/255, i.e. under one 8-bit level, from resvg's premultiplied-alpha round trip. Upstream's std@2x.png is byte-identical to std.png (no high-resolution artwork exists); Martin's @2x is an upscale declared at pixelRatio 2, which sizes icons correctly on retina where upstream's does not.",
       "kind": "derived_from_sheet",
       "sheet": [
         {
@@ -79,7 +79,15 @@
           "size_bytes": 109290
         }
       ],
-      "icon_count": 119
+      "icon_count": 119,
+      "fidelity": {
+        "alpha_differences": 0,
+        "opaque_pixel_differences": 0,
+        "semi_transparent_pixels_differing": 1267,
+        "max_abs_rgb_delta": 16,
+        "max_premultiplied_delta_per_255": 0.98,
+        "measured": "2026-09-20, live sheet vs pinned upstream sheet"
+      }
     },
     {
       "sprite_id": "bvmap-starlight",
@@ -119,7 +127,16 @@
           "size_bytes": 109196
         }
       ],
-      "icon_count": 119
+      "icon_count": 119,
+      "fidelity": {
+        "alpha_differences": 0,
+        "opaque_pixel_differences": 0,
+        "semi_transparent_pixels_differing": 12458,
+        "max_abs_rgb_delta": 32,
+        "max_premultiplied_delta_per_255": 0.99,
+        "measured": "2026-09-20, live sheet vs dwg7/bvmap sheet at 1410d64",
+        "note": "Reported by dwg7/bvmap and confirmed here after an earlier check of ours wrongly called it pixel-identical: Pillow's Image.getbbox() defaults to alpha_only=True, so a difference image with a matching alpha channel returns None however much the colour channels differ."
+      }
     }
   ]
 }
