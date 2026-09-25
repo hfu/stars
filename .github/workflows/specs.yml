@@ -46,6 +46,11 @@ jobs:
           fi
 
       - name: Collect specs
+        # The asset-pin check asks the GitHub API whether our pinned commits/tags are
+        # still current. Unauthenticated that is 60 requests an hour per runner address,
+        # which a busy runner pool can exhaust; the job's own token lifts it to 1,000.
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: python3 monitoring/collect-specs.py . pages/specs
 
       - name: Sync dashboard assets

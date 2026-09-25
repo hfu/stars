@@ -265,6 +265,27 @@ def diff_snapshots(prev, cur):
     return changes
 
 
+def collect_assets(repo_root):
+    """Fonts and sprites stars serves itself, and whether their pins still match upstream.
+
+    Copying an asset to stop depending on someone's web server trades one failure mode
+    (their host goes away) for another (our copy quietly ages). The pins in
+    assets/*.json answer the second one only if something actually looks; this is that
+    something, run once a day alongside the rest of the specs. A moved pin is reported,
+    not acted on -- taking a new version is a decision, not a sync.
+    """
+    sys.path.insert(0, str(repo_root / "assets"))
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "check_pins", repo_root / "assets" / "check-pins.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod.check_all(repo_root)
+    except Exception as e:  # noqa: BLE001 - a GitHub hiccup must not lose the whole snapshot
+        return {"ts": now_iso(), "error": str(e)}
+
+
 def main():
     if len(sys.argv) != 3:
         print("usage: collect-specs.py <repo-root> <out-dir>", file=sys.stderr)
@@ -287,6 +308,7 @@ def main():
         "ts": now_iso(),
         "datasets": datasets,
         "styles": styles,
+        "assets": collect_assets(repo_root),
         "external_dependencies": external_dependencies(styles),
         "disk": reconcile_with_disk(datasets, explicit_sources),
         "summary": {
