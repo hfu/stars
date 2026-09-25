@@ -297,6 +297,14 @@ a change to that ongoing convention.
     `~/.local/state/stars-monitoring/` (same filesystem as `/home/stars/data`, so the
     final `mv` is still an atomic rename) and only the finished `.json` lands in the
     watched directory. Baseline before the fix: 38 such warnings in the preceding 24 h.
+- **The asset pins are checked daily since 2026-09-26:** the specs collector runs
+  `assets/check-pins.py` (stdlib + GitHub REST, no `gh`) and the dashboard's 資産諸元 panel
+  shows how many of the 18 pins still match upstream, plus what stars serves itself (12
+  fonts, 3 sprites, 240 icons). **Reporting only — a moved pin is never followed
+  automatically**, since taking a new upstream version is a judgement call. The workflow
+  passes `github.token` because unauthenticated GitHub allows 60 requests an hour per
+  runner address. Verified live 2026-09-26: 18/18 current, and the styles panel now lists
+  exactly one external host (`cyberjapandata.gsi.go.jp`, the std style's own subject).
 - **stars serves its own sprites since 2026-09-20:** `/sprite/positron` (2 SVG icons from
   openmaptiles/positron-gl-style), `/sprite/optimal-bvmap` and `/sprite/bvmap-starlight`
   (119 GSI icons each, the second greyscaled by `dwg7/bvmap`). GSI publishes only a built
