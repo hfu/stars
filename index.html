@@ -419,9 +419,49 @@
     );
   }
 
+  function renderSpecsAssets(spec) {
+    const a = spec.assets || {};
+    if (a.error) {
+      return `<div class="panel"><h2>自前配信の資産(フォント・スプライト)</h2>` +
+             `<div class="value bad">上流確認に失敗</div>` +
+             `<div class="note">${esc(a.error)}</div></div>`;
+    }
+    const moved = a.pins_moved || [];
+    const errs = a.errors || [];
+    const movedRows = moved.map((m) =>
+      `<tr><td>${esc(m.asset)}</td><td class="wrap">${esc(m.file)}</td>` +
+      `<td class="wrap">${esc(m.repo)}</td>` +
+      `<td>${esc(String(m.pinned).slice(0, 12))} → ${esc(String(m.upstream).slice(0, 12))}</td>` +
+      `<td>${esc((m.upstream_date || "").slice(0, 10))}</td></tr>`
+    ).join("");
+
+    return (
+      `<div class="panel"><h2>自前配信の資産</h2>` +
+      `<div class="value">フォント ${a.fonts_served} / スプライト ${a.sprites_served}` +
+      ` (アイコン ${a.sprite_icons})</div>` +
+      `<div class="note">スタイルの glyphs と sprite は stars 自身が配信しています。` +
+      `第三者ホストが止まってもラベル・アイコンは描けます` +
+      `(元データの入手元・ハッシュ・ライセンスは repo の <code>assets/</code>)。</div></div>` +
+
+      `<div class="panel"><h2>上流への追随</h2>` +
+      `<div class="value ${moved.length || errs.length ? "bad" : "ok"}">` +
+      `${a.pins_current}/${a.pins_checked} が pin どおり` +
+      `${moved.length ? " / " + moved.length + " 件で上流が更新" : ""}</div>` +
+      (moved.length
+        ? `<div class="scroll"><table><thead><tr><th>資産</th><th>ファイル</th><th>上流</th>` +
+          `<th>pin → 現在</th><th>更新日</th></tr></thead><tbody>${movedRows}</tbody></table></div>`
+        : "") +
+      (errs.length ? `<div class="note">確認できなかったもの: ${esc(errs.map((e) => e.file).join(", "))}</div>` : "") +
+      `<div class="note">上流が動いても自動では追随しません。取り込むかどうかは判断案件で、` +
+      `取り込むときは <code>assets/fetch-fonts.py</code> / <code>fetch-sprites.py</code> で` +
+      `pin とハッシュを更新します。確認は日次です。</div></div>`
+    );
+  }
+
   const SPECS = [
     { key: "specs-datasets", name: "データセット諸元", render: renderSpecsDatasets },
     { key: "specs-styles", name: "スタイル諸元", render: renderSpecsStyles },
+    { key: "specs-assets", name: "資産諸元(フォント・スプライト)", render: renderSpecsAssets },
   ];
   const SPECS_BY_KEY = new Map(SPECS.map((s) => [s.key, s]));
 
