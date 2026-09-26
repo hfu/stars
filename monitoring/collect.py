@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 
 METRICS_URL = "https://stars.optgeo.org/_/metrics"
 HOST_STATUS_URL = "https://depot.optgeo.org/host-status.json"
+HOST_INVENTORY_URL = "https://depot.optgeo.org/host-inventory.json"
 TILE_ENDPOINT = "/{source_ids}/{z}/{x}/{y}"
 MAX_LINES = 12000
 TIMEOUT_S = 15
@@ -48,6 +49,76 @@ def fetch_host_status():
         if resp.status != 200:
             raise RuntimeError(f"unexpected status {resp.status}")
         return json.loads(resp.read().decode("utf-8", errors="replace"))
+
+
+def fetch_host_inventory():
+    """Fetch the hourly listing of what actually sits in /home/stars/data.
+
+    `/home/stars/data` is written directly by trusted contributors, so a 272 GB archive
+    can be swapped without anything in this repo doing it. That happened on 2026-09-19
+    and went unnoticed for a week: the change *was* recorded daily, but nothing put it
+    where anyone would look. Reading the inventory here, on the 10-minute cadence, is
+    what turns "recorded" into "noticed".
+    """
+    url = f"{HOST_INVENTORY_URL}?cb={int(time.time())}"
+    req = urllib.request.Request(url, headers={"User-Agent": "stars-monitoring/1.0"})
+    with urllib.request.urlopen(req, timeout=TIMEOUT_S) as resp:
+        if resp.status != 200:
+            raise RuntimeError(f"unexpected status {resp.status}")
+        return json.loads(resp.read().decode("utf-8", errors="replace"))
+
+
+def inventory_fingerprint(inventory):
+    """{name: [size, mtime]} for the served archives -- staging files are excluded.
+
+    A file being written is not a change to what is served; it becomes one only when it
+    is renamed into place, which is exactly when its size or mtime under the served name
+    moves.
+    """
+    return {name: [v.get("size"), v.get("mtime")]
+            for name, v in (inventory.get("pmtiles") or {}).items()}
+
+
+def inventory_changes(prev_fp, cur_fp):
+    """What changed between two fingerprints, in terms a reader can act on."""
+    changes = []
+    for name in sorted(set(prev_fp) | set(cur_fp)):
+        before, after = prev_fp.get(name), cur_fp.get(name)
+        if before == after:
+            continue
+        if before is None:
+            changes.append({"name": name, "kind": "added",
+                            "size": after[0], "mtime": after[1]})
+        elif after is None:
+            changes.append({"name": name, "kind": "removed",
+                            "size_before": before[0], "mtime_before": before[1]})
+        else:
+            changes.append({"name": name, "kind": "replaced",
+                            "size_before": before[0], "size": after[0],
+                            "size_delta": (after[0] or 0) - (before[0] or 0),
+                            "mtime_before": before[1], "mtime": after[1]})
+    return changes
+
+
+def find_last_with(path, key):
+    """Most recent row carrying `key`.
+
+    The full inventory fingerprint is written only on the rows where it changed -- at
+    ~1.3 KB for 33 archives, writing it every 10 minutes would add roughly 15 MB to a
+    12,000-line file that exists to be fetched by a browser.
+    """
+    if not path.exists():
+        return None
+    for line in reversed(path.read_text().splitlines()):
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if key in row:
+            return row
+    return None
 
 
 def parse_metrics(text):
@@ -228,6 +299,20 @@ def main():
     except (urllib.error.URLError, RuntimeError, TimeoutError) as e:
         print(f"scrape failed: {e}", file=sys.stderr)
         row = build_row(None, prev_row, up=False, host_status=host_status)
+
+    # What is actually on disk, and whether it moved since the last time we looked.
+    try:
+        fp = inventory_fingerprint(fetch_host_inventory())
+        prev_fp_row = find_last_with(out_path, "_inv")
+        prev_fp = (prev_fp_row or {}).get("_inv")
+        if prev_fp is None:
+            row["_inv"] = fp          # first run: record the baseline, claim nothing
+        elif prev_fp != fp:
+            row["_inv"] = fp
+            row["data_changes"] = inventory_changes(prev_fp, fp)
+        row["served_archive_count"] = len(fp)
+    except (urllib.error.URLError, RuntimeError, TimeoutError, ValueError, KeyError) as e:
+        print(f"host-inventory scrape failed: {e}", file=sys.stderr)
 
     with out_path.open("a") as f:
         f.write(json.dumps(row, separators=(",", ":")) + "\n")

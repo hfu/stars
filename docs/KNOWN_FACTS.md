@@ -297,6 +297,15 @@ a change to that ongoing convention.
     `~/.local/state/stars-monitoring/` (same filesystem as `/home/stars/data`, so the
     final `mv` is still an atomic rename) and only the finished `.json` lands in the
     watched directory. Baseline before the fix: 38 such warnings in the preceding 24 h.
+- **Replacements in `/home/stars/data` are surfaced since 2026-09-26:** the 10-minute
+  collector reads `host-inventory.json`, keeps a `{name: [size, mtime]}` fingerprint of
+  the served archives, and writes a `data_changes` entry whenever one is added, removed
+  or replaced; the dashboard shows it as the second panel, right under liveness. Written
+  after a 272 GB archive was swapped on 2026-09-19 by a contributor and went unnoticed
+  here for a week — the daily specs snapshot *had* recorded it, but a record nobody reads
+  is not a notice. Detection lags by up to ~1 h 10 min (the inventory itself is hourly),
+  and the fingerprint is stored only on rows where it changed, since writing 1.3 KB every
+  10 minutes would add ~15 MB to the telemetry file a browser fetches.
 - **The asset pins are checked daily since 2026-09-26:** the specs collector runs
   `assets/check-pins.py` (stdlib + GitHub REST, no `gh`) and the dashboard's 資産諸元 panel
   shows how many of the 18 pins still match upstream, plus what stars serves itself (12
