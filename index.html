@@ -465,8 +465,62 @@
   ];
   const SPECS_BY_KEY = new Map(SPECS.map((s) => [s.key, s]));
 
+  function renderDataChanges(rows) {
+    // /home/stars/data is written directly by trusted contributors, so an archive can be
+    // swapped without anything in this repo doing it. This panel exists because that
+    // happened on 2026-09-19 (a 272 GB replacement) and nobody noticed for a week: the
+    // daily specs snapshot had recorded it, but a record nobody reads is not a notice.
+    const withChanges = rows.filter((r) => Array.isArray(r.data_changes) && r.data_changes.length);
+    const served = lastDefined(rows, "served_archive_count");
+    // Archives here run from a few MB to 272 GB, so a fixed unit prints either
+    // "0.0 GB" or an unreadable number of megabytes.
+    const size = (n) => {
+      if (n === null || n === undefined) return "?";
+      const a = Math.abs(n);
+      if (a >= 1e9) return (n / 1e9).toFixed(1) + " GB";
+      if (a >= 1e6) return (n / 1e6).toFixed(1) + " MB";
+      if (a >= 1e3) return (n / 1e3).toFixed(1) + " kB";
+      return n + " B";
+    };
+    const gb = size;
+    const signed = (n) => (n > 0 ? "+" : "") + size(n);
+
+    if (!withChanges.length) {
+      return (
+        `<div class="panel"><h2>配信データの変更</h2>` +
+        `<div class="value ok">この期間は変更なし</div>` +
+        `<div class="note">配信中のアーカイブ ${served !== null ? served + " 件" : "—"}。` +
+        `サイズか更新時刻が動いたら、ここに出ます` +
+        `(検知はホスト側の毎時棚卸し経由なので、最大1時間+10分の遅れがあります)。</div></div>`
+      );
+    }
+    const items = withChanges.slice(-6).reverse().map((r) => {
+      const lines = r.data_changes.map((c) => {
+        if (c.kind === "replaced") {
+          return `<b>${esc(c.name)}</b> 差し替え ${gb(c.size_before)} → ${gb(c.size)} ` +
+                 `<span class="muted">(${signed(c.size_delta)})</span>`;
+        }
+        if (c.kind === "added") return `<b>${esc(c.name)}</b> 追加 ${gb(c.size)}`;
+        return `<b>${esc(c.name)}</b> 削除 ${gb(c.size_before)}`;
+      }).join("<br>");
+      return `<tr><td>${fmtTs(r.ts)}</td><td class="wrap">${lines}</td></tr>`;
+    }).join("");
+    const total = withChanges.reduce((n, r) => n + r.data_changes.length, 0);
+
+    return (
+      `<div class="panel"><h2>配信データの変更</h2>` +
+      `<div class="value bad">${total} 件</div>` +
+      `<div class="scroll"><table><thead><tr><th>検知時刻</th><th>内容</th></tr></thead>` +
+      `<tbody>${items}</tbody></table></div>` +
+      `<div class="note">配信中のアーカイブ ${served !== null ? served + " 件" : "—"}。` +
+      `<code>/home/stars/data</code> は信頼された貢献者が直接書き換えるので、` +
+      `このリポジトリ由来でない差し替えもここに現れます。意図した更新であれば問題ありません。</div></div>`
+    );
+  }
+
   const INSTRUMENTS = [
     { key: "liveness", name: "死活", render: renderLiveness },
+    { key: "data-changes", name: "配信データの変更", render: renderDataChanges },
     { key: "latency", name: "タイル配信 平均レイテンシ", render: renderLatency },
     { key: "requests", name: "タイル配信リクエスト量 / エラー率", render: renderRequests },
     { key: "cache", name: "pmtilesディレクトリキャッシュ ヒット率", render: renderCache },
