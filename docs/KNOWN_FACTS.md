@@ -328,6 +328,21 @@ a change to that ongoing convention.
   first style here whose glyphs, sprite and tiles all come from stars. Note for future
   reviews: a PR opened from the `hfu` account cannot be approved on GitHub (self-approval
   is blocked), so the review was posted as a comment instead.
+- **`styles/bvmap-koicha-starlight.json` added 2026-10-12** via PR #14: `bvmap-starlight`
+  with every zoom value shifted by −1 (layer `minzoom`/`maxzoom` and the `step`/`interpolate`
+  stops on `["zoom"]`), because `dwg7/bvmap-koicha`'s tiles carry bvmap's z+1 content at
+  zoom z. Reviewed by re-applying that shift to this repo's `bvmap-starlight.json` and
+  diffing: all 123 layers matched exactly. Its source is `bvmap-koicha-tokyo`
+  (`encoding: "mlt"`, `application/vnd.maplibre-tile`, z3–16, 24 vector layers, bounds
+  139.73–139.80 / 35.65–35.71) — the **first MLT-encoded source served here**; a
+  nationwide replacement is expected later. Glyphs, sprite and tiles are all stars'.
+- **A brand-new pmtiles file in a scanned `pmtiles.paths` directory is registered without
+  a restart.** Observed 2026-10-12: `bvmap-koicha-tokyo.pmtiles` was copied into
+  `/home/stars/data` at 20:57 and appeared in `/catalog` while Martin was still running
+  from its 10-09 23:45 start. This refines the rule recorded below and in CLAUDE.md — the
+  restart is needed when a **new source ID is introduced by editing config.yaml** (config
+  is read only at startup), not when a new file lands in a directory Martin scans. A new
+  *style* file still needs a restart (`styles.paths` is scanned once at startup).
 - **stars serves its own glyphs since 2026-09-20:** Martin's `fonts.paths`
   (`/home/stars/fonts`, 12 files, 13 MB) serves `https://stars.optgeo.org/font/{fontstack}/{range}`
   — **no `.pbf` suffix**, unlike the two hosts it replaced (`gsi-cyberjapan.github.io`,
