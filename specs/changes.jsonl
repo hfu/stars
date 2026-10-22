@@ -14,3 +14,4 @@
 {"ts":"2026-10-09T19:01:26Z","changes":[{"kind":"dataset_changed","id":"openstreetmap_jp_planet","fields":["planetiler:osm:osmosisreplicationtime"]}]}
 {"ts":"2026-10-12T19:02:47Z","changes":[{"kind":"dataset_added","id":"bvmap-koicha-tokyo"},{"kind":"style_added","id":"bvmap-koicha-starlight"},{"kind":"file_added","id":"bvmap-koicha-tokyo","size":5704019}]}
 {"ts":"2026-10-16T19:01:48Z","changes":[{"kind":"dataset_changed","id":"openstreetmap_jp_planet","fields":["planetiler:osm:osmosisreplicationtime"]}]}
+{"ts":"2026-10-22T19:01:41Z","changes":[{"kind":"dataset_added","id":"waterloo-oam"},{"kind":"file_added","id":"waterloo-oam","size":7445626935}]}
