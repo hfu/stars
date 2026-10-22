@@ -1,0 +1,17 @@
+:8080 {
+	root * /home/stars/data
+
+	header {
+		Access-Control-Allow-Origin *
+		Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+		Access-Control-Allow-Headers "Range, If-Match, If-None-Match"
+		Access-Control-Expose-Headers "Content-Range, Content-Length, Accept-Ranges, ETag"
+		Access-Control-Max-Age "86400"
+	}
+
+	route {
+		@options method OPTIONS
+		respond @options 204
+		file_server browse
+	}
+}

@@ -422,6 +422,32 @@ a change to that ongoing convention.
   make direct range-based reads (e.g. a COG reader) against a large file hosted here —
   Martin-mediated pmtiles serving is unaffected, since Martin does the range reading
   server-side and returns ordinary tile responses to the client either way.
+- **depot answers CORS preflights since 2026-10-22, and its Caddyfile is now mirrored at
+  [config/Caddyfile](../config/Caddyfile).** Before that, a browser on another origin
+  could not read a `.pmtiles` from depot through a pmtiles library: a `Range` header makes
+  the request non-simple, and the preflight `OPTIONS` hit Caddy's `file_server`, which
+  answers `405` with `allow: GET, HEAD` and no `Access-Control-Allow-Headers` — so the
+  preflight failed even though the ranged `GET` itself was a correct `206`. Reported by
+  `dwg7/waterloo` and reproduced here. The fix adds `Access-Control-Allow-Headers: Range,
+  If-Match, If-None-Match`, `Access-Control-Expose-Headers: Content-Range, Content-Length,
+  Accept-Ranges, ETag` (needed because `Content-Range` is not CORS-safelisted, so JS
+  cannot read it otherwise), `Access-Control-Max-Age`, and a `route` block answering
+  `OPTIONS` with `204` ahead of `file_server`. Verified live: preflight `204` with those
+  headers, ranged `GET` `206` with `content-range`, directory browse still `200`.
+  Notes for next time:
+  - **`Access-Control-Allow-Origin` stays `*`, deliberately** — depot's GETs are
+    edge-cached, so reflecting the request's origin risks serving one origin's
+    `Access-Control-Allow-Origin` to another from cache. Preflights are not cached
+    (`cf-cache-status: DYNAMIC`), so the change took effect immediately.
+  - `/etc/caddy/Caddyfile` is root-owned and `stars` has **no passwordless sudo**
+    (`sudo: a password is required`), so this session cannot apply it. What worked: stage
+    the new file as `stars` (`/home/stars/Caddyfile.new`), validate it without root
+    (`caddy validate --config ...` — Caddy 2.11.4), then have the user run the
+    `sudo install` + `systemctl reload caddy` in their own terminal.
+  - **`reload`, not `restart`** — and it touches depot only, not Martin or the shared
+    `cloudflared`.
+  - The Cloudflare large-file Range caveat above still applies; this changes nothing
+    about it. `waterloo-oam.pmtiles` (7.4 GB) ranges correctly.
 - Installed version **2026.8.2** (upgraded from 2026.6.0 via Cloudflare's official apt
   repository — `/etc/apt/sources.list.d/cloudflared.list`,
   `sudo apt-get install --only-upgrade cloudflared`), confirmed live via `cloudflared
