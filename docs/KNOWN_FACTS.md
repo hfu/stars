@@ -336,6 +336,23 @@ a change to that ongoing convention.
   (`encoding: "mlt"`, `application/vnd.maplibre-tile`, z3–16, 24 vector layers, bounds
   139.73–139.80 / 35.65–35.71) — the **first MLT-encoded source served here**; a
   nationwide replacement is expected later. Glyphs, sprite and tiles are all stars'.
+- **Martin's composite source (comma-separated IDs in the path) works for MLT, and does
+  not re-encode the tile.** Since 2026-10-24 `styles/bvmap-koicha-starlight.json` reads
+  `https://stars.optgeo.org/bvmap-koicha-hokkaido,bvmap-koicha-tokyo` (PR #15) instead of
+  the single Tokyo source, so regional `bvmap-koicha-<area>` cells can be added without
+  touching the style again. Measured here before merging: tiles fetched through the
+  composite are **byte-identical** to the same tiles from the single source (4 of 4
+  cases), and the content type stays `application/vnd.maplibre-tile` — so for cells that
+  do not overlap, nothing is merged or rewritten. The composite TileJSON spans both
+  (`minzoom` 3 from Tokyo, `maxzoom` 16, bounds covering both), and its `vector_layers`
+  holds **48 entries: all 24 layer IDs twice**, one set per source. That is cosmetic for
+  rendering — MapLibre resolves `source-layer` by the name inside the tile — but worth
+  knowing before reading a layer count off a composite TileJSON. Overlapping cells were
+  deliberately not tested, by `dwg7/bvmap-koicha`'s design (spatial-ID cells are
+  mutually exclusive); when a nationwide `bvmap-koicha.pmtiles` exists the style goes
+  back to a single source. **MLT PMTiles must stay uncompressed** — Martin 1.14.0 cannot
+  read MLT + gzip/brotli/zstd ("not yet supported"); reported by that session, not
+  verified here.
 - **A brand-new pmtiles file in a scanned `pmtiles.paths` directory is registered without
   a restart.** Observed 2026-10-12: `bvmap-koicha-tokyo.pmtiles` was copied into
   `/home/stars/data` at 20:57 and appeared in `/catalog` while Martin was still running
