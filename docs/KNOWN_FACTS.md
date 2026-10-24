@@ -447,7 +447,17 @@ a change to that ongoing convention.
   - **`reload`, not `restart`** — and it touches depot only, not Martin or the shared
     `cloudflared`.
   - The Cloudflare large-file Range caveat above still applies; this changes nothing
-    about it. `waterloo-oam.pmtiles` (7.4 GB) ranges correctly.
+    about it. `waterloo-oam.pmtiles` (7.4 GB) ranges correctly — **but not always.** On
+    2026-10-24, three identical ranged GETs through the public domain came back `200`
+    with the full 7.4 GB body instead of `206`, inside one ~3-minute window; before and
+    after it, 17 of 17 attempts were `206`, and the origin (`localhost:8080`, bypassing
+    Cloudflare) was `206` 6 times out of 6. So it is Cloudflare, not Caddy, and it is not
+    the Origin header (the same value produced both). The window coincided with a full
+    7.4 GB fetch of ours that was aborted part-way, so Cloudflare serving concurrent
+    range requests as full-content streams during an origin fetch is a plausible
+    mechanism — **not confirmed**; `cf-cache-status` was `BYPASS` throughout. Practical
+    consequence for any browser client: **treat a `200` answer to a ranged request as a
+    failure and abort**, or the visitor starts pulling 7.4 GB.
 - Installed version **2026.8.2** (upgraded from 2026.6.0 via Cloudflare's official apt
   repository — `/etc/apt/sources.list.d/cloudflared.list`,
   `sudo apt-get install --only-upgrade cloudflared`), confirmed live via `cloudflared
