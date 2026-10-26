@@ -336,6 +336,49 @@ a change to that ongoing convention.
   (`encoding: "mlt"`, `application/vnd.maplibre-tile`, z3–16, 24 vector layers, bounds
   139.73–139.80 / 35.65–35.71) — the **first MLT-encoded source served here**; a
   nationwide replacement is expected later. Glyphs, sprite and tiles are all stars'.
+- **Line-placed annotations render upside-down in MapLibre GL JS, and the cause is still
+  open (2026-10-24..27).** `styles/bvmap-starlight.json`'s `bvmap-注記角度付き線` layer —
+  `symbol-placement: line-center`, `text-rotation-alignment: map`,
+  `text-writing-mode: ["horizontal","vertical"]`, `text-keep-upright` unset (default
+  true) — draws many steep CJK annotations rotated 180°. **The layer is GSI's upstream
+  `std.json` verbatim** (also in `bvmap-dark.json`), so this is not a starlight change,
+  and the style spec says `text-keep-upright` exists "to prevent it from being rendered
+  upside-down", so the behaviour contradicts the documented contract. GSI's own demo does
+  not show it because it sets `localIdeographFontFamily: false` (its index.html).
+  What is **established** by measurement here:
+  - The orientation decision lives in `requiresOrientationChange()`
+    (`src/symbol/projection.ts`). Its horizontal→vertical test is
+    `|dy| > |dx| × aspectRatio` in **clip space**, where `aspectRatio` is the viewport's
+    `width/height` — the factor cancels clip-space normalisation, so the real threshold is
+    **θ > 45°**, independent of window shape. Verified by instrumenting the published
+    unminified `maplibre-gl-dev.mjs`.
+  - For a reproducing case (53.6°), that function's inputs and outputs are **identical**
+    between a render that comes out upright and one that comes out inverted. **The flip is
+    not decided there.**
+  - Local (TinySDF) and server (PBF) glyph metrics for the same CJK characters are nearly
+    identical — `advance` 24 and `top` −7 in both; the one categorical difference is
+    `isDoubleResolution: true`, used only for texture scale (`src/symbol/quads.ts`).
+  What is **refuted** (do not re-test):
+  - A MapLibre version regression — v2.4.0 reproduces it too.
+  - A race between TinySDF glyph generation and symbol layout — adding the probe layer
+    after `idle` still reproduced it.
+  - The style's `sprite`, an unused vector `source`, `text-variable-anchor` +
+    `text-radial-offset` + `text-justify` + `text-max-width`, and collision
+    (`text-allow-overlap: false`) — each added to a minimal style on its own, all upright.
+  - Line digitisation direction and curvature — reversing the vertex order, and
+    straightening the real 4-point geometry, changed nothing.
+  **Open:** in every *controlled* single-variable configuration built so far (minimal
+  style, GeoJSON line, the layer's own layout) the label renders **upright** under both
+  glyph paths; the inversion is reliable only with the real style on real tile features.
+  Also note the orientation calls so far were judged from small screenshot crops, which is
+  not a sound basis — the next step is an objective check (read back canvas pixels with
+  `preserveDrawingBuffer` and compare against the 180°-rotated reference) before bisecting
+  the real layer's remaining properties (`text-size`/`text-font` expressions,
+  `symbol-sort-key`) and the real tile geometry.
+  **Mitigation available today:** a consuming viewer can set
+  `localIdeographFontFamily: false`, which also makes the maps actually use the fonts
+  stars hosts — with the default `'sans-serif'`, CJK is drawn from the browser's local
+  font and our glyph hosting is bypassed entirely.
 - **Martin's composite source (comma-separated IDs in the path) works for MLT, and does
   not re-encode the tile.** Since 2026-10-24 `styles/bvmap-koicha-starlight.json` reads
   `https://stars.optgeo.org/bvmap-koicha-hokkaido,bvmap-koicha-tokyo` (PR #15) instead of
