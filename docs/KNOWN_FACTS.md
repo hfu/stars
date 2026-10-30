@@ -379,6 +379,12 @@ a change to that ongoing convention.
   `localIdeographFontFamily: false`, which also makes the maps actually use the fonts
   stars hosts — with the default `'sans-serif'`, CJK is drawn from the browser's local
   font and our glyph hosting is bypassed entirely.
+  **Decision 2026-10-30 (user): this is not being communicated to downstream viewers.**
+  The user's position is that system fonts are the intended future, so asking consumers to
+  switch the local-font path off is the wrong direction; the line-label inversion is
+  therefore left to be fixed upstream (or avoided in `bvmap-koicha`, which owns its
+  tiles), not worked around in consumers. Consequence worth remembering: with the default
+  `localIdeographFontFamily`, the fonts stars hosts are not what readers see.
 - **Martin's composite source (comma-separated IDs in the path) works for MLT, and does
   not re-encode the tile.** Since 2026-10-24 `styles/bvmap-koicha-starlight.json` reads
   `https://stars.optgeo.org/bvmap-koicha-hokkaido,bvmap-koicha-tokyo` (PR #15) instead of
