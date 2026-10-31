@@ -926,7 +926,111 @@
   {
    "id": "bvmap-等高線",
    "paint": {
-    "line-color": "rgba(168,169,172,1)",
+    "line-color": "rgba(192,193,197,1)",
+    "line-opacity": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     8,
+     0,
+     9,
+     [
+      "case",
+      [
+       "==",
+       [
+        "%",
+        [
+         "get",
+         "vt_alti"
+        ],
+        50
+       ],
+       0
+      ],
+      1,
+      0
+     ],
+     13,
+     [
+      "case",
+      [
+       "==",
+       [
+        "%",
+        [
+         "get",
+         "vt_alti"
+        ],
+        50
+       ],
+       0
+      ],
+      1,
+      0
+     ],
+     14,
+     1,
+     15,
+     [
+      "case",
+      [
+       "==",
+       [
+        "get",
+        "vt_code"
+       ],
+       7353
+      ],
+      0,
+      1
+     ]
+    ],
+    "line-width": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     13,
+     0.25,
+     15,
+     0.4,
+     17,
+     0.6,
+     19,
+     0.9
+    ]
+   },
+   "source": "bvmap",
+   "source-layer": "Cntr",
+   "type": "line",
+   "filter": [
+    "!",
+    [
+     "==",
+     [
+      "%",
+      [
+       "get",
+       "vt_alti"
+      ],
+      50
+     ],
+     0
+    ]
+   ]
+  },
+  {
+   "id": "bvmap-等高線(計曲線)",
+   "paint": {
+    "line-color": "rgba(146,147,152,1)",
     "line-opacity": [
      "interpolate",
      [
@@ -999,32 +1103,34 @@
       "zoom"
      ],
      8,
-     0.7,
+     0.4,
      11,
-     0.7,
-     12,
-     [
-      "case",
-      [
-       "==",
-       [
-        "%",
-        [
-         "get",
-         "vt_alti"
-        ],
-        50
-       ],
-       0
-      ],
-      1.4,
-      0.7
-     ]
+     0.55,
+     13,
+     0.8,
+     15,
+     1.1,
+     17,
+     1.5,
+     19,
+     2.0
     ]
    },
    "source": "bvmap",
    "source-layer": "Cntr",
-   "type": "line"
+   "type": "line",
+   "filter": [
+    "==",
+    [
+     "%",
+     [
+      "get",
+      "vt_alti"
+     ],
+     50
+    ],
+    0
+   ]
   },
   {
    "id": "bvmap-等深線",
@@ -27412,6 +27518,9 @@
  "metadata": {
   "derived-from": "dwg7/bvmap style/bvmap-starlight.json @ 9068c809beeecaec2a97366f8e1a6e210459eacd",
   "zoom-shift": -1,
-  "generator": "dwg7/bvmap-koicha style/make_koicha_starlight.py"
+  "generator": "dwg7/bvmap-koicha style/make_koicha_starlight.py",
+  "patches": [
+   "contours"
+  ]
  }
 }
