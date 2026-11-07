@@ -19,3 +19,4 @@
 {"ts":"2026-10-24T19:01:57Z","changes":[{"kind":"dataset_added","id":"bvmap-koicha-hokkaido"},{"kind":"dataset_changed","id":"bvmap-koicha-tokyo","fields":["referenced_by_stars_style"]},{"kind":"style_changed","id":"bvmap-koicha-starlight","fields":["deployed_hash","repo_hash"]},{"kind":"file_added","id":"bvmap-koicha-hokkaido","size":3221824917}]}
 {"ts":"2026-10-30T19:02:06Z","changes":[{"kind":"dataset_changed","id":"openstreetmap_jp_planet","fields":["planetiler:osm:osmosisreplicationtime"]}]}
 {"ts":"2026-11-06T19:02:10Z","changes":[{"kind":"dataset_changed","id":"openstreetmap_jp_planet","fields":["planetiler:osm:osmosisreplicationtime"]}]}
+{"ts":"2026-11-07T19:01:46Z","changes":[{"kind":"dataset_added","id":"bvmap-koicha-tokyo-roads"},{"kind":"file_added","id":"bvmap-koicha-tokyo-roads","size":6374063}]}
