@@ -66,6 +66,38 @@ a change to that ongoing convention.
   - **Decision 2026-09-15 (user): the switch stays for now**, so the 100 Mb/s link and
     the stall behaviour above are the standing state. Keep load tests at c ≤ 6. If the
     link speed ever changes, re-run the benchmark rather than assuming the stalls went away.
+  - **Correction 2026-11-08: the link now negotiates 1000 Mb/s full duplex.** After the
+    reboot below, `/sys/class/net/eth0/speed` = 1000 and the kernel logged
+    `eth0: Link is Up - 1Gbps/Full - flow control rx/tx` at 23:47:32; `ethtool eth0` now
+    shows the **link partner advertising 1000baseT/Full** (it was 10/100 only on
+    2026-09-15). `rx_pause`/`tx_pause`/`tx_errors` are all 0 since boot, and the host's
+    LAN address is `192.168.50.244/24` behind gateway `192.168.50.1`, not the
+    `192.168.11.x` network recorded above — so the switch/gateway in front of the Pi is
+    no longer the old one. What changed, and when, is **not recorded here** (the last
+    recorded link speed was 100 Mb/s; renegotiation only happens when the link drops, so
+    the swap cannot be dated from the Pi). The 2026-09-15 benchmark
+    ceilings (~11.6 MB/s) and the "keep load tests at c ≤ 6" rule describe the old
+    100 Mb/s link: re-measure before relying on either. Note that the TX-stall cause is
+    still unexplained — 0 stalls in 2 minutes of uptime proves nothing.
+  - **apt security update and reboot, 2026-11-08** (user attended, entered the sudo
+    password in their own terminal; `stars` has no passwordless sudo). 129 packages
+    upgraded (libc6 2.41-12+rpt1+deb13u4, openssl 3.5.7, curl, glib, gpg, nodejs,
+    libnss3, perl, python3.13, raspi-firmware, …), then `caddy` 2.11.4 → 2.11.9 and
+    `cloudflared` 2026.8.2 → 2026.10.7 as a separate step (cloudflared restart drops the
+    SSH path, so it ran in a host-side tmux). `cloudflared.service` is a hand-written
+    unit in `/etc/systemd/system/`, so the package upgrade does not restart it — it needs
+    an explicit `systemctl restart`. The running kernel went **6.12.75 → 6.18.39** on the
+    reboot (`kernel8.img` had been 6.18.39 since an earlier upgrade, never booted until
+    now); it came back in under 3 minutes with no failed units, `throttled=0x0`,
+    Martin/caddy/cloudflared active, `/catalog` 46 tiles/9 styles. Martin takes ~20 s
+    (after a plain restart) to answer — 502 from the edge in that window is expected.
+    The 6.12.75 `vmlinuz`/`initrd` are staged as `/boot/firmware/kernel8_612.img` and
+    `initramfs8_612` for a fallback (set `kernel=` / `initramfs … followkernel` in
+    `config.txt` from another machine); delete them once 6.18 has proven stable.
+    `rpi-eeprom` is still **held** (bootloader update 2026-01-09 → 2026-05-17 pending,
+    deliberately not combined with the kernel change). `apt upgrade` keeps the
+    `linux-image-rpi-*`/`linux-base-rpi-*`/`rpi-swap` packages back; that is the normal
+    behaviour here, not a hold.
 - **Thermal margin is already thin without any load test.** At 100 days' uptime,
   `vcgencmd get_throttled` = `0xe0000`: ARM frequency capping, throttling, and the soft
   temperature limit have each *occurred* since boot (under-voltage has not); none active
