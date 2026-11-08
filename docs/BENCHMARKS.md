@@ -278,3 +278,27 @@ behaviour over hours; profile finding 3 before any link upgrade.
 (`host-sampler.sh`), and the analyzer prints per-step `tx_errors` and PAUSE deltas.
 Finding 3 is explained (TileJSON cloning); what's left there is a decision — report it
 upstream, and/or trim `tilestats` from vbm's metadata — not more profiling.
+
+## 2026-11-09 — Phase 1 re-run at gigabit: partial (`20261108T2155Z-phase1-gbit`)
+
+The link changed (the user's RT-AX59U; eth0 now 1000 Mb/s, see KNOWN_FACTS.md), which is
+one of the re-open conditions above. Tests A–D of Phase 1 were re-run from the wired
+`slate.local` straight at Martin on the LAN (`monitoring/bench/phase1-gbit.sh`; E/F
+omitted because the original blocks' coordinates were never recorded). **Only A finished;
+B stopped at its c=8 step and C/D did not run.** Per-step numbers and the full account of
+the stop: [`summary.md`](../benchmarks/20261108T2155Z-phase1-gbit/summary.md).
+
+- **`vbm` is now CPU-bound, not link-bound.** Plateau 419–422 rps (was 275–280) at only
+  17.6 MB/s on the wire (was the 11.4–11.7 MB/s link ceiling), with the Pi at 93–98% CPU
+  (100% max) from c=8. That is ~1.5× the old rate, and 16% of the new line rate. The
+  kernel also changed (6.12.75 → 6.18.39) between the two runs, so the gain is not
+  attributable to the link alone; the rate is in the range expected from the TileJSON
+  cloning cost (finding 3), which is unchanged (Martin is still 1.14.0).
+- **No TX stalls seen**: `tx_errors` 0 and PAUSE 0/0 across A and the part of B that ran.
+  That is not evidence they are gone — Phase 3 showed they need minutes to appear, and
+  these steps were 30 s.
+- **B (`freetown`, WebP) reached 107.4 MB/s TX (~86% of the line) at c=8, then traffic
+  stopped dead at 22:05:26Z**; the run was lost to a connection reset to the generator.
+  Cause unestablished (not a Pi `tx_errors`/watchdog event). Until it is explained the
+  gigabit ceiling for raster tiles is **not measured** — c=4 (62 MB/s) is the highest
+  completed step.

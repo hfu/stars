@@ -1,0 +1,15 @@
+[21:55:39Z] run 20261108T2155Z-phase1-gbit starting
+[21:55:47Z] sampler started on Pi; baseline 120s
+[21:57:47Z] test A-vbm-warm: --source vbm --tile-list vbm.txt
+c=  1  rps=   168.3  p50=5.9  p95=7.7  p99=9.0  max=13.6ms  err=0.0  7.11MB/s  tile mean 42236B  status={'200': 5111}
+c=  2  rps=   325.0  p50=6.0  p95=8.1  p99=9.3  max=15.0ms  err=0.0  13.73MB/s  tile mean 42247B  status={'200': 9880}
+c=  4  rps=   405.8  p50=9.3  p95=15.0  p99=18.0  max=41.2ms  err=0.0  17.15MB/s  tile mean 42250B  status={'200': 12351}
+c=  8  rps=   419.5  p50=18.4  p95=27.3  p99=35.7  max=78.8ms  err=0.0  17.64MB/s  tile mean 42044B  status={'200': 12761}
+c= 16  rps=   421.5  p50=36.6  p95=55.3  p99=71.8  max=128.4ms  err=0.0  17.68MB/s  tile mean 41941B  status={'200': 12812}
+c= 32  rps=   422.2  p50=67.8  p95=112.5  p99=142.4  max=253.1ms  err=0.0  17.64MB/s  tile mean 41787B  status={'200': 12861}
+wrote results/A-vbm-warm.json
+[22:02:21Z] test B-freetown: --source freetown-mapterhorn --tile-list freetown.txt
+c=  1  rps=   931.9  p50=0.9  p95=2.2  p99=2.9  max=867.3ms  err=0.0  13.09MB/s  tile mean 14043B  status={'200': 28274}
+c=  2  rps=  2274.1  p50=0.7  p95=1.6  p99=2.3  max=10.5ms  err=0.0  32.24MB/s  tile mean 14176B  status={'200': 68981}
+c=  4  rps=  4412.0  p50=0.8  p95=1.8  p99=2.5  max=7.0ms  err=0.0  62.21MB/s  tile mean 14100B  status={'200': 133759}
+[22:29:53Z] collected results into benchmarks/20261108T2155Z-phase1-gbit

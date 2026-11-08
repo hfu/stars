@@ -1,0 +1,17 @@
+run_id: 20261108T2155Z-phase1-gbit
+repo_commit: 5a8d32c64c72b40c23aa82de16d1066d8056ec99
+started_utc: 2026-11-08T21:55:39Z
+generator: slate.local (Apple M4 Python 3.9.6 )
+generator_link: media: autoselect (1000baseT <full-duplex,flow-control>)
+base: http://192.168.50.244:3000
+steps: 1,2,4,8,16,32  duration_s: 30  pause_s: 15  max_temp_c: 80
+pi_model: Raspberry Pi 4 Model B Rev 1.5
+kernel: 6.18.39+rpt-rpi-v8
+martin: martin 1.14.0
+martin_since: Sun 2026-11-08 23:47:47 JST
+eth0_speed_mbps: 1000
+throttled_at_start: throttled=0x0
+temp_at_start: temp=50.1'C
+mem: 7818 MB total, 7498 MB available
+throttled_at_end: throttled=0x0
+temp_at_end: temp=55.5'C
