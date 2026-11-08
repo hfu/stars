@@ -73,9 +73,12 @@ a change to that ongoing convention.
     2026-09-15). `rx_pause`/`tx_pause`/`tx_errors` are all 0 since boot, and the host's
     LAN address is `192.168.50.244/24` behind gateway `192.168.50.1`, not the
     `192.168.11.x` network recorded above — so the switch/gateway in front of the Pi is
-    no longer the old one. What changed, and when, is **not recorded here** (the last
-    recorded link speed was 100 Mb/s; renegotiation only happens when the link drops, so
-    the swap cannot be dated from the Pi). The 2026-09-15 benchmark
+    no longer the old one. **The user states the Pi is now connected to the ASUS RT-AX59U**
+    (the candidate replacement discussed earlier; the gateway's MAC `10:7c:61:e0:da:f2`
+    is consistent with an ASUS device, but that is only the user's statement plus an
+    unchecked vendor-prefix match, not something verified from the Pi). When the swap
+    happened is **not recorded** (the last recorded link speed was 100 Mb/s;
+    renegotiation only happens when the link drops, so it cannot be dated from the Pi). The 2026-09-15 benchmark
     ceilings (~11.6 MB/s) and the "keep load tests at c ≤ 6" rule describe the old
     100 Mb/s link: re-measure before relying on either. Note that the TX-stall cause is
     still unexplained — 0 stalls in 2 minutes of uptime proves nothing.
