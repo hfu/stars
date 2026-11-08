@@ -1909,7 +1909,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線色0",
@@ -1953,7 +1953,7 @@
       ]
      ]
     ],
-    16,
+    15,
     [
      "all",
      [
@@ -2562,7 +2562,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線0",
@@ -2754,7 +2754,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線旗竿0",
@@ -2869,7 +2869,7 @@
     ]
    },
    "minzoom": 13,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線ククリ橋0",
@@ -3196,7 +3196,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線色橋0",
@@ -3618,7 +3618,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-建築物0",
@@ -3836,7 +3836,7 @@
     ]
    },
    "minzoom": 14,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋ククリ白0",
@@ -3955,7 +3955,7 @@
     ]
    },
    "minzoom": 13,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋駅ククリ0",
@@ -4127,7 +4127,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋0",
@@ -4308,7 +4308,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線旗竿橋0",
@@ -4412,7 +4412,7 @@
     ]
    },
    "minzoom": 13,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線ククリ1",
@@ -4765,7 +4765,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線色1",
@@ -5192,7 +5192,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線駅ククリ1",
@@ -5375,7 +5375,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線1",
@@ -5567,7 +5567,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線旗竿1",
@@ -5682,7 +5682,7 @@
     ]
    },
    "minzoom": 13,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線ククリ橋1",
@@ -6009,7 +6009,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線色橋1",
@@ -6431,7 +6431,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋ククリ黒1",
@@ -6563,7 +6563,7 @@
     ]
    },
    "minzoom": 14,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋ククリ白1",
@@ -6682,7 +6682,7 @@
     ]
    },
    "minzoom": 13,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋駅ククリ1",
@@ -6854,7 +6854,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋1",
@@ -7035,7 +7035,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線旗竿橋1",
@@ -7139,7 +7139,7 @@
     ]
    },
    "minzoom": 13,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-建築物1",
@@ -7578,7 +7578,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線色2",
@@ -8005,7 +8005,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線駅ククリ2",
@@ -8188,7 +8188,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線2",
@@ -8380,7 +8380,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線旗竿2",
@@ -8495,7 +8495,7 @@
     ]
    },
    "minzoom": 13,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線ククリ橋2",
@@ -8822,7 +8822,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線色橋2",
@@ -9244,7 +9244,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋ククリ黒2",
@@ -9376,7 +9376,7 @@
     ]
    },
    "minzoom": 14,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋ククリ白2",
@@ -9495,7 +9495,7 @@
     ]
    },
    "minzoom": 13,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋駅ククリ2",
@@ -9667,7 +9667,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋2",
@@ -9848,7 +9848,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線旗竿橋2",
@@ -9952,7 +9952,7 @@
     ]
    },
    "minzoom": 13,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-建築物2",
@@ -10391,7 +10391,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線色3",
@@ -10818,7 +10818,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線駅ククリ3",
@@ -11001,7 +11001,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線3",
@@ -11193,7 +11193,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線旗竿3",
@@ -11308,7 +11308,7 @@
     ]
    },
    "minzoom": 13,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線ククリ橋3",
@@ -11635,7 +11635,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線色橋3",
@@ -12057,7 +12057,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋ククリ黒3",
@@ -12189,7 +12189,7 @@
     ]
    },
    "minzoom": 14,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋ククリ白3",
@@ -12308,7 +12308,7 @@
     ]
    },
    "minzoom": 13,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋駅ククリ3",
@@ -12480,7 +12480,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋3",
@@ -12661,7 +12661,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線旗竿橋3",
@@ -12765,7 +12765,7 @@
     ]
    },
    "minzoom": 13,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-建築物3",
@@ -12975,7 +12975,7 @@
      "vt_drworder"
     ]
    },
-   "maxzoom": 16,
+   "maxzoom": 15,
    "minzoom": 10,
    "paint": {
     "line-color": [
@@ -13631,7 +13631,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線駅ククリ4",
@@ -13814,7 +13814,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線4",
@@ -14006,7 +14006,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "filter": [
@@ -14056,7 +14056,7 @@
     ]
    ],
    "id": "bvmap-鉄道中心線旗竿4",
-   "maxzoom": 16,
+   "maxzoom": 15,
    "minzoom": 13,
    "paint": {
     "line-color": "rgb(255,255,255)",
@@ -14448,7 +14448,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-道路中心線色橋4",
@@ -14870,7 +14870,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "filter": [
@@ -14893,7 +14893,7 @@
     ]
    ],
    "id": "bvmap-鉄道中心線橋ククリ黒4",
-   "maxzoom": 16,
+   "maxzoom": 15,
    "minzoom": 14,
    "paint": {
     "line-color": "rgba(0,0,0,1)",
@@ -15025,7 +15025,7 @@
     ]
    ],
    "id": "bvmap-鉄道中心線橋ククリ白4",
-   "maxzoom": 16,
+   "maxzoom": 15,
    "minzoom": 13,
    "paint": {
     "line-color": "rgba(255,255,255,1)",
@@ -15293,7 +15293,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "id": "bvmap-鉄道中心線橋4",
@@ -15474,7 +15474,7 @@
     ]
    },
    "minzoom": 10,
-   "maxzoom": 16
+   "maxzoom": 15
   },
   {
    "filter": [
@@ -15513,7 +15513,7 @@
     ]
    ],
    "id": "bvmap-鉄道中心線旗竿橋4",
-   "maxzoom": 16,
+   "maxzoom": 15,
    "minzoom": 13,
    "paint": {
     "line-color": "rgb(255,255,255)",
@@ -15686,7 +15686,7 @@
       ]
      ]
     ],
-    16,
+    15,
     [
      "all",
      [
@@ -15843,7 +15843,7 @@
     ]
    ],
    "id": "bvmap-道路中心線階段",
-   "maxzoom": 16,
+   "maxzoom": 15,
    "minzoom": 10,
    "paint": {
     "line-color": "rgba(113,114,116,1)",
@@ -15996,7 +15996,7 @@
       ]
      ]
     ],
-    16,
+    15,
     [
      "all",
      [
@@ -16235,7 +16235,7 @@
       ]
      ]
     ],
-    16,
+    15,
     [
      "all",
      [
@@ -16470,7 +16470,7 @@
      "vt_drworder"
     ]
    },
-   "minzoom": 16,
+   "minzoom": 15,
    "paint": {
     "line-color": [
      "match",
@@ -16494,22 +16494,82 @@
      8
     ],
     "line-width": [
-     "match",
+     "interpolate",
      [
-      "get",
-      "vt_code"
+      "linear"
      ],
      [
-      2802,
-      2804
+      "zoom"
      ],
-     3,
+     15,
      [
-      2812,
-      2814
+      "*",
+      [
+       "match",
+       [
+        "get",
+        "vt_code"
+       ],
+       [
+        2802,
+        2804
+       ],
+       3,
+       [
+        2812,
+        2814
+       ],
+       2,
+       1
+      ],
+      0.3
      ],
-     2,
-     1
+     16,
+     [
+      "*",
+      [
+       "match",
+       [
+        "get",
+        "vt_code"
+       ],
+       [
+        2802,
+        2804
+       ],
+       3,
+       [
+        2812,
+        2814
+       ],
+       2,
+       1
+      ],
+      0.6
+     ],
+     17,
+     [
+      "*",
+      [
+       "match",
+       [
+        "get",
+        "vt_code"
+       ],
+       [
+        2802,
+        2804
+       ],
+       3,
+       [
+        2812,
+        2814
+       ],
+       2,
+       1
+      ],
+      1.0
+     ]
     ]
    },
    "source": "bvmap",
@@ -16525,26 +16585,224 @@
      "vt_drworder"
     ]
    },
-   "minzoom": 16,
+   "minzoom": 15,
    "paint": {
     "line-color": "rgba(113,114,116,1)",
     "line-width": [
-     "match",
+     "interpolate",
      [
-      "get",
-      "vt_code"
+      "linear"
      ],
      [
-      2203,
-      2243
+      "zoom"
      ],
-     3,
-     2
+     15,
+     [
+      "*",
+      [
+       "match",
+       [
+        "get",
+        "vt_code"
+       ],
+       [
+        2203,
+        2243
+       ],
+       3,
+       2
+      ],
+      0.3
+     ],
+     16,
+     [
+      "*",
+      [
+       "match",
+       [
+        "get",
+        "vt_code"
+       ],
+       [
+        2203,
+        2243
+       ],
+       3,
+       2
+      ],
+      0.6
+     ],
+     17,
+     [
+      "*",
+      [
+       "match",
+       [
+        "get",
+        "vt_code"
+       ],
+       [
+        2203,
+        2243
+       ],
+       3,
+       2
+      ],
+      1.0
+     ]
     ]
    },
    "source": "bvmap",
    "source-layer": "RdEdg",
    "type": "line"
+  },
+  {
+   "id": "bvmap-道路中心線(主要道路・細線)",
+   "type": "line",
+   "source": "bvmap",
+   "source-layer": "RdCL",
+   "minzoom": 15,
+   "filter": [
+    "any",
+    [
+     "==",
+     [
+      "get",
+      "vt_motorway"
+     ],
+     1
+    ],
+    [
+     "in",
+     [
+      "get",
+      "vt_rdctg"
+     ],
+     [
+      "literal",
+      [
+       "高速自動車国道等",
+       "国道",
+       "都道府県道"
+      ]
+     ]
+    ]
+   ],
+   "layout": {
+    "line-join": "round",
+    "line-cap": "butt",
+    "line-sort-key": [
+     "get",
+     "vt_drworder"
+    ]
+   },
+   "paint": {
+    "line-color": [
+     "case",
+     [
+      "any",
+      [
+       "==",
+       [
+        "get",
+        "vt_motorway"
+       ],
+       1
+      ],
+      [
+       "==",
+       [
+        "get",
+        "vt_rdctg"
+       ],
+       "高速自動車国道等"
+      ]
+     ],
+     "rgba(108,109,114,1)",
+     [
+      "==",
+      [
+       "get",
+       "vt_rdctg"
+      ],
+      "国道"
+     ],
+     "rgba(134,135,140,1)",
+     "rgba(166,167,171,1)"
+    ],
+    "line-width": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     15,
+     [
+      "case",
+      [
+       "any",
+       [
+        "==",
+        [
+         "get",
+         "vt_motorway"
+        ],
+        1
+       ],
+       [
+        "==",
+        [
+         "get",
+         "vt_rdctg"
+        ],
+        "高速自動車国道等"
+       ]
+      ],
+      1.2,
+      0.8
+     ],
+     17,
+     [
+      "case",
+      [
+       "any",
+       [
+        "==",
+        [
+         "get",
+         "vt_motorway"
+        ],
+        1
+       ],
+       [
+        "==",
+        [
+         "get",
+         "vt_rdctg"
+        ],
+        "高速自動車国道等"
+       ]
+      ],
+      2.4,
+      1.6
+     ]
+    ],
+    "line-opacity": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     17,
+     1,
+     18.5,
+     0
+    ]
+   }
   },
   {
    "filter": [
@@ -16556,14 +16814,28 @@
     2401
    ],
    "id": "bvmap-道路構成線トンネル内の道路",
-   "minzoom": 16,
+   "minzoom": 15,
    "paint": {
     "line-color": "rgba(113,114,116,1)",
     "line-dasharray": [
      10,
      8
     ],
-    "line-width": 1
+    "line-width": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     15,
+     0.3,
+     16,
+     0.6,
+     17,
+     1.0
+    ]
    },
    "source": "bvmap",
    "source-layer": "RdCompt",
@@ -16579,10 +16851,24 @@
     2411
    ],
    "id": "bvmap-道路構成線分離帯",
-   "minzoom": 16,
+   "minzoom": 15,
    "paint": {
     "line-color": "rgba(113,114,116,1)",
-    "line-width": 2
+    "line-width": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     15,
+     0.6,
+     16,
+     1.2,
+     17,
+     2.0
+    ]
    },
    "source": "bvmap",
    "source-layer": "RdCompt",
@@ -16625,7 +16911,7 @@
      "vt_drworder"
     ]
    },
-   "minzoom": 16,
+   "minzoom": 15,
    "paint": {
     "line-color": [
      "match",
@@ -16648,24 +16934,88 @@
      "rgba(113,114,116,1)"
     ],
     "line-width": [
-     "match",
+     "interpolate",
      [
-      "get",
-      "vt_code"
+      "linear"
      ],
      [
-      2801,
-      2803,
-      2806
+      "zoom"
      ],
-     3,
+     15,
      [
-      2811,
-      2813,
-      2816
+      "*",
+      [
+       "match",
+       [
+        "get",
+        "vt_code"
+       ],
+       [
+        2801,
+        2803,
+        2806
+       ],
+       3,
+       [
+        2811,
+        2813,
+        2816
+       ],
+       2,
+       1
+      ],
+      0.3
      ],
-     2,
-     1
+     16,
+     [
+      "*",
+      [
+       "match",
+       [
+        "get",
+        "vt_code"
+       ],
+       [
+        2801,
+        2803,
+        2806
+       ],
+       3,
+       [
+        2811,
+        2813,
+        2816
+       ],
+       2,
+       1
+      ],
+      0.6
+     ],
+     17,
+     [
+      "*",
+      [
+       "match",
+       [
+        "get",
+        "vt_code"
+       ],
+       [
+        2801,
+        2803,
+        2806
+       ],
+       3,
+       [
+        2811,
+        2813,
+        2816
+       ],
+       2,
+       1
+      ],
+      1.0
+     ]
     ]
    },
    "source": "bvmap",
@@ -16747,7 +17097,7 @@
   },
   {
    "id": "bvmap-構造物線",
-   "minzoom": 16,
+   "minzoom": 15,
    "paint": {
     "line-color": [
      "match",
@@ -16761,7 +17111,21 @@
      "rgba(113,114,116,1)",
      "rgba(0,0,0,0)"
     ],
-    "line-width": 1.5
+    "line-width": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     15,
+     0.45,
+     16,
+     0.9,
+     17,
+     1.5
+    ]
    },
    "source": "bvmap",
    "source-layer": "StrctLine",
@@ -27520,7 +27884,8 @@
   "zoom-shift": -1,
   "generator": "dwg7/bvmap-koicha style/make_koicha_starlight.py",
   "patches": [
-   "contours"
+   "contours",
+   "roads"
   ]
  }
 }
