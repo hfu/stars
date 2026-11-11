@@ -101,6 +101,15 @@ a change to that ongoing convention.
     deliberately not combined with the kernel change). `apt upgrade` keeps the
     `linux-image-rpi-*`/`linux-base-rpi-*`/`rpi-swap` packages back; that is the normal
     behaviour here, not a hold.
+  - **Measured at 1 Gb/s, 2026-11-11 ([BENCHMARKS.md](BENCHMARKS.md)):** LAN-direct, the Pi
+    serves raster tiles at the line rate — `freetown-mapterhorn` 8,022 rps / 112.8 MB/s and
+    cold `kitaphoto17` 1,371 rps / 112.2 MB/s (wire TX 121–125 of 125 MB/s) — about ten
+    times the 100 Mb/s figures above, with the disk ≤ 27% busy. Vector tiles from `vbm`
+    stay CPU-bound at ~290 rps (12 MB/s) however fast the link is (a partial run the
+    same week measured 420 rps; unexplained, see `benchmarks/20261111T1030Z-phase1-gbit/`).
+    No `tx_errors`, PAUSE frames or watchdog events in 30 s steps up to c=32 — **not proof
+    the stalls are gone** (they took minutes to appear before). The "keep load tests at
+    c ≤ 6" and "~11.6 MB/s ceiling" statements above describe the old link only.
 - **Thermal margin is already thin without any load test.** At 100 days' uptime,
   `vcgencmd get_throttled` = `0xe0000`: ARM frequency capping, throttling, and the soft
   temperature limit have each *occurred* since boot (under-voltage has not); none active

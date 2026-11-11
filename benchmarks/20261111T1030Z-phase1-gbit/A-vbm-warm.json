@@ -1,0 +1,151 @@
+{
+ "meta": {
+  "base": "http://192.168.50.244:3000",
+  "tool": "stars loadgen.py",
+  "started_utc": "2026-11-11T10:32:31Z",
+  "target": "vbm",
+  "zooms": [
+   5,
+   14
+  ],
+  "candidate_tiles": 1531,
+  "tile_list": "vbm.txt",
+  "hot_set": 0,
+  "bounds": [
+   140.560318,
+   41.952454,
+   144.486207,
+   43.731871
+  ],
+  "format": "pbf",
+  "accept_encoding": true
+ },
+ "steps": [
+  {
+   "concurrency": 1,
+   "elapsed_s": 30.38,
+   "requests": 3122,
+   "rps": 102.8,
+   "mb_per_s": 4.35,
+   "tile_bytes_mean": 42291,
+   "tile_bytes_p50": 32734,
+   "latency_ms": {
+    "50": 9.1,
+    "90": 11.0,
+    "95": 11.7,
+    "99": 13.5,
+    "max": 879.2
+   },
+   "status": {
+    "200": 3122
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  },
+  {
+   "concurrency": 2,
+   "elapsed_s": 30.34,
+   "requests": 6963,
+   "rps": 229.5,
+   "mb_per_s": 9.71,
+   "tile_bytes_mean": 42299,
+   "tile_bytes_p50": 32904,
+   "latency_ms": {
+    "50": 8.6,
+    "90": 10.6,
+    "95": 11.3,
+    "99": 13.0,
+    "max": 32.0
+   },
+   "status": {
+    "200": 6963
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  },
+  {
+   "concurrency": 4,
+   "elapsed_s": 30.4,
+   "requests": 8524,
+   "rps": 280.4,
+   "mb_per_s": 11.88,
+   "tile_bytes_mean": 42360,
+   "tile_bytes_p50": 32377,
+   "latency_ms": {
+    "50": 13.5,
+    "90": 19.4,
+    "95": 22.0,
+    "99": 26.8,
+    "max": 46.5
+   },
+   "status": {
+    "200": 8524
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  },
+  {
+   "concurrency": 8,
+   "elapsed_s": 30.26,
+   "requests": 8717,
+   "rps": 288.0,
+   "mb_per_s": 12.03,
+   "tile_bytes_mean": 41781,
+   "tile_bytes_p50": 32240,
+   "latency_ms": {
+    "50": 26.7,
+    "90": 38.3,
+    "95": 41.5,
+    "99": 51.3,
+    "max": 92.2
+   },
+   "status": {
+    "200": 8717
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  },
+  {
+   "concurrency": 16,
+   "elapsed_s": 30.27,
+   "requests": 8727,
+   "rps": 288.4,
+   "mb_per_s": 12.02,
+   "tile_bytes_mean": 41674,
+   "tile_bytes_p50": 32421,
+   "latency_ms": {
+    "50": 53.9,
+    "90": 76.3,
+    "95": 78.3,
+    "99": 97.4,
+    "max": 198.6
+   },
+   "status": {
+    "200": 8727
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  },
+  {
+   "concurrency": 32,
+   "elapsed_s": 30.34,
+   "requests": 8763,
+   "rps": 288.9,
+   "mb_per_s": 11.99,
+   "tile_bytes_mean": 41512,
+   "tile_bytes_p50": 31897,
+   "latency_ms": {
+    "50": 104.6,
+    "90": 154.5,
+    "95": 177.4,
+    "99": 191.9,
+    "max": 351.0
+   },
+   "status": {
+    "200": 8763
+   },
+   "error_rate": 0.0,
+   "stopped_early": null
+  }
+ ]
+}

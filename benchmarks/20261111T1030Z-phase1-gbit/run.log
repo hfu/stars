@@ -1,0 +1,36 @@
+[10:30:29Z] run 20261111T1030Z-phase1-gbit starting
+[10:30:31Z] sampler started on Pi; baseline 120s
+[10:32:31Z] test A-vbm-warm: --source vbm --tile-list vbm.txt
+c=  1  rps=   102.8  p50=9.1  p95=11.7  p99=13.5  max=879.2ms  err=0.0  4.35MB/s  tile mean 42291B  status={'200': 3122}
+c=  2  rps=   229.5  p50=8.6  p95=11.3  p99=13.0  max=32.0ms  err=0.0  9.71MB/s  tile mean 42299B  status={'200': 6963}
+c=  4  rps=   280.4  p50=13.5  p95=22.0  p99=26.8  max=46.5ms  err=0.0  11.88MB/s  tile mean 42360B  status={'200': 8524}
+c=  8  rps=   288.0  p50=26.7  p95=41.5  p99=51.3  max=92.2ms  err=0.0  12.03MB/s  tile mean 41781B  status={'200': 8717}
+c= 16  rps=   288.4  p50=53.9  p95=78.3  p99=97.4  max=198.6ms  err=0.0  12.02MB/s  tile mean 41674B  status={'200': 8727}
+c= 32  rps=   288.9  p50=104.6  p95=177.4  p99=191.9  max=351.0ms  err=0.0  11.99MB/s  tile mean 41512B  status={'200': 8763}
+wrote results/A-vbm-warm.json
+[10:37:04Z] test B-freetown: --source freetown-mapterhorn --tile-list freetown.txt
+c=  1  rps=  1019.4  p50=0.8  p95=2.0  p99=2.7  max=9.4ms  err=0.0  14.33MB/s  tile mean 14057B  status={'200': 30797}
+c=  2  rps=  1893.2  p50=0.9  p95=2.0  p99=2.6  max=11.0ms  err=0.0  26.89MB/s  tile mean 14203B  status={'200': 57176}
+c=  4  rps=  3287.7  p50=1.1  p95=2.4  p99=3.1  max=7.3ms  err=0.0  46.38MB/s  tile mean 14107B  status={'200': 99277}
+c=  8  rps=  6320.3  p50=1.0  p95=2.9  p99=4.5  max=15.0ms  err=0.0  88.82MB/s  tile mean 14054B  status={'200': 190011}
+c= 16  rps=  7613.3  p50=1.4  p95=6.1  p99=10.7  max=40.2ms  err=0.0  106.46MB/s  tile mean 13983B  status={'200': 229298}
+c= 32  rps=  8021.7  p50=2.0  p95=14.3  p99=33.6  max=174.6ms  err=0.0  112.77MB/s  tile mean 14058B  status={'200': 241910}
+wrote results/B-freetown.json
+[10:41:36Z] test C-kitaphoto17-cold: --source kitaphoto17 --tile-list kitaphoto17.txt
+c=  1  rps=   336.8  p50=2.9  p95=3.9  p99=4.6  max=12.2ms  err=0.0  27.47MB/s  tile mean 81578B  status={'200': 10182}
+c=  2  rps=   682.9  p50=2.9  p95=4.0  p99=5.3  max=27.6ms  err=0.0  55.75MB/s  tile mean 81644B  status={'200': 20645}
+c=  4  rps=  1023.2  p50=3.8  p95=6.0  p99=7.7  max=13.8ms  err=0.0  83.6MB/s  tile mean 81711B  status={'200': 30919}
+c=  8  rps=  1253.3  p50=5.4  p95=13.7  p99=18.9  max=36.8ms  err=0.0  102.35MB/s  tile mean 81666B  status={'200': 37737}
+c= 16  rps=  1340.5  p50=9.7  p95=26.0  p99=52.6  max=144.7ms  err=0.0  109.61MB/s  tile mean 81764B  status={'200': 40394}
+c= 32  rps=  1370.7  p50=19.5  p95=48.1  p99=95.6  max=282.2ms  err=0.0  112.16MB/s  tile mean 81830B  status={'200': 41265}
+wrote results/C-kitaphoto17-cold.json
+[10:46:08Z] test D-vbm-decompress: --source vbm --tile-list vbm.txt --no-accept-encoding
+c=  1  rps=   115.4  p50=8.4  p95=12.2  p99=14.9  max=24.6ms  err=0.0  7.89MB/s  tile mean 68378B  status={'200': 3495}
+c=  2  rps=   167.2  p50=11.5  p95=17.0  p99=20.9  max=35.2ms  err=0.0  11.33MB/s  tile mean 67755B  status={'200': 5074}
+c=  4  rps=   242.7  p50=15.4  p95=24.7  p99=31.7  max=50.9ms  err=0.0  16.53MB/s  tile mean 68115B  status={'200': 7386}
+c=  8  rps=   252.1  p50=29.1  p95=45.4  p99=58.1  max=119.7ms  err=0.0  16.94MB/s  tile mean 67220B  status={'200': 7680}
+c= 16  rps=   252.3  p50=57.2  p95=96.0  p99=112.7  max=251.6ms  err=0.0  16.88MB/s  tile mean 66915B  status={'200': 7685}
+c= 32  rps=   251.6  p50=113.6  p95=187.4  p99=220.8  max=486.3ms  err=0.0  16.84MB/s  tile mean 66939B  status={'200': 7675}
+wrote results/D-vbm-decompress.json
+[10:50:41Z] run 20261111T1030Z-phase1-gbit finished
+[10:50:44Z] collected results into benchmarks/20261111T1030Z-phase1-gbit

@@ -288,7 +288,8 @@ omitted because the original blocks' coordinates were never recorded). **Only A 
 B stopped at its c=8 step and C/D did not run.** Per-step numbers and the full account of
 the stop: [`summary.md`](../benchmarks/20261108T2155Z-phase1-gbit/summary.md).
 
-- **`vbm` is now CPU-bound, not link-bound.** Plateau 419–422 rps (was 275–280) at only
+- **(Superseded by the complete re-run below: a later run of the same test gave 289 rps,
+  so 420 rps was not a stable ceiling.)** **`vbm` is now CPU-bound, not link-bound.** Plateau 419–422 rps (was 275–280) at only
   17.6 MB/s on the wire (was the 11.4–11.7 MB/s link ceiling), with the Pi at 93–98% CPU
   (100% max) from c=8. That is ~1.5× the old rate, and 16% of the new line rate. The
   kernel also changed (6.12.75 → 6.18.39) between the two runs, so the gain is not
@@ -302,3 +303,35 @@ the stop: [`summary.md`](../benchmarks/20261108T2155Z-phase1-gbit/summary.md).
   Cause unestablished (not a Pi `tx_errors`/watchdog event). Until it is explained the
   gigabit ceiling for raster tiles is **not measured** — c=4 (62 MB/s) is the highest
   completed step.
+
+## 2026-11-11 — Phase 1 re-run at gigabit: complete (`20261111T1030Z-phase1-gbit`)
+
+Tests A–D again from the wired `slate.local` (it had just rebooted; Spotlight was busy, but
+the `/health` calibration was unchanged), after a 60 s single-stream line-rate transfer
+(116.6 MB/s, no stall) had cleared the path. Per-step numbers, environment and the open
+question below: [`summary.md`](../benchmarks/20261111T1030Z-phase1-gbit/summary.md).
+
+| test | was (100 Mb/s) | now (1 Gb/s) | bound by now |
+|---|---|---|---|
+| A `vbm` warm | 275–280 rps, 11.4–11.7 MB/s | 289 rps, 12.0 MB/s | **Pi CPU** (93–100%) |
+| B `freetown` WebP | 800–814 rps, 11.3–11.6 MB/s | 8,022 rps, 112.8 MB/s | **link** (wire TX 121.5 of 125 MB/s) |
+| C `kitaphoto17` cold | 139–144 rps, 11.3–11.7 MB/s | 1,371 rps, 112.2 MB/s | **link** (wire TX 124.7; disk ≤ 27% busy) |
+| D `vbm` no-AE | 170–176 rps, 11.5–11.7 MB/s | 252 rps, 16.9 MB/s | **Pi CPU** |
+
+- **Raster tiles went ~10× (B) and ~10× (C) and are link-bound again, at 1 Gb/s.** The Pi
+  keeps up with a gigabit link for pass-through raster; the disk was not the limit even for
+  178 GB of cold random reads (≤ 27% busy).
+- **Vector tiles from `vbm` did not benefit from the link** (A: 280 → 289 rps): they are
+  CPU-bound at ~3.3 ms of Pi CPU per request, consistent with finding 3 (TileJSON cloning,
+  maplibre/martin#3323). The prediction in finding 3 — that on a faster link vector serving
+  runs out of CPU first — holds.
+- **No NIC TX stalls in 30-second steps**: `tx_errors` 0, PAUSE 0/0, no watchdog line, at
+  c=32 on a full line (B, C). The 2026-09 run logged 103 at the same concurrency, so the
+  old failure does not appear on the new link — but Phase 3 showed that these stalls needed
+  minutes to appear. **A long soak at the new link speed is the only way to say they are
+  gone.** Thermal: max 71.6 °C (was 69.6), no live throttling.
+- **The earlier partial run's A (420 rps) and this run's A (289 rps) disagree by 1.4×**,
+  same Pi and test, unexplained; see `summary.md`. Do not quote either vbm number as the
+  ceiling until a Martin-restart re-run of A settles it. The earlier run's B stop (traffic
+  ceased at c=8) did not recur: B ran to c=32 at line rate here; its cause remains unknown,
+  but nothing on the Pi side pointed at it.
