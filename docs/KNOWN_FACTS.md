@@ -453,6 +453,31 @@ a change to that ongoing convention.
   restart is needed when a **new source ID is introduced by editing config.yaml** (config
   is read only at startup), not when a new file lands in a directory Martin scans. A new
   *style* file still needs a restart (`styles.paths` is scanned once at startup).
+- **`dorayaki-numazu` — an experimental, non-vector MLT source, hosted 2026-11-14
+  (`dwg7/dorayaki`).** `/home/stars/data/dorayaki-numazu.pmtiles`, 603,132 B, sha256
+  `7c3ce0b1…b017` (re-hashed here from `depot.optgeo.org`, matches what the uploading
+  session reported), PMTiles v3, tile_type 6, tile compression none, internal compression
+  gzip, z18–19, 2 tiles (`18/232154/103715` 122,294 B, `19/464309/207430` 479,894 B).
+  The tiles are MLT frames carrying an unknown tag-0x7e frame and an experimental
+  tag-0xD0 "Surfel Block" frame — **not vector layers, not a standard**; the metadata name
+  says "Dorayaki experimental surfel tiles". Source data: Shizuoka Prefecture VIRTUAL
+  SHIZUOKA MMS point cloud (CC BY), attribution carried in the TileJSON. Registered with
+  no restart and no config change; `/catalog` went 46 → 47. Verified over public HTTPS:
+  both tiles come back **byte-identical in size and sha256 to what the producer
+  reported**, `application/vnd.maplibre-tile`, no `Content-Encoding`; missing tiles inside
+  z18–19 → `204`, outside (z17, z20) → `404`; `Access-Control-Allow-Origin` echoes the
+  request Origin (Martin's behaviour, any origin), preflight `200`. So Martin 1.14.0
+  passes tile bytes it does not understand through unchanged, and reads an archive with a
+  gzip-compressed directory and uncompressed tiles. **Provenance of the upload:** the
+  `dorayaki` session ran the commands (read-only check, `scp` to a hidden
+  `.dorayaki-numazu.pmtiles.new.<rand>`, size + sha256 on the host, `mv -n`) after the user
+  completed the Cloudflare Access login for `ssh spacex.optgeo.org` in *that* session;
+  the user had told this session directly that they would do the upload. This session did
+  not see the commands, only the result. The file is expected to be **replaced** (same
+  name/id) as the format evolves (v3 → v4, coarser pyramids); a different sha256 or tile
+  size later is not by itself a fault. TileJSON copies a `?cb=` query from the request
+  into its `tiles` template, so fetch the clean URL (no query) for a template you intend
+  to reuse.
 - **stars serves its own glyphs since 2026-09-20:** Martin's `fonts.paths`
   (`/home/stars/fonts`, 12 files, 13 MB) serves `https://stars.optgeo.org/font/{fontstack}/{range}`
   — **no `.pbf` suffix**, unlike the two hosts it replaced (`gsi-cyberjapan.github.io`,
