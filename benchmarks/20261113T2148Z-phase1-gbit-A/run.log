@@ -1,0 +1,12 @@
+[21:48:00Z] run 20261113T2148Z-phase1-gbit-A starting
+[21:48:03Z] sampler started on Pi; baseline 60s
+[21:49:03Z] test A-vbm-warm: --source vbm --tile-list vbm.txt
+c=  1  rps=   152.2  p50=6.5  p95=8.5  p99=9.7  max=18.4ms  err=0.0  6.4MB/s  tile mean 42052B  status={'200': 4628}
+c=  2  rps=   321.7  p50=6.0  p95=7.9  p99=9.0  max=14.2ms  err=0.0  13.56MB/s  tile mean 42152B  status={'200': 9780}
+c=  4  rps=   385.9  p50=9.3  p95=16.6  p99=20.1  max=36.4ms  err=0.0  16.35MB/s  tile mean 42359B  status={'200': 11706}
+c=  8  rps=   401.2  p50=17.6  p95=30.9  p99=39.2  max=88.1ms  err=0.0  16.93MB/s  tile mean 42205B  status={'200': 12210}
+c= 16  rps=   400.0  p50=35.1  p95=59.2  p99=76.1  max=128.9ms  err=0.0  16.71MB/s  tile mean 41768B  status={'200': 12161}
+c= 32  rps=   393.5  p50=70.9  p95=119.3  p99=154.9  max=250.7ms  err=0.0  16.34MB/s  tile mean 41532B  status={'200': 11982}
+wrote results/A-vbm-warm.json
+[21:53:36Z] run 20261113T2148Z-phase1-gbit-A finished
+[21:53:38Z] collected results into benchmarks/20261113T2148Z-phase1-gbit-A

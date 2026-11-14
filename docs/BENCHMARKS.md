@@ -335,3 +335,12 @@ question below: [`summary.md`](../benchmarks/20261111T1030Z-phase1-gbit/summary.
   ceiling until a Martin-restart re-run of A settles it. The earlier run's B stop (traffic
   ceased at c=8) did not recur: B ran to c=32 at line rate here; its cause remains unknown,
   but nothing on the Pi side pointed at it.
+
+**Update, 2026-11-14 — a re-run of A on a freshly restarted Martin gave 401 rps**
+(`benchmarks/20261113T2148Z-phase1-gbit-A/`; Martin restarted 2026-11-13 15:56 JST by
+someone else, RSS 205 MB). So the partial run's 420 rps and this 400 rps both came from a
+young Martin, while the 289 rps came from one 3 days old with RSS 598 MB. Consistent with
+Martin slowing as it ages, **not proven** (one sample per age; nothing was varied on
+purpose). Run-to-run variance at one age is unmeasured: a second repeat was abandoned when
+the benchmark machines became unreachable. Treat `vbm` as ~290–420 rps CPU-bound until this
+is settled.

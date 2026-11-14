@@ -97,6 +97,8 @@ sleep "$BASELINE_S"
 
 run() {  # name, loadgen args...
   local name=$1; shift
+  # ONLY=A runs just the tests whose name starts with A (re-runs of a single test).
+  if [ -n "${ONLY:-}" ] && [[ "$name" != "$ONLY"* ]]; then return; fi
   if ssh "$GEN" "test -e $STOP"; then log "skipping $name: STOP present"; return; fi
   log "test $name: $*"
   ssh "$GEN" "cd $GEN_DIR && python3 monitoring/bench/loadgen.py --base $BASE --concurrency $STEPS \
