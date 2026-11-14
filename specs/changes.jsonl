@@ -22,3 +22,4 @@
 {"ts":"2026-11-07T19:01:46Z","changes":[{"kind":"dataset_added","id":"bvmap-koicha-tokyo-roads"},{"kind":"file_added","id":"bvmap-koicha-tokyo-roads","size":6374063}]}
 {"ts":"2026-11-08T19:01:59Z","changes":[{"kind":"dataset_removed","id":"bvmap-koicha-tokyo-roads"},{"kind":"dataset_changed","id":"bvmap-koicha-hokkaido","fields":["description"]},{"kind":"dataset_changed","id":"bvmap-koicha-tokyo","fields":["center","description"]},{"kind":"style_changed","id":"bvmap-koicha-starlight","fields":["deployed_hash","layer_count","repo_hash"]},{"kind":"file_removed","id":"bvmap-koicha-tokyo-roads","size":6374063}]}
 {"ts":"2026-11-13T19:01:58Z","changes":[{"kind":"dataset_changed","id":"openstreetmap_jp_planet","fields":["planetiler:osm:osmosisreplicationtime"]}]}
+{"ts":"2026-11-14T19:01:57Z","changes":[{"kind":"dataset_added","id":"dorayaki-numazu"},{"kind":"file_added","id":"dorayaki-numazu","size":603132}]}
