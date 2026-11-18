@@ -25,3 +25,4 @@
 {"ts":"2026-11-14T19:01:57Z","changes":[{"kind":"dataset_added","id":"dorayaki-numazu"},{"kind":"file_added","id":"dorayaki-numazu","size":603132}]}
 {"ts":"2026-11-15T19:01:37Z","changes":[{"kind":"dataset_added","id":"dorayaki-kawazu"},{"kind":"file_added","id":"dorayaki-kawazu","size":132030481}]}
 {"ts":"2026-11-16T19:02:18Z","changes":[{"kind":"dataset_changed","id":"dorayaki-kawazu","fields":["name"]}]}
+{"ts":"2026-11-18T19:02:02Z","changes":[{"kind":"dataset_changed","id":"dorayaki-kawazu","fields":["name"]}]}
