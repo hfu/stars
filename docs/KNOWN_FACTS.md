@@ -96,7 +96,9 @@ a change to that ongoing convention.
     (after a plain restart) to answer — 502 from the edge in that window is expected.
     The 6.12.75 `vmlinuz`/`initrd` are staged as `/boot/firmware/kernel8_612.img` and
     `initramfs8_612` for a fallback (set `kernel=` / `initramfs … followkernel` in
-    `config.txt` from another machine); delete them once 6.18 has proven stable.
+    `config.txt` from another machine); delete them once 6.18 has proven stable. The
+    root-owned `/boot/firmware` backup taken before the upgrade was deleted on 2026-11-22
+    (the user typed the sudo password), after 13+ days of uptime on 6.18.39.
     `rpi-eeprom` is still **held** (bootloader update 2026-01-09 → 2026-05-17 pending,
     deliberately not combined with the kernel change). `apt upgrade` keeps the
     `linux-image-rpi-*`/`linux-base-rpi-*`/`rpi-swap` packages back; that is the normal
@@ -478,6 +480,32 @@ a change to that ongoing convention.
   size later is not by itself a fault. TileJSON copies a `?cb=` query from the request
   into its `tiles` template, so fetch the clean URL (no query) for a template you intend
   to reuse.
+- **`dorayaki-kawazu` appeared in `/catalog` (48 sources) on 2026-11-17 JST**
+  (`/home/stars/data/dorayaki-kawazu.pmtiles`, 84,036,082 B, zoom 15–17, nine merged
+  `kawazu-cls6-*` point-cloud tiles around Kawazu, same Shizuoka CC BY attribution and a
+  custom `dorayaki` metadata object as `dorayaki-numazu`). The user remembers adding it
+  (via the `dorayaki` session); this session did **not** verify its tile contents — no
+  checksums were received.
+- **`bvmap-koicha-hokkaido.pmtiles` replaced with the seam-free build, 2026-11-21 ~20:43
+  JST** (`dwg7/bvmap-koicha` D31–D33; the user approved it directly in this session
+  before it started). Verified here afterwards over SSH and publicly: 3,153,480,332 B
+  (was 3,305,776,770 B), sha256 `3749a333…9c35` (matches what the producer reported),
+  PMTiles v3, tile_type 6, tile compression none, internal gzip, z4–16, addressed tiles
+  768,230 (identical to the old file; entries 767,027 vs 767,011, contents 680,668 vs
+  680,686). `/catalog` still lists it; the composite `bvmap-koicha-hokkaido,
+  bvmap-koicha-tokyo` serves z3–16 / 48 layers; the Tokyo tile is unchanged. The source's
+  TileJSON `name` is now `bvmap-koicha-hokkaido-roads-seams` (from the new file's
+  metadata; styles reference the source id, so nothing broke). The producer's transfer
+  over the Cloudflare SSH tunnel swung between 0.03 and 3.8 MB/s and hung once, so a 21 GB
+  nationwide file is **not realistic over that route** — it needs a same-LAN copy or a
+  physical hand-over. A `.bak.20261121_204314` of the old file was still on the host when
+  checked, to be deleted by the producer after its own verification.
+- **Martin was restarted twice with no record of who did it**: 2026-11-13 15:56:26 JST
+  and 2026-11-21 22:34:30 JST (`systemctl --user show martin`: `NRestarts=0`,
+  `Result=success`, i.e. a deliberate `restart`, not a crash). Neither the user nor this
+  session remembers doing it; no config or data change preceded the first one. The second
+  came ~2 h after the Hokkaido swap, whose producer said no restart was needed. Cause
+  unknown — treat Martin's start time as something to re-read rather than assume.
 - **stars serves its own glyphs since 2026-09-20:** Martin's `fonts.paths`
   (`/home/stars/fonts`, 12 files, 13 MB) serves `https://stars.optgeo.org/font/{fontstack}/{range}`
   — **no `.pbf` suffix**, unlike the two hosts it replaced (`gsi-cyberjapan.github.io`,
