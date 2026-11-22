@@ -370,6 +370,26 @@ a change to that ongoing convention.
   trip. **`sprites.paths` takes one directory per sprite and names the sprite after that
   directory**, so pointing it at a parent publishes `/sprite/<parent>` with icons named
   `<subdir>/<icon>`. Registering a sprite needs a Martin restart.
+- **`bvmap-nightsky` deployed 2026-11-22 12:59 JST** (PR #18, `f8412337`, from
+  `dwg7/bvmap#1` @ `6d74f864`; the user approved the merge and the immediate deployment
+  directly in this session). A dark, light-on-dark companion of `bvmap-starlight` (123
+  layers, same `bvmap` source and layer ids, stars' own glyphs, `sprite`
+  `/sprite/bvmap-nightsky`), made as the base map for the dorayaki splat demos. Review
+  found the style byte-identical to upstream and both sprite sheet files matching their
+  pinned sha256 (`f5184d39…`, `a5a4fe23…`). Deployed in this order: back up
+  `config.yaml` → scp the 119 sprite SVGs (built locally with
+  `assets/build-sprite-from-sheet.py`, because production has no Pillow) to a hidden
+  `.bvmap-nightsky.new` and `mv` them into `/home/stars/sprites/bvmap-nightsky` → replace
+  `config.yaml` and add `styles/bvmap-nightsky.json` (sha256 checked on the host) →
+  `systemctl --user restart martin` (back at `/health` 200 in ~6 s) → verify →
+  delete the backup. The sprite directory had to exist **before** the restart, since
+  `sprites.paths` lists it. After: `/catalog` still 48 sources, now 10 styles and 4
+  sprites; `/style/bvmap-nightsky` (JSON-equal to the repo file; Martin re-serialises it,
+  so it is not byte-identical), `/sprite/bvmap-nightsky{,@2x}.{json,png}` all `200`; the
+  other styles unchanged. **Sprite fidelity measured** (119 icons, 478,025 pixels, live
+  sheet vs upstream): alpha identical, every fully-opaque pixel identical, worst
+  alpha-weighted colour error 0.98/255 on semi-transparent edge pixels — recorded in
+  `assets/sprites.json`. The style's on-screen rendering is **not** judged here.
 - **`styles/bvmap-starlight.json` added 2026-09-20** via PR #12 from `dwg7/bvmap`: the
   first style here whose glyphs, sprite and tiles all come from stars. Note for future
   reviews: a PR opened from the `hfu` account cannot be approved on GitHub (self-approval

@@ -142,7 +142,7 @@
       "sprite_id": "bvmap-nightsky",
       "replaces": "(new) light-on-dark derivative of GSI's optimal_bvmap sprite, for dwg7/bvmap's bvmap-nightsky style",
       "used_by": [
-        "bvmap-nightsky.json (pending PR from dwg7/bvmap)"
+        "bvmap-nightsky.json"
       ],
       "license": {
         "spdx": "(GSI content terms)",
@@ -178,7 +178,12 @@
       ],
       "icon_count": 119,
       "fidelity": {
-        "measured": "not yet — to be measured against the live sheet after the first build (same resvg premultiplied round trip as bvmap-starlight; expect alpha identical, colour differing only in semi-transparent edge pixels)"
+        "measured": "2026-11-22, live sheet vs dwg7/bvmap sheet at 6d74f864 (119 icons, 478,025 pixels compared; same resvg premultiplied round trip as bvmap-starlight)",
+        "alpha_mismatches": 0,
+        "opaque_colour_mismatches": 0,
+        "semi_transparent_pixels": 17228,
+        "max_premultiplied_colour_delta_8bit": 0.98,
+        "note": "Alpha identical and every fully-opaque pixel identical. Straight-alpha colour differs by up to 23/255 on some semi-transparent edge pixels, but weighted by alpha (what is actually drawn) the worst case is 0.98/255, i.e. under one 8-bit level — the same behaviour as bvmap-starlight. Measured against the served 1x PNG at https://stars.optgeo.org/sprite/bvmap-nightsky.png."
       }
     }
   ]
