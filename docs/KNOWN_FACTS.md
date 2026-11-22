@@ -98,7 +98,11 @@ a change to that ongoing convention.
     `initramfs8_612` for a fallback (set `kernel=` / `initramfs … followkernel` in
     `config.txt` from another machine); delete them once 6.18 has proven stable. The
     root-owned `/boot/firmware` backup taken before the upgrade was deleted on 2026-11-22
-    (the user typed the sudo password), after 13+ days of uptime on 6.18.39.
+    (the user typed the sudo password), after 13+ days of uptime on 6.18.39. **The staged
+    fallback `kernel8_612.img` / `initramfs8_612` were deleted too (2026-11-22, same way),
+    so there is no longer a ready-made 6.12.75 fallback in `/boot/firmware`** — the
+    6.12.75 `vmlinuz`/`initrd` and `/lib/modules` are still installed under `/boot`, so
+    one could be re-staged from the root filesystem if ever needed.
     `rpi-eeprom` is still **held** (bootloader update 2026-01-09 → 2026-05-17 pending,
     deliberately not combined with the kernel change). `apt upgrade` keeps the
     `linux-image-rpi-*`/`linux-base-rpi-*`/`rpi-swap` packages back; that is the normal
