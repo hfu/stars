@@ -50,6 +50,7 @@ sprites:
     - /home/stars/sprites/positron
     - /home/stars/sprites/optimal-bvmap
     - /home/stars/sprites/bvmap-starlight
+    - /home/stars/sprites/bvmap-nightsky
 
 styles:
   paths:

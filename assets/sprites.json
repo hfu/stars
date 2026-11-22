@@ -137,6 +137,49 @@
         "measured": "2026-09-20, live sheet vs dwg7/bvmap sheet at 1410d64",
         "note": "Reported by dwg7/bvmap and confirmed here after an earlier check of ours wrongly called it pixel-identical: Pillow's Image.getbbox() defaults to alpha_only=True, so a difference image with a matching alpha channel returns None however much the colour channels differ."
       }
+    },
+    {
+      "sprite_id": "bvmap-nightsky",
+      "replaces": "(new) light-on-dark derivative of GSI's optimal_bvmap sprite, for dwg7/bvmap's bvmap-nightsky style",
+      "used_by": [
+        "bvmap-nightsky.json (pending PR from dwg7/bvmap)"
+      ],
+      "license": {
+        "spdx": "(GSI content terms)",
+        "url": "https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html"
+      },
+      "attribution": "国土地理院最適化ベクトルタイルのスプライトを改変（グレースケール化・明暗反転）して作成。出典: 国土地理院。改変者: dwg7/bvmap。国土地理院コンテンツ利用規約に基づく。",
+      "modified": true,
+      "modification": "GSI's std sprite sheet recoloured to greyscale and lightness-inverted (dark glyphs -> light, for a dark ground) by dwg7/bvmap to match the bvmap-nightsky palette (their docs/decisions/0043). The GSI terms allow adaptation, but require both the source attribution and a statement that the work was modified — hence `modified` here and the wording above, which the consuming style is expected to carry too.",
+      "kind": "derived_from_sheet",
+      "sheet": [
+        {
+          "file": "bvmap-nightsky.json",
+          "source": {
+            "kind": "github_raw",
+            "repo": "dwg7/bvmap",
+            "ref": "6d74f864e4503ee209febfe7c048fda2ee9f4d6f",
+            "path": "sprite/bvmap-nightsky.json"
+          },
+          "sha256": "f5184d39d765dedfdeef7c98a95f9b6984a27ee74094d0b197a49a60e3842179",
+          "size_bytes": 14146
+        },
+        {
+          "file": "bvmap-nightsky.png",
+          "source": {
+            "kind": "github_raw",
+            "repo": "dwg7/bvmap",
+            "ref": "6d74f864e4503ee209febfe7c048fda2ee9f4d6f",
+            "path": "sprite/bvmap-nightsky.png"
+          },
+          "sha256": "a5a4fe23f121cc2811cf0268953f7cf88031cbda75c1ec5ca2b0446e4ba21639",
+          "size_bytes": 108570
+        }
+      ],
+      "icon_count": 119,
+      "fidelity": {
+        "measured": "not yet — to be measured against the live sheet after the first build (same resvg premultiplied round trip as bvmap-starlight; expect alpha identical, colour differing only in semi-transparent edge pixels)"
+      }
     }
   ]
 }
