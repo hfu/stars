@@ -500,12 +500,24 @@ a change to that ongoing convention.
   nationwide file is **not realistic over that route** — it needs a same-LAN copy or a
   physical hand-over. A `.bak.20261121_204314` of the old file was still on the host when
   checked, to be deleted by the producer after its own verification.
-- **Martin was restarted twice with no record of who did it**: 2026-11-13 15:56:26 JST
-  and 2026-11-21 22:34:30 JST (`systemctl --user show martin`: `NRestarts=0`,
-  `Result=success`, i.e. a deliberate `restart`, not a crash). Neither the user nor this
-  session remembers doing it; no config or data change preceded the first one. The second
-  came ~2 h after the Hokkaido swap, whose producer said no restart was needed. Cause
-  unknown — treat Martin's start time as something to re-read rather than assume.
+- **Martin restarts on 2026-11-13 15:56:26 and 2026-11-21 22:34:28 JST were
+  `remote-watch.service`, not a person** (first thought to be unexplained; the user and
+  this session both said they had not done them, and the first write-up here said
+  "cause unknown" — that was wrong, the mechanism was already documented above). The
+  user-level `remote-watch.timer` (every 15 min, enabled 2026-09-15) restarts Martin when
+  an upstream remote archive's fingerprint changes on two consecutive runs: both times it
+  was OSM Japan republishing `https://tile.openstreetmap.jp/static/planet.pmtiles`
+  (`Last-Modified` Fri 13 Nov 05:39:30 GMT, then Sat 21 Nov 01:53:47 GMT; the restart
+  follows the first sighting by ~16 min). Read it with
+  `journalctl _SYSTEMD_USER_UNIT=remote-watch.service` and
+  `/home/stars/.local/state/stars-remote-watch/state.json` (`last_restart` was
+  1795268062 = 2026-11-21 22:34:22 JST, matching Martin's start). **Expect a restart —
+  ~20 s of 502 at the edge, then normal — every time OSM Japan republishes** (about weekly
+  so far). Two details worth knowing: the 11-21 restart logged `WARNING: martin health
+  check failed after restart` only 7 s after the restart — Martin needs ~20 s to answer,
+  so that check looks too eager; Martin was in fact healthy afterwards. And a restart
+  coincident with someone's `.pmtiles` swap is not proof the swap needed or caused it
+  (the Hokkaido swap on 11-21 20:43 did not).
 - **stars serves its own glyphs since 2026-09-20:** Martin's `fonts.paths`
   (`/home/stars/fonts`, 12 files, 13 MB) serves `https://stars.optgeo.org/font/{fontstack}/{range}`
   — **no `.pbf` suffix**, unlike the two hosts it replaced (`gsi-cyberjapan.github.io`,
