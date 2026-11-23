@@ -28,3 +28,4 @@
 {"ts":"2026-11-18T19:02:02Z","changes":[{"kind":"dataset_changed","id":"dorayaki-kawazu","fields":["name"]}]}
 {"ts":"2026-11-21T19:01:52Z","changes":[{"kind":"dataset_changed","id":"bvmap-koicha-hokkaido","fields":["description","name"]},{"kind":"dataset_changed","id":"openstreetmap_jp_planet","fields":["planetiler:osm:osmosisreplicationtime"]}]}
 {"ts":"2026-11-22T19:01:56Z","changes":[{"kind":"dataset_changed","id":"dorayaki-kawazu","fields":["name"]},{"kind":"style_added","id":"bvmap-nightsky"}]}
+{"ts":"2026-11-23T19:02:10Z","changes":[{"kind":"dataset_added","id":"ax-asahikawa"},{"kind":"dataset_added","id":"dorayaki-sasebo"},{"kind":"file_added","id":"ax-asahikawa","size":3414637},{"kind":"file_added","id":"dorayaki-sasebo","size":203951931}]}
