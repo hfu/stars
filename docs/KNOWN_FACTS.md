@@ -120,7 +120,16 @@ a change to that ongoing convention.
     which only take effect at the next boot, so a stars-owned `/boot/firmware` copy
     (`/home/stars/boot-firmware.bak.20261127_211639`) is kept until that reboot.
     Still pending: kernel 6.18.39 → 6.18.60 (kept back, needs a reboot), `rpi-eeprom`
-    (held).
+    (held). *Update 2026-11-28:* the lists are now refreshed daily —
+    `/etc/apt/apt.conf.d/02periodic-stars` (mirrored at
+    [config/apt/02periodic-stars](../config/apt/02periodic-stars)) sets
+    `APT::Periodic::Update-Package-Lists "1"` and explicitly **0** for download,
+    autoclean and unattended-upgrade, so `apt-daily.timer` keeps `apt list --upgradable`
+    current while installing stays a user-attended step. Installed 2026-11-28 04:33 JST
+    (sha256 `becd53b5…`, identical to the repo) and verified by a manual
+    `apt-daily.service` run that wrote `/var/lib/apt/periodic/update-stamp` at 04:33:43
+    (an `InRelease` file's mtime is the archive's own timestamp, not the fetch time, so
+    check the stamp instead).
   - **Measured at 1 Gb/s, 2026-11-11 ([BENCHMARKS.md](BENCHMARKS.md)):** LAN-direct, the Pi
     serves raster tiles at the line rate — `freetown-mapterhorn` 8,022 rps / 112.8 MB/s and
     cold `kitaphoto17` 1,371 rps / 112.2 MB/s (wire TX 121–125 of 125 MB/s) — about ten
@@ -577,7 +586,10 @@ a change to that ongoing convention.
   ~20 s of 502 at the edge, then normal — every time OSM Japan republishes** (about weekly
   so far). Two details worth knowing: the 11-21 restart logged `WARNING: martin health
   check failed after restart` only 7 s after the restart — Martin needs ~20 s to answer,
-  so that check looks too eager; Martin was in fact healthy afterwards. And a restart
+  so that check looks too eager; Martin was in fact healthy afterwards. *Fixed
+  2026-11-28:* `monitoring/remote-watch.sh` now waits 12 s before the health check
+  (it logged the same false WARNING again on 2026-11-27 at 5 s); deployed to
+  `/home/stars/.local/bin/remote-watch.sh` (sha256 `020fdc9f…`, identical to the repo). And a restart
   coincident with someone's `.pmtiles` swap is not proof the swap needed or caused it
   (the Hokkaido swap on 11-21 20:43 did not).
 - **stars serves its own glyphs since 2026-09-20:** Martin's `fonts.paths`

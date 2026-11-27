@@ -84,7 +84,9 @@ elif [ "${#confirmed[@]}" -gt 0 ]; then
   else
     log "restarting martin for ${#confirmed[@]} changed source(s)"
     systemctl --user restart martin
-    sleep 5
+    # Martin answers /health ~6-20 s after a restart (it opens every source first);
+    # 5 s produced false WARNINGs on 2026-11-21 and 2026-11-27, so wait 12 s.
+    sleep 12
     if curl -sf --max-time 10 http://127.0.0.1:3000/health > /dev/null; then
       log "martin healthy after restart"
     else
