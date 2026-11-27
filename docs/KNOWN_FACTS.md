@@ -107,6 +107,20 @@ a change to that ongoing convention.
     deliberately not combined with the kernel change). `apt upgrade` keeps the
     `linux-image-rpi-*`/`linux-base-rpi-*`/`rpi-swap` packages back; that is the normal
     behaviour here, not a hold.
+  - **Second apt round, 2026-11-27** (user attended, sudo typed by the user, run over
+    LAN SSH in a host-side tmux). **The package lists had not been refreshed since our
+    own 2026-11-08 run — `APT::Periodic` is not configured, so `apt-daily` never
+    updates them and `apt list --upgradable` on the host silently shows nothing new.**
+    A read-only probe (`apt-get -o Dir::State::lists=/tmp/… update` as `stars`) found 54
+    upgrades, 19 from trixie-security. Applied: 53 packages (openssl/libssl 3.5.7 → 3.5.9,
+    sudo, krb5, zstd, nghttp2, freetype, c-ares, rsync, passwd, firmware-*, …), then
+    `cloudflared` 2026.10.7 → 2026.11.2 (restarted explicitly), then a Martin restart —
+    Martin was the only process still mapping the replaced libssl/libzstd (back at
+    `/health` 200 in ~6 s). Firmware packages regenerated `initramfs8`/`initramfs_2712`,
+    which only take effect at the next boot, so a stars-owned `/boot/firmware` copy
+    (`/home/stars/boot-firmware.bak.20261127_211639`) is kept until that reboot.
+    Still pending: kernel 6.18.39 → 6.18.60 (kept back, needs a reboot), `rpi-eeprom`
+    (held).
   - **Measured at 1 Gb/s, 2026-11-11 ([BENCHMARKS.md](BENCHMARKS.md)):** LAN-direct, the Pi
     serves raster tiles at the line rate — `freetown-mapterhorn` 8,022 rps / 112.8 MB/s and
     cold `kitaphoto17` 1,371 rps / 112.2 MB/s (wire TX 121–125 of 125 MB/s) — about ten
@@ -510,6 +524,10 @@ a change to that ongoing convention.
   custom `dorayaki` metadata object as `dorayaki-numazu`). The user remembers adding it
   (via the `dorayaki` session); this session did **not** verify its tile contents — no
   checksums were received.
+- **More sources the user added themselves (confirmed by the user, 2026-11-27):**
+  `ax-asahikawa` (3,414,637 B, 2026-11-23) and `dorayaki-sasebo` (713,970,031 B,
+  2026-11-25); `dorayaki-kawazu` was also replaced on 2026-11-22 (83,887,706 B). `/catalog`
+  is at 50 sources. Not reviewed or checksummed here.
 - **`bvmap-koicha-hokkaido.pmtiles` replaced with the seam-free build, 2026-11-21 ~20:43
   JST** (`dwg7/bvmap-koicha` D31–D33; the user approved it directly in this session
   before it started). Verified here afterwards over SSH and publicly: 3,153,480,332 B
