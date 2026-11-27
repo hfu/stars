@@ -524,6 +524,26 @@ a change to that ongoing convention.
   custom `dorayaki` metadata object as `dorayaki-numazu`). The user remembers adding it
   (via the `dorayaki` session); this session did **not** verify its tile contents — no
   checksums were received.
+- **Nationwide `bvmap-koicha` (one file) is live, and `bvmap-koicha-starlight` reads it
+  since 2026-11-28 04:28 JST.** `/home/stars/data/bvmap-koicha.pmtiles`, 21,758,339,372 B,
+  sha256 `847e5564…8ad0` (re-hashed on the host here in 2 m 29 s, matches the producer),
+  PMTiles v3, tile_type 6, tile compression none, internal gzip, z3–16, 2,906,869
+  addressed tiles, 24 vector layers, bounds 122,17 – 154.77,46, small metadata (2,958 B,
+  no tilestats); GSI source of 2026-11-26 (`hfu/bvmap-koicha` D37–D39). Placed by the
+  `bvmap-koicha` session over the **LAN** (`stars.local`) after the user confirmed it
+  directly here: rsync at 25–28 MB/s for the first 0.98 GB, then — `rsync --inplace`
+  stalled after its checksum pass on resume — the remaining 20.78 GB appended as one
+  `tail -c +N | ssh 'cat >>'` stream in 19 m 58 s (~17 MB/s); `chmod 644`, `mv` at
+  2026-11-27 14:32:32 UTC. Registered by fs-watch without a restart (TileJSON 200 within
+  ~20 s, first fetch 1.09 s); `/catalog` 50 → 51. Eight check tiles across Japan
+  (Sapporo, Tokyo, Umeda, Tenjin, Naha, the Northern Alps' heaviest 328 KB tile,
+  Okinotorishima, the z3 overview) matched the producer's sizes and sha256 when fetched
+  publicly. PR #19 (one-line `sources.bvmap.url` → `https://stars.optgeo.org/bvmap-koicha`)
+  was squash-merged by the user (`c37c6ad6`) before this session reviewed it; a
+  post-merge review found nothing beyond that line. Deployed after the user's explicit
+  go (backup → scp → sha256 `de2f8b7e…` → `?cb=` → backup deleted), no restart. The
+  `hokkaido`/`tokyo` files stay for a 3-week transition (to ~2026-12-18); deleting them
+  is to be confirmed with the user then.
 - **More sources the user added themselves (confirmed by the user, 2026-11-27):**
   `ax-asahikawa` (3,414,637 B, 2026-11-23) and `dorayaki-sasebo` (713,970,031 B,
   2026-11-25); `dorayaki-kawazu` was also replaced on 2026-11-22 (83,887,706 B). `/catalog`
