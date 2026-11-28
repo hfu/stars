@@ -130,6 +130,27 @@ a change to that ongoing convention.
     `apt-daily.service` run that wrote `/var/lib/apt/periodic/update-stamp` at 04:33:43
     (an `InRelease` file's mtime is the archive's own timestamp, not the fetch time, so
     check the stamp instead).
+  - **Kernel 6.18.60 reboot, 2026-11-29** (user attended, sudo typed by the user, LAN SSH).
+    `apt-get full-upgrade` on 11-28 (in a host-side tmux; `rpi-eeprom` stayed held): kernel
+    6.18.39 → 6.18.60 (`linux-image/headers/base-rpi-*`), `libcamera` 0.7 → 0.8, `rpicam-apps`
+    1.15, `rpi-swap` 1.2.4 (which now depends on `ack` + `libfile-next-perl`, so those got
+    installed too). Before rebooting: `cmp` showed `/boot/firmware/kernel8.img` =
+    `/boot/vmlinuz-6.18.60+rpt-rpi-v8` and `initramfs8` = its `initrd.img`; `dpkg --audit`
+    clean; no transfer in flight. Rebooted 00:46 JST, up in under a minute on
+    `6.18.60+rpt-rpi-v8`: no failed units, `throttled=0x0`, eth0 1000 Mb/s, zram swap,
+    Martin/caddy/cloudflared/remote-watch active, `/catalog` 52 sources / 10 styles /
+    4 sprites (public, `?cb=`). The stars-owned `/home/stars/boot-firmware.bak.20261127_211639`
+    was deleted afterwards. Left for later: `libyuv0` is now autoremovable; the 6.12.75
+    image/headers/kbuild packages are still installed and the purged 6.18.33/6.18.34 leave
+    11-file `/lib/modules` stubs; `rpi-eeprom` still held.
+    **Martin's first start at boot failed and systemd restarted it 17 s later**
+    (`NRestarts=1`): at 00:46:31 the network/DNS was not up yet, the two remote sources
+    (`bvmap` on cyberjapandata.gsi.go.jp and `japan-seamless-aerial-z18` on
+    data.source.coop) failed after their retries, and Martin 1.14 exits on
+    `TileResolutionWarningsIssued`; the 00:46:48 start succeeded (`Restart=on-failure`,
+    `RestartSec=5`). The installed user unit only has `After=network.target`, which a
+    *user* manager cannot use to wait for the system's network-online. Harmless as long as
+    `Restart=on-failure` stays, but worth knowing when reading the boot log.
   - **Measured at 1 Gb/s, 2026-11-11 ([BENCHMARKS.md](BENCHMARKS.md)):** LAN-direct, the Pi
     serves raster tiles at the line rate — `freetown-mapterhorn` 8,022 rps / 112.8 MB/s and
     cold `kitaphoto17` 1,371 rps / 112.2 MB/s (wire TX 121–125 of 125 MB/s) — about ten
@@ -557,6 +578,11 @@ a change to that ongoing convention.
   `ax-asahikawa` (3,414,637 B, 2026-11-23) and `dorayaki-sasebo` (713,970,031 B,
   2026-11-25); `dorayaki-kawazu` was also replaced on 2026-11-22 (83,887,706 B). `/catalog`
   is at 50 sources. Not reviewed or checksummed here.
+  *Update 2026-11-29:* `dorayaki-nagasaki` (9,292,294,957 B, 00:27 JST, "nagasaki-01je",
+  MLT z13–17, attribution 長崎県 オープンナガサキ CC BY 4.0) added by the user and picked up
+  by fs-watch without a restart — `/catalog` 52 sources; z13/z15/z17 tiles at its centre
+  return 200 publicly. `dorayaki-sasebo` was replaced again on 2026-11-28 15:44
+  (359,202,276 B). Not checksummed here.
 - **`bvmap-koicha-hokkaido.pmtiles` replaced with the seam-free build, 2026-11-21 ~20:43
   JST** (`dwg7/bvmap-koicha` D31–D33; the user approved it directly in this session
   before it started). Verified here afterwards over SSH and publicly: 3,153,480,332 B
